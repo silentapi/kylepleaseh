@@ -1,0 +1,1471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FBF6F1">
+<title>Lune</title>
+<meta name="description" content="Lune: the period app that gets your supplies to your door before your period shows up, with a mystery buddy sealed in every box.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#FBF6F1;
+  --surface:#FFFFFF;
+  --surface-2:#F4ECE6;
+  --ink:#2A1B2E;
+  --ink-2:#5E4E62;
+  --muted:#8C7D8F;
+  --line:#EDE3DC;
+  --berry:#B23A6E;
+  --berry-soft:#F8E1EA;
+  --plum:#3A2140;
+  --period:#E0567A;
+  --predicted:#F7CAD6;
+  --fertile:#D3EBDD;
+  --fertile-ink:#2F6B4B;
+  --lilac:#EDE4F6;
+  --lilac-ink:#5B3F86;
+  --gold:#F2B83B;
+  --radius:22px;
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+  --ease-in-out:cubic-bezier(0.77,0,0.175,1);
+  --ease-drawer:cubic-bezier(0.32,0.72,0,1);
+  --spring:cubic-bezier(0.34,1.56,0.64,1);
+  --shadow:0 1px 2px rgba(42,27,46,.04),0 10px 30px -14px rgba(42,27,46,.16);
+  --font:"DM Sans",system-ui,-apple-system,sans-serif;
+  --display:"Fraunces",Georgia,serif;
+  --ph-a:#EEE8FB; --ph-b:#DCD0F4; --ph:#8A63C9;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{background:#E9E0DA;font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.45}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+input{font:inherit;color:inherit}
+h1,h2,h3{margin:0;font-weight:600;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+.tnum{font-variant-numeric:tabular-nums}
+svg{display:block}
+
+/* ---------- phone frame ---------- */
+.app{position:relative;height:100dvh;width:100%;background:var(--bg);overflow:hidden;display:flex;flex-direction:column;isolation:isolate}
+@media (min-width:520px){
+  body{display:grid;place-items:center;min-height:100vh;padding:24px 0}
+  .app{width:390px;height:844px;max-height:calc(100vh - 48px);border-radius:46px;box-shadow:0 0 0 10px #1d1420,0 30px 80px -20px rgba(29,20,32,.55)}
+}
+.scroller{flex:1;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:none}
+.scroller::-webkit-scrollbar{display:none}
+.screen{padding:calc(env(safe-area-inset-top) + 14px) 16px 28px;display:flex;flex-direction:column;gap:12px}
+.screen.in>*{animation:rise 420ms var(--ease-out) both}
+.screen.in>*:nth-child(2){animation-delay:40ms}
+.screen.in>*:nth-child(3){animation-delay:80ms}
+.screen.in>*:nth-child(4){animation-delay:120ms}
+.screen.in>*:nth-child(5){animation-delay:160ms}
+.screen.in>*:nth-child(n+6){animation-delay:200ms}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:none;opacity:1}}
+
+/* ---------- primitives ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:54px;padding:0 22px;border-radius:18px;font-weight:600;font-size:16px;background:var(--berry);color:#fff;transition:transform 160ms var(--ease-out),background-color 200ms ease,opacity 200ms ease;user-select:none;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn.block{width:100%}
+.btn.ghost{background:var(--surface-2);color:var(--ink)}
+.btn.dark{background:var(--ink);color:#fff}
+.btn.white{background:#fff;color:var(--ink)}
+.btn.glass{background:rgba(255,255,255,.55);color:var(--ink);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.btn.sm{height:40px;padding:0 16px;font-size:14px;border-radius:13px}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.link{color:var(--berry);font-weight:600;font-size:14px;transition:opacity 150ms ease}
+.link:active{opacity:.6}
+.card{background:var(--surface);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.row{display:flex;align-items:center;gap:12px}
+.between{justify-content:space-between}
+.grow{flex:1;min-width:0}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.title{font-family:var(--display);font-size:30px;line-height:1.05;letter-spacing:-.015em;font-weight:600}
+.h2{font-family:var(--display);font-size:21px;line-height:1.15;font-weight:600;letter-spacing:-.01em}
+.pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.pill.berry{background:var(--berry-soft);color:var(--berry)}
+.pill.green{background:var(--fertile);color:var(--fertile-ink)}
+.pill.gold{background:#FBEFD0;color:#8A6412}
+.pill.lilac{background:var(--lilac);color:var(--lilac-ink)}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.chev{color:var(--muted);flex:none}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{height:38px;padding:0 14px;border-radius:12px;background:var(--surface-2);font-size:14px;font-weight:500;color:var(--ink-2);transition:transform 200ms var(--spring),background-color 180ms ease,color 180ms ease}
+.chip:active{transform:scale(.94)}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff}
+
+.seg{display:flex;background:var(--surface-2);border-radius:14px;padding:4px;position:relative}
+.seg button{flex:1;height:38px;border-radius:10px;font-size:14px;font-weight:600;color:var(--muted);position:relative;z-index:1;transition:color 200ms ease}
+.seg button[aria-pressed="true"]{color:var(--ink)}
+.seg .thumb{position:absolute;top:4px;bottom:4px;left:4px;border-radius:10px;background:var(--surface);box-shadow:0 1px 3px rgba(42,27,46,.12);transition:transform 340ms var(--ease-drawer)}
+
+.stepper{display:flex;align-items:center;gap:2px;background:var(--surface-2);border-radius:12px;padding:3px;flex:none}
+.stepper button{width:34px;height:32px;border-radius:9px;font-size:18px;font-weight:600;color:var(--ink-2);transition:transform 140ms var(--ease-out),background-color 150ms ease}
+.stepper button:active{transform:scale(.88);background:var(--surface)}
+.stepper span{min-width:28px;text-align:center;font-weight:600}
+
+.switch{width:50px;height:30px;border-radius:99px;background:#DCD1CA;position:relative;transition:background-color 220ms ease;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform 300ms var(--spring)}
+.switch[aria-checked="true"]{background:var(--berry)}
+.switch[aria-checked="true"]::after{transform:translateX(20px)}
+
+.list-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--line);width:100%;text-align:left}
+.list-row:first-child{border-top:0}
+.icon-btn{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--surface);box-shadow:var(--shadow);transition:transform 160ms var(--ease-out)}
+.icon-btn:active{transform:scale(.92)}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow);color:var(--berry);display:grid;place-items:center;font-weight:600;font-family:var(--display);font-size:18px;transition:transform 160ms var(--ease-out);flex:none}
+.avatar:active{transform:scale(.92)}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
+
+/* ---------- tab bar ---------- */
+.tabbar{flex:none;position:relative;display:flex;background:rgba(251,246,241,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:6px 10px calc(env(safe-area-inset-bottom) + 6px)}
+@media (min-width:520px){.tabbar{padding-bottom:18px}}
+.tab-ind{position:absolute;top:6px;left:10px;height:50px;border-radius:16px;background:var(--berry-soft);transition:transform 420ms var(--ease-drawer);z-index:0}
+.tab{flex:1;height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:600;color:var(--muted);transition:color 220ms ease;position:relative;z-index:1}
+.tab svg{width:24px;height:24px;transition:transform 300ms var(--spring)}
+.tab:active svg{transform:scale(.85)}
+.tab[aria-current="page"]{color:var(--berry)}
+.tab[aria-current="page"] svg{transform:translateY(-1px)}
+.tab .badge{position:absolute;top:7px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:var(--period);box-shadow:0 0 0 2px var(--bg);animation:pop 400ms var(--spring)}
+
+/* ---------- Today hero ---------- */
+.hero{position:relative;border-radius:30px;padding:18px;background:linear-gradient(165deg,var(--ph-a),var(--ph-b));overflow:hidden;isolation:isolate}
+.blob{position:absolute;border-radius:50%;background:rgba(255,255,255,.55);filter:blur(28px);z-index:-1;animation:drift 14s ease-in-out infinite alternate}
+.blob.b2{animation-duration:18s;animation-delay:-6s;background:rgba(255,255,255,.4)}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(40px,30px) scale(1.2)}}
+.ring{position:relative;width:212px;height:212px;margin:2px auto 0}
+.ring svg{position:absolute;inset:0;overflow:visible}
+.ring .prog{transition:stroke-dashoffset 1100ms var(--ease-out)}
+.ring .knob{transition:transform 1100ms var(--ease-out);transform-origin:106px 106px}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.ring-center .big{font-family:var(--display);font-size:64px;line-height:.95;font-weight:600;letter-spacing:-.03em}
+.ring-center .lbl{font-size:13px;font-weight:600;color:var(--ink-2)}
+.phase-pill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:99px;background:rgba(255,255,255,.7);font-size:12px;font-weight:700;color:var(--ink);margin-top:8px}
+.mascot{position:absolute;width:74px;right:14px;top:14px;animation:bob 3.6s ease-in-out infinite}
+.eyes{animation:blink 4.5s infinite;transform-box:fill-box;transform-origin:center}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-6px) rotate(3deg)}}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+.mascot.happy{animation:hop 600ms var(--spring)}
+@keyframes hop{0%{transform:translateY(0)}35%{transform:translateY(-18px) rotate(-8deg) scale(1.08)}100%{transform:translateY(0)}}
+.countdown{font-family:var(--display);font-size:24px;font-weight:600;line-height:1.1;letter-spacing:-.01em;margin-top:10px}
+
+/* ---------- status strip ---------- */
+.strip{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);transition:transform 160ms var(--ease-out)}
+.strip:active{transform:scale(.98)}
+.strip .ic{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;flex:none;overflow:hidden}
+.strip.dark{background:var(--plum);color:#fff}
+.strip.dark .muted{color:rgba(255,255,255,.66)}
+.track{position:relative;height:6px;border-radius:99px;background:rgba(255,255,255,.18);margin-top:14px}
+.card .track{background:var(--surface-2)}
+.track .fill{position:absolute;inset:0 auto 0 0;border-radius:inherit;background:linear-gradient(90deg,#F7CAD6,#fff);transition:width 900ms var(--ease-out)}
+.card .track .fill{background:linear-gradient(90deg,#E48FA8,var(--berry))}
+.track .truck{position:absolute;top:50%;width:30px;height:30px;margin-left:-15px;margin-top:-15px;border-radius:50%;background:#fff;display:grid;place-items:center;color:var(--plum);box-shadow:0 4px 12px rgba(0,0,0,.2);transition:left 900ms var(--ease-out)}
+.track .truck svg{animation:rumble 600ms ease-in-out infinite}
+@keyframes rumble{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
+.here{background:linear-gradient(150deg,#3A2140,#6E2F63 60%,#A8406F);color:#fff;border-radius:var(--radius);padding:18px;position:relative;overflow:hidden}
+.here .muted{color:rgba(255,255,255,.72)}
+.here .gift{position:absolute;right:14px;top:16px;width:84px;animation:bob 3s ease-in-out infinite}
+
+/* ---------- check-in ---------- */
+.moods{display:flex;justify-content:space-between;margin-top:14px}
+.mood{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);transition:opacity 250ms ease,color 200ms ease}
+.mood .face{width:52px;height:52px;border-radius:50%;transition:transform 380ms var(--spring),box-shadow 220ms ease}
+.mood:active .face{transform:scale(.9)}
+.moods.picked .mood{opacity:.45}
+.moods.picked .mood[aria-pressed="true"]{opacity:1;color:var(--ink)}
+.mood[aria-pressed="true"] .face{transform:scale(1.14);box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--ink)}
+.reveal-rows{display:grid;grid-template-rows:0fr;transition:grid-template-rows 420ms var(--ease-drawer)}
+.reveal-rows>div{overflow:hidden}
+.reveal-rows.open{grid-template-rows:1fr}
+.moons{display:flex;gap:8px}
+.moon{width:26px;height:26px;border-radius:50%;background:var(--surface-2);position:relative;overflow:hidden;flex:none}
+.moon.on{background:var(--gold);animation:pop 450ms var(--spring)}
+.moon.on::after{content:"";position:absolute;width:55%;height:55%;border-radius:50%;top:15%;left:50%;background:rgba(255,255,255,.35)}
+.pouch-ready{animation:nudge 2.4s var(--ease-out) infinite}
+@keyframes nudge{0%,80%,100%{transform:rotate(0)}84%{transform:rotate(-4deg)}88%{transform:rotate(4deg)}92%{transform:rotate(-2deg)}}
+.fly{position:absolute;left:0;top:0;width:26px;height:26px;z-index:70;pointer-events:none}
+
+/* ---------- calendar ---------- */
+.cal-head{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-grid.from-r{animation:fromR 360ms var(--ease-out)}
+.cal-grid.from-l{animation:fromL 360ms var(--ease-out)}
+@keyframes fromR{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes fromL{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+.day{aspect-ratio:1;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;position:relative;transition:transform 180ms var(--ease-out)}
+.day:active{transform:scale(.88)}
+.day.out{visibility:hidden}
+.day.period{background:var(--period);color:#fff}
+.day.predicted{background:var(--predicted);color:#8B2446}
+.day.fertile{background:var(--fertile);color:var(--fertile-ink)}
+.day.ovulation{background:var(--fertile);color:var(--fertile-ink);box-shadow:inset 0 0 0 2px #7BBF98}
+.day.boxday{background:var(--plum);color:#fff}
+.day.today{box-shadow:inset 0 0 0 2px var(--ink)}
+.day .mk{position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:var(--ink)}
+.day.period .mk,.day.boxday .mk{background:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+
+/* ---------- box ---------- */
+.box-hero{position:relative;border-radius:30px;padding:20px;background:linear-gradient(165deg,#F3EAFB,#F9DCE7);overflow:hidden;text-align:center;isolation:isolate}
+.box-art{width:150px;margin:0 auto;animation:bob 4s ease-in-out infinite;overflow:visible}
+.box-art .lid{animation:lid 4s ease-in-out infinite;transform-box:fill-box;transform-origin:center bottom}
+@keyframes lid{0%,70%,100%{transform:translateY(0)}78%{transform:translateY(-7px) rotate(-2deg)}86%{transform:translateY(0)}}
+.big-count{font-family:var(--display);font-size:56px;font-weight:600;line-height:1;letter-spacing:-.03em}
+.perks{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:12px}
+.tiles{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 16px 10px;margin:0 -16px;scrollbar-width:none;scroll-padding:0 16px}
+.tiles::-webkit-scrollbar{display:none}
+.tile{flex:none;width:108px;scroll-snap-align:start;background:var(--surface);border-radius:20px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;box-shadow:var(--shadow);position:relative;transition:transform 260ms var(--spring),box-shadow 220ms ease}
+.tile .art{width:52px;height:52px}
+.tile .nm{font-size:13px;font-weight:600;line-height:1.2}
+.tile .sub{font-size:12px;color:var(--muted)}
+.tile.addon{box-shadow:inset 0 0 0 1.5px var(--line);background:transparent}
+.tile.addon:active{transform:scale(.94)}
+.tile.addon[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--berry);background:var(--surface)}
+.tile .tick{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--muted);transition:background-color 200ms ease,color 200ms ease,transform 400ms var(--spring)}
+.tile[aria-pressed="true"] .tick{background:var(--berry);color:#fff;transform:rotate(360deg)}
+.sticky-cta{position:sticky;bottom:0;margin:0 -16px -28px;padding:16px 16px 16px;background:linear-gradient(to top,var(--bg) 72%,rgba(251,246,241,0));z-index:5}
+
+/* ---------- timeline ---------- */
+.timeline{position:relative;padding-left:28px}
+.tl-item{position:relative;padding-bottom:16px}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{content:"";position:absolute;left:-21px;top:18px;bottom:-2px;width:2px;background:var(--line);transition:background-color 400ms ease}
+.tl-item:last-child::before{display:none}
+.tl-item.done::before{background:var(--berry)}
+.tl-dot{position:absolute;left:-28px;top:2px;width:16px;height:16px;border-radius:50%;background:var(--surface);box-shadow:inset 0 0 0 2px var(--line);transition:background-color 300ms ease,box-shadow 300ms ease}
+.tl-item.done .tl-dot{background:var(--berry);box-shadow:none}
+.tl-item.current .tl-dot{background:var(--berry);box-shadow:0 0 0 5px var(--berry-soft)}
+.tl-item.current .tl-dot::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--berry);animation:ping 1.6s var(--ease-out) infinite}
+@keyframes ping{0%{transform:scale(.6);opacity:.6}100%{transform:scale(1.6);opacity:0}}
+.tl-label{font-weight:600;transition:color 300ms ease}
+.tl-item:not(.done):not(.current) .tl-label{color:var(--muted)}
+
+/* ---------- shelf ---------- */
+.shelf{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.buddy-tile{background:var(--surface);border-radius:20px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:var(--shadow);position:relative;transition:transform 200ms var(--ease-out)}
+.buddy-tile:active{transform:scale(.95)}
+.buddy-tile .fig{width:74px;height:74px}
+.buddy-tile:not(.locked) .fig{animation:bob 3.8s ease-in-out infinite}
+.buddy-tile .nm{font-size:12px;font-weight:600}
+.buddy-tile.locked{background:var(--surface-2);box-shadow:none}
+.buddy-tile.locked .nm{color:var(--muted)}
+.buddy-tile .flags{display:flex;gap:3px;height:16px;align-items:center}
+.flag{font-size:9px;font-weight:700;letter-spacing:.04em;padding:2px 5px;border-radius:5px;text-transform:uppercase}
+.flag.p{background:var(--ink);color:#fff}
+.flag.d{background:var(--lilac);color:var(--lilac-ink)}
+.flag.r{background:#FBEFD0;color:#8A6412}
+.progress{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.progress>i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#E48FA8,var(--berry));transition:width 700ms var(--ease-out)}
+.tilt{transition:transform 200ms var(--ease-out)}
+
+/* ---------- sheets ---------- */
+.backdrop{position:absolute;inset:0;background:rgba(29,20,32,.42);opacity:0;transition:opacity 420ms var(--ease-drawer);z-index:40}
+.backdrop.show{opacity:1}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:92%;background:var(--bg);border-radius:30px 30px 0 0;z-index:41;transform:translateY(100%);transition:transform 500ms var(--ease-drawer);display:flex;flex-direction:column;box-shadow:0 -10px 40px -10px rgba(29,20,32,.25);touch-action:none}
+.sheet.show{transform:translateY(0)}
+.sheet.dragging{transition:none}
+.grab{padding:10px 0 4px;display:grid;place-items:center;cursor:grab;flex:none}
+.grab i{width:40px;height:5px;border-radius:99px;background:#D7CBC4}
+.sheet-body{overflow-y:auto;padding:6px 20px calc(env(safe-area-inset-bottom) + 24px);touch-action:pan-y;scrollbar-width:none;display:flex;flex-direction:column;gap:12px}
+.sheet-body::-webkit-scrollbar{display:none}
+.sheet.show .sheet-body.stagger>*{animation:rise 460ms var(--ease-out) both}
+.sheet.show .sheet-body.stagger>*:nth-child(2){animation-delay:50ms}
+.sheet.show .sheet-body.stagger>*:nth-child(3){animation-delay:90ms}
+.sheet.show .sheet-body.stagger>*:nth-child(4){animation-delay:130ms}
+.sheet.show .sheet-body.stagger>*:nth-child(n+5){animation-delay:170ms}
+@media (min-width:520px){.sheet-body{padding-bottom:32px}}
+.sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:2px}
+.x-btn{width:34px;height:34px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;flex:none;transition:transform 160ms var(--ease-out)}
+.x-btn:active{transform:scale(.9)}
+
+/* ---------- toast (island) ---------- */
+.toast-wrap{position:absolute;top:calc(env(safe-area-inset-top) + 10px);left:0;right:0;z-index:80;pointer-events:none;display:flex;justify-content:center;padding:0 16px}
+@media (min-width:520px){.toast-wrap{top:14px}}
+.toast{position:absolute;pointer-events:auto;background:#1d1420;color:#fff;border-radius:22px;padding:10px 16px 10px 10px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;box-shadow:0 14px 30px -10px rgba(0,0,0,.45);transform:translateY(-16px) scale(.6);opacity:0;transition:transform 520ms var(--spring),opacity 220ms ease;max-width:calc(100% - 32px)}
+.toast.show{transform:none;opacity:1}
+.toast.hide{transform:translateY(-12px) scale(.85);opacity:0;transition:transform 260ms var(--ease-out),opacity 200ms ease}
+.toast .t-ic{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.12);display:grid;place-items:center;flex:none;color:#F7CAD6}
+
+/* ---------- onboarding ---------- */
+.ob{flex:1;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 18px) 20px calc(env(safe-area-inset-bottom) + 20px);overflow-y:auto;overflow-x:hidden;position:relative;isolation:isolate}
+@media (min-width:520px){.ob{padding-top:34px;padding-bottom:28px}}
+.ob-dots{display:flex;gap:6px}
+.ob-dots i{height:6px;width:6px;border-radius:99px;background:var(--line);transition:width 400ms var(--ease-drawer),background-color 300ms ease}
+.ob-dots i.on{width:22px;background:var(--berry)}
+.ob-body{flex:1;display:flex;flex-direction:column}
+.ob-body.fwd>*{animation:slideIn 480ms var(--ease-out) both}
+.ob-body.back>*{animation:slideBack 480ms var(--ease-out) both}
+.ob-body>*:nth-child(2){animation-delay:40ms!important}
+.ob-body>*:nth-child(3){animation-delay:80ms!important}
+.ob-body>*:nth-child(4){animation-delay:120ms!important}
+.ob-body>*:nth-child(5){animation-delay:160ms!important}
+@keyframes slideIn{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes slideBack{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+.field{display:block;background:var(--surface);border-radius:18px;padding:12px 16px;box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow 180ms ease}
+.field.row{display:flex}
+.field:focus-within{box-shadow:inset 0 0 0 2px var(--berry)}
+.field .lbl{display:block;font-size:12px;font-weight:600;color:var(--muted)}
+.field input{border:0;outline:0;background:none;width:100%;font-size:17px;padding:2px 0 0;min-height:28px}
+.option{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border-radius:18px;padding:12px 14px;box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow 180ms ease,transform 160ms var(--ease-out)}
+.option:active{transform:scale(.98)}
+.option .art{width:44px;height:44px;flex:none}
+.option[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--berry)}
+.option .tick{margin-left:auto;width:24px;height:24px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line);display:grid;place-items:center;transition:background-color 180ms ease,box-shadow 180ms ease;flex:none;color:#fff}
+.option[aria-pressed="true"] .tick{background:var(--berry);box-shadow:none}
+.option .tick svg{opacity:0;transform:scale(.4);transition:opacity 160ms ease,transform 300ms var(--spring)}
+.option[aria-pressed="true"] .tick svg{opacity:1;transform:none}
+.hero-art{display:flex;justify-content:center;align-items:flex-end}
+.hero-art>span{display:block}
+.hero-art>span:nth-child(1),.hero-art>span:nth-child(3){width:96px;margin:0 -12px}
+.hero-art>span:nth-child(2){width:132px;position:relative;z-index:1}
+.float{animation:bob 4s ease-in-out infinite}
+.float.d2{animation-delay:-1.3s}.float.d3{animation-delay:-2.6s}
+.welcome-bg{position:absolute;inset:0;z-index:-1;background:radial-gradient(120% 55% at 50% 12%,#F6DDE9 0%,rgba(251,246,241,0) 70%)}
+
+/* ---------- reveal ---------- */
+.reveal-stage{height:290px;display:grid;place-items:center;position:relative}
+.reveal-stage>*{grid-area:1/1}
+.rays{width:420px;height:420px;border-radius:50%;opacity:0;transform:scale(.4);transition:opacity 600ms ease,transform 900ms var(--ease-out);position:relative}
+.rays::before{content:"";position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(var(--ray) 0 10deg,transparent 10deg 24deg);mask:radial-gradient(circle,#000 10%,transparent 62%);-webkit-mask:radial-gradient(circle,#000 10%,transparent 62%);animation:spin 18s linear infinite}
+.opened .rays{opacity:1;transform:none}
+.pouch{width:170px;height:210px;position:relative;cursor:pointer;z-index:2}
+.pouch.shake1{animation:shake1 380ms var(--ease-out)}
+.pouch.shake2{animation:shake2 420ms var(--ease-out)}
+@keyframes shake1{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg) scale(1.02)}60%{transform:rotate(4deg)}}
+@keyframes shake2{0%,100%{transform:rotate(0)}15%{transform:rotate(-9deg) scale(1.05)}35%{transform:rotate(8deg) scale(1.05)}55%{transform:rotate(-6deg)}75%{transform:rotate(3deg)}}
+.pouch .top,.pouch .bottom,.pouch .rip{transition:transform 700ms var(--ease-out),opacity 500ms ease}
+.opened .pouch .top{transform:translate(40px,-110px) rotate(24deg);opacity:0}
+.opened .pouch .bottom{transform:translateY(120px);opacity:0}
+.opened .pouch .rip{opacity:0}
+.opened .pouch{pointer-events:none}
+.pouch .rip{stroke-dasharray:162;stroke-dashoffset:162;transition:stroke-dashoffset 300ms var(--ease-out),opacity 300ms ease}
+.revealed{display:grid;place-items:center;pointer-events:none;z-index:3}
+.revealed .fig{width:196px;opacity:0;transform:scale(.6) translateY(30px);filter:blur(10px);transition:opacity 400ms var(--ease-out) 150ms,transform 800ms var(--spring) 150ms,filter 450ms var(--ease-out) 150ms}
+.opened .revealed .fig{opacity:1;transform:none;filter:blur(0)}
+.opened .revealed .fig svg{animation:bob 3.4s ease-in-out 1s infinite}
+.taps{display:flex;justify-content:center;gap:8px}
+.taps i{width:8px;height:8px;border-radius:50%;background:var(--line);transition:background-color 200ms ease,transform 300ms var(--spring)}
+.taps i.on{background:var(--berry);transform:scale(1.3)}
+.particle{position:absolute;left:0;top:0;pointer-events:none;z-index:90;border-radius:3px}
+
+.check-anim{width:84px;height:84px;border-radius:50%;background:var(--fertile);display:grid;place-items:center;margin:4px auto 0;animation:pop 520ms var(--spring) both}
+.check-anim path{stroke-dasharray:40;stroke-dashoffset:40;animation:draw 420ms var(--ease-out) 220ms forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.spinner{width:20px;height:20px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin 700ms linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (hover:hover) and (pointer:fine){
+  .btn:hover{filter:brightness(1.06)}
+  .chip:hover{background:#EEE4DD}
+  .chip[aria-pressed="true"]:hover{background:var(--ink)}
+  .buddy-tile:hover,.icon-btn:hover,.tile.addon:hover{transform:translateY(-2px)}
+  .tab:hover{color:var(--ink-2)}
+  .tab[aria-current="page"]:hover{color:var(--berry)}
+  .mood:hover .face{transform:scale(1.06)}
+  .mood[aria-pressed="true"]:hover .face{transform:scale(1.14)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:1ms!important;animation-iteration-count:1!important;transition-duration:1ms!important;transition-delay:0ms!important}
+}
+:focus-visible{outline:2px solid var(--berry);outline-offset:2px;border-radius:12px}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="scroller" id="scroller"><main class="screen" id="screen"></main></div>
+  <nav class="tabbar" id="tabbar" aria-label="Main"></nav>
+  <div class="toast-wrap" id="toasts" aria-live="polite"></div>
+  <div id="sheet-root"></div>
+</div>
+
+<script>
+/* Lune: front-end-only demo. Data stays on this device. Shipping runs on a sped-up clock. */
+
+const DAY = 86400000;
+const STORE_KEY = 'lune-demo-v2';
+const BOX_PRICE = 16;
+const TOPUP_PRICE = 9;
+const ADDONS = [
+  {id:'heat', name:'Heat patches', price:4},
+  {id:'choc', name:'Dark choc',    price:3},
+  {id:'tea',  name:'Sleepy tea',   price:3},
+];
+const PRODUCTS = [
+  {id:'pads',    name:'Pads',     desc:'Organic cotton, with wings'},
+  {id:'tampons', name:'Tampons',  desc:'Organic cotton'},
+  {id:'liners',  name:'Liners',   desc:'Light days and backup'},
+  {id:'cup',     name:'Cup care', desc:'Wash and travel wipes'},
+];
+const FLOWS = ['Light','Regular','Heavy'];
+const MOODS = ['Great','Good','Okay','Low','Rough'];
+const SYMPTOMS = ['Cramps','Bloating','Headache','Cravings','Tired','Acne','Tender','Moody','Back pain'];
+const STAGES = [
+  {label:'Order placed',     sub:'Packing soon',       t:0},
+  {label:'Packed',           sub:'Buddy sealed in',    t:6},
+  {label:'Shipped',          sub:'Plain box, no logos',t:12},
+  {label:'Out for delivery', sub:'Arriving today',     t:18},
+  {label:'Delivered',        sub:'At your door',       t:24},
+];
+
+/* ---------- Night Garden, Series 1 ---------- */
+const BUDDIES = [
+  {id:'luna',   name:'Luna',      color:'#C9B8F0', top:'moon',   rarity:'common', blurb:'Up with you at 3am.'},
+  {id:'berry',  name:'Berry',     color:'#F49AB0', top:'leaf',   rarity:'common', blurb:'Sweet, a little tart.'},
+  {id:'cham',   name:'Chamomile', color:'#F6D78B', top:'steam',  rarity:'common', blurb:'Kettle is already on.'},
+  {id:'snug',   name:'Snug',      color:'#E2C3A6', top:'ears',   rarity:'common', blurb:'Professional blanket burrito.'},
+  {id:'drizzle',name:'Drizzle',   color:'#9CC7E8', top:'drop',   rarity:'common', blurb:'Cries at dog videos. Valid.'},
+  {id:'peachy', name:'Peachy',    color:'#F7B89A', top:'leaf',   rarity:'common', blurb:'Soft outside, tough on cramps.'},
+  {id:'tulip',  name:'Tulip',     color:'#F5A3C7', top:'petals', rarity:'common', blurb:'Blooms a bit more each cycle.'},
+  {id:'cocoa',  name:'Cocoa',     color:'#B08468', top:'ears',   rarity:'common', blurb:'Will share the chocolate. Some.'},
+  {id:'sprout', name:'Sprout',    color:'#A8D5A2', top:'leaf2',  rarity:'common', blurb:'Small. Stubborn. Growing.'},
+  {id:'twinkle',name:'Twinkle',   color:'#FFE08A', top:'star',   rarity:'rare',   blurb:'One wish per cycle.'},
+  {id:'ribbon', name:'Ribbon',    color:'#E48FA8', top:'bow',    rarity:'rare',   blurb:'Wraps up bad days.'},
+  {id:'prism',  name:'Prism',     color:'grad',    top:'star',   rarity:'secret', blurb:'1 in 96 boxes. Lucky you.'},
+];
+const RARITY_LABEL = {common:'Common', rare:'Rare', secret:'Secret'};
+const RARITY_ODDS  = {common:'1 in 12', rare:'1 in 24', secret:'1 in 96'};
+const RAY = {common:'rgba(201,184,240,.45)', rare:'rgba(246,200,76,.5)', secret:'rgba(249,168,201,.55)'};
+
+let _uid = 0;
+function buddySVG(b, {locked=false, eyesClass=''}={}){
+  const id = 'g' + (++_uid);
+  const body = locked ? '#E4DAD4' : (b.color==='grad' ? `url(#${id})` : b.color);
+  const acc  = locked ? '#D6CBC4' : shade(b.color, -18);
+  const tops = {
+    moon:  `<path d="M58 16a14 14 0 1 0 8 25 16 16 0 0 1-8-25z" fill="${locked?acc:'#FFE7A3'}"/>`,
+    leaf:  `<path d="M50 30c-2-8 2-15 10-17-1 8-4 13-10 17z" fill="${locked?acc:'#7DBE83'}"/><path d="M50 32v-6" stroke="${locked?acc:'#5C9C63'}" stroke-width="3" stroke-linecap="round"/>`,
+    leaf2: `<path d="M50 30c-6-4-10-10-8-17 7 2 10 8 8 17z" fill="${locked?acc:'#5FAE6B'}"/><path d="M50 30c5-5 11-8 17-5-4 6-10 8-17 5z" fill="${locked?acc:'#7DBE83'}"/>`,
+    steam: `<path d="M42 26c-4-5 4-8 0-13M52 26c-4-5 4-8 0-13M62 26c-4-5 4-8 0-13" stroke="${locked?acc:'#fff'}" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".9"/>`,
+    ears:  `<circle cx="30" cy="36" r="10" fill="${body}"/><circle cx="70" cy="36" r="10" fill="${body}"/><circle cx="30" cy="36" r="5" fill="${acc}"/><circle cx="70" cy="36" r="5" fill="${acc}"/>`,
+    drop:  `<path d="M50 14c6 9 9 13 9 18a9 9 0 0 1-18 0c0-5 3-9 9-18z" fill="${locked?acc:'#6FA8D6'}"/>`,
+    petals:`<g fill="${locked?acc:'#FFF1F6'}"><circle cx="38" cy="30" r="7"/><circle cx="50" cy="25" r="7"/><circle cx="62" cy="30" r="7"/></g><circle cx="50" cy="29" r="4" fill="${locked?acc:'#F6C84C'}"/>`,
+    star:  `<path d="M50 10l5.3 10.7 11.8 1.7-8.5 8.3 2 11.7L50 36.9l-10.6 5.5 2-11.7-8.5-8.3 11.8-1.7z" fill="${locked?acc:(b.rarity==='secret'?'#fff':'#F6C84C')}"/>`,
+    bow:   `<path d="M50 32l-16-9v18zM50 32l16-9v18z" fill="${locked?acc:'#fff'}"/><circle cx="50" cy="32" r="5" fill="${locked?acc:'#fff'}"/>`,
+  };
+  const face = locked
+    ? `<text x="50" y="72" text-anchor="middle" font-family="Fraunces,Georgia,serif" font-size="26" font-weight="600" fill="#BFB2AA">?</text>`
+    : `<g class="${eyesClass}"><ellipse cx="40" cy="60" rx="3.6" ry="4.4" fill="#2A1B2E"/><ellipse cx="60" cy="60" rx="3.6" ry="4.4" fill="#2A1B2E"/>
+       <circle cx="41.2" cy="58.4" r="1.2" fill="#fff"/><circle cx="61.2" cy="58.4" r="1.2" fill="#fff"/></g>
+       <ellipse cx="33" cy="68" rx="5" ry="3" fill="#F26D8F" opacity=".35"/><ellipse cx="67" cy="68" rx="5" ry="3" fill="#F26D8F" opacity=".35"/>
+       <path d="M46 68q4 4 8 0" stroke="#2A1B2E" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+  const sparkle = (!locked && b.rarity!=='common')
+    ? `<path d="M84 22l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#F6C84C"/><path d="M14 50l1.4 3.5 3.5 1.4-3.5 1.4L14 60l-1.4-3.5-3.5-1.4 3.5-1.4z" fill="#F6C84C" opacity=".8"/>` : '';
+  return `<svg viewBox="0 0 100 100" aria-hidden="true" style="width:100%;height:auto;overflow:visible">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F9A8C9"/><stop offset=".35" stop-color="#C9B8F0"/><stop offset=".7" stop-color="#9CD7E8"/><stop offset="1" stop-color="#FFE08A"/></linearGradient></defs>
+    <ellipse cx="50" cy="91" rx="24" ry="3.5" fill="#2A1B2E" opacity=".08"/>
+    ${b.top==='ears'?tops.ears:''}
+    <path d="M50 30c20 0 33 14 33 32 0 16-13 26-33 26S17 78 17 62c0-18 13-32 33-32z" fill="${body}"/>
+    <path d="M30 44c4-6 10-9 16-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity="${locked?0:.45}"/>
+    ${b.top!=='ears'?tops[b.top]:''}
+    ${face}${sparkle}
+  </svg>`;
+}
+function shade(hex, pct){
+  if(!hex.startsWith('#')) return '#E7B8D8';
+  const n = parseInt(hex.slice(1),16);
+  const f = v => Math.max(0,Math.min(255, Math.round(v + v*pct/100)));
+  return '#' + [f(n>>16), f((n>>8)&255), f(n&255)].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+const MOOD_STYLE = {
+  Great:{c:'#FFD66B', mouth:'<path d="M37 60q13 17 26 0z" fill="#2A1B2E"/>', eyes:'<path d="M32 49q6-7 12 0M56 49q6-7 12 0" stroke="#2A1B2E" stroke-width="3.4" fill="none" stroke-linecap="round"/>'},
+  Good: {c:'#FFB4C6', mouth:'<path d="M40 61q10 9 20 0" stroke="#2A1B2E" stroke-width="3.4" fill="none" stroke-linecap="round"/>'},
+  Okay: {c:'#D6CAF3', mouth:'<path d="M42 64h16" stroke="#2A1B2E" stroke-width="3.4" stroke-linecap="round"/>'},
+  Low:  {c:'#AFD3EE', mouth:'<path d="M41 67q9-7 18 0" stroke="#2A1B2E" stroke-width="3.4" fill="none" stroke-linecap="round"/>'},
+  Rough:{c:'#C5CDD6', mouth:'<path d="M38 66q3.5-4 7 0t7 0t7 0" stroke="#2A1B2E" stroke-width="3.2" fill="none" stroke-linecap="round"/>', extra:'<path d="M76 24c3 5 4 7 4 9a4 4 0 0 1-8 0c0-2 1-4 4-9z" fill="#7FB6E0"/>'},
+};
+function moodFace(m){
+  const s = MOOD_STYLE[m];
+  const eyes = s.eyes || '<circle cx="37" cy="47" r="4.2" fill="#2A1B2E"/><circle cx="63" cy="47" r="4.2" fill="#2A1B2E"/>';
+  return `<svg viewBox="0 0 100 100" class="face" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="${s.c}"/>
+    <ellipse cx="26" cy="60" rx="7" ry="4.5" fill="#F26D8F" opacity=".28"/><ellipse cx="74" cy="60" rx="7" ry="4.5" fill="#F26D8F" opacity=".28"/>
+    ${eyes}${s.mouth}${s.extra||''}</svg>`;
+}
+
+/* ---------- Item art ---------- */
+const ART = {
+  pads:`<svg viewBox="0 0 52 52"><rect x="2" y="2" width="48" height="48" rx="15" fill="#FDE7EE"/><path d="M14 22h-4v8h4M38 22h4v8h-4" fill="#fff" stroke="#F2A7BC" stroke-width="2" stroke-linejoin="round"/><rect x="14" y="11" width="24" height="30" rx="8" fill="#fff" stroke="#F2A7BC" stroke-width="2"/><rect x="21" y="17" width="10" height="18" rx="5" fill="#F9D3DE"/></svg>`,
+  tampons:`<svg viewBox="0 0 52 52"><rect x="2" y="2" width="48" height="48" rx="15" fill="#EFE7FB"/><rect x="19" y="9" width="14" height="25" rx="7" fill="#fff" stroke="#B9A3E6" stroke-width="2"/><path d="M26 34c0 5-3 6-1 10" stroke="#B9A3E6" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M21 16h10" stroke="#DCD0F4" stroke-width="2"/></svg>`,
+  liners:`<svg viewBox="0 0 52 52"><rect x="2" y="2" width="48" height="48" rx="15" fill="#E4F3EA"/><rect x="18" y="9" width="16" height="34" rx="8" fill="#fff" stroke="#8FCBA6" stroke-width="2"/></svg>`,
+  cup:`<svg viewBox="0 0 52 52"><rect x="2" y="2" width="48" height="48" rx="15" fill="#FFF1DC"/><path d="M15 13h22l-4 18a7 7 0 0 1-14 0z" fill="#fff" stroke="#EDBB72" stroke-width="2" stroke-linejoin="round"/><path d="M26 38v6" stroke="#EDBB72" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+  heat:`<svg viewBox="0 0 52 52"><rect x="2" y="2" width="48" height="48" rx="15" fill="#FFE6D6"/><rect x="12" y="12" width="28" height="28" rx="9" fill="#FFB38A"/><path d="M19 32c0-4 4-4 4-9M26 32c0-4 4-4 4-9M33 32c0-4 4-4 4-9" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" transform="translate(-2 0)"/></svg>`,
+  choc:`<svg viewBox="0 0 52 52"><rect x="2" y="2" width="48" height="48" rx="15" fill="#F3E6DD"/><rect x="14" y="11" width="24" height="30" rx="4" fill="#7A4B33"/><path d="M14 21h24M14 31h24M26 11v30" stroke="#5E3625" stroke-width="2"/><path d="M14 31l24-16v11L25 41H14z" fill="#E48FA8"/></svg>`,
+  tea:`<svg viewBox="0 0 52 52"><rect x="2" y="2" width="48" height="48" rx="15" fill="#FBF3D6"/><path d="M12 22h23v8a9 9 0 0 1-9 9h-5a9 9 0 0 1-9-9z" fill="#fff" stroke="#E0C46A" stroke-width="2"/><path d="M35 25h2a4 4 0 0 1 0 8h-3" stroke="#E0C46A" stroke-width="2" fill="none"/><path d="M20 17c-2-3 2-4 0-7M27 17c-2-3 2-4 0-7" stroke="#E0C46A" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`,
+  mystery:`<svg viewBox="0 0 52 52"><rect x="2" y="2" width="48" height="48" rx="15" fill="#3A2140"/><path d="M15 15h22v25a2 2 0 0 1-2 2H17a2 2 0 0 1-2-2z" fill="#B23A6E"/><path d="M15 15l2.75 3 2.75-3 2.75 3 2.75-3 2.75 3 2.75-3 2.75 3 2.75-3" stroke="#fff" stroke-width="1.4" fill="none" opacity=".6"/><text x="26" y="36" text-anchor="middle" font-family="Fraunces,Georgia,serif" font-size="14" font-weight="700" fill="#fff">?</text></svg>`,
+};
+const BOX_ART = `<svg viewBox="0 0 160 150" class="box-art" aria-hidden="true">
+  <ellipse cx="80" cy="140" rx="52" ry="7" fill="#3A2140" opacity=".12"/>
+  <path d="M28 62l52 24v52l-52-24z" fill="#5C2A55"/>
+  <path d="M132 62L80 86v52l52-24z" fill="#76336C"/>
+  <path d="M50 72l6 3v52l-6-3z" fill="#F7CAD6" opacity=".9"/>
+  <path d="M104 75l6-3v52l-6 3z" fill="#F7CAD6" opacity=".9"/>
+  <circle cx="118" cy="98" r="9" fill="#FBF6F1"/><path d="M119.5 92.5a6.5 6.5 0 1 0 4 9.6 7.5 7.5 0 0 1-4-9.6z" fill="#B23A6E"/>
+  <g class="lid">
+    <path d="M22 56l58-27 58 27-58 27z" fill="#9A4383"/>
+    <path d="M22 56l58 27v8l-58-27z" fill="#6E3470"/><path d="M138 56l-58 27v8l58-27z" fill="#86407A"/>
+    <path d="M47 44l58 27M113 44L55 71" stroke="#F7CAD6" stroke-width="7"/>
+    <path d="M80 50c-10-14-26-10-20-2 4 5 14 4 20 2zM80 50c10-14 26-10 20-2-4 5-14 4-20 2z" fill="#F9DCE7" stroke="#E48FA8" stroke-width="1.5"/>
+    <circle cx="80" cy="50" r="4" fill="#E48FA8"/>
+  </g>
+</svg>`;
+
+/* ---------- Icons ---------- */
+const I = {
+  today:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>`,
+  cal:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>`,
+  box:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3.5 8 12 4l8.5 4v8.5L12 20.5 3.5 16.5z"/><path d="M3.5 8 12 12l8.5-4M12 12v8.5"/></svg>`,
+  shelf:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 4.5c4.5 0 7.5 3 7.5 7.2 0 3.6-3 6-7.5 6s-7.5-2.4-7.5-6c0-4.2 3-7.2 7.5-7.2z"/><circle cx="9.5" cy="11.5" r=".7" fill="currentColor"/><circle cx="14.5" cy="11.5" r=".7" fill="currentColor"/><path d="M4 20.5h16"/></svg>`,
+  check:`<svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.2 5 8.6l4.5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  plus:`<svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 2.5v7M2.5 6h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+  chevL:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 5-7 7 7 7"/></svg>`,
+  chevR:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="chev"><path d="m9 5 7 7-7 7"/></svg>`,
+  truck:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8" fill="#fff"/><circle cx="17.5" cy="17.5" r="1.8" fill="#fff"/></svg>`,
+  truckLg:`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17.5" cy="17.5" r="1.8"/></svg>`,
+  close:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>`,
+  star:`<svg viewBox="0 0 24 24" width="26" height="26"><path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.4 1.1 6.2L12 17l-5.6 3 1.1-6.2L2.9 9.4l6.3-.9z" fill="#F2B83B"/></svg>`,
+  sparkle:`<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" fill="currentColor"/></svg>`,
+  gift:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="9" width="17" height="11.5" rx="2"/><path d="M12 9v11.5M3.5 13h17M12 9C9 9 7 7.5 8 5.5s4 .5 4 3.5c0-3 3-5.5 4-3.5S15 9 12 9z"/></svg>`,
+  drop:`<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 3c4 5.5 6 8.6 6 11.2a6 6 0 0 1-12 0C6 11.6 8 8.5 12 3z" fill="currentColor"/></svg>`,
+};
+
+/* ---------- Dates ---------- */
+const sod = d => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
+const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return sod(x); };
+const diffDays = (a,b) => Math.round((sod(a)-sod(b))/DAY);
+const key = d => { const x = sod(d); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`; };
+const parseKey = k => { const [y,m,dd] = k.split('-').map(Number); return new Date(y,m-1,dd); };
+const fmt = (d,o={month:'short',day:'numeric'}) => new Date(d).toLocaleDateString('en-US',o);
+const fmtDow = d => fmt(d,{weekday:'short',month:'short',day:'numeric'});
+const today = () => sod(new Date());
+const money = n => '$' + (Number.isInteger(n) ? n : n.toFixed(2));
+const plural = (n,w) => `${n} ${w}${n===1?'':'s'}`;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp = (n,a,b) => Math.max(a,Math.min(b,n));
+const $ = (s, r=document) => r.querySelector(s);
+const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- State ---------- */
+function freshState(){
+  return {
+    onboarded:false, name:'',
+    lastStart: key(addDays(today(), -18)),
+    cycleLen:28, periodLen:5,
+    products:['pads'], flow:'Regular',
+    plan:'free', paused:false,
+    addons:{heat:true, choc:false, tea:false},
+    stars:4, streak:3,
+    checkins:{}, orders:[], owned:{},
+    demoFast:true,
+  };
+}
+let S;
+try { S = JSON.parse(localStorage.getItem(STORE_KEY)) || freshState(); } catch(e){ S = freshState(); }
+S = Object.assign(freshState(), S);
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }catch(e){} }
+
+const ui = { tab:'today', obStep:0, obDir:'fwd', calMonth:null, calDir:'', draft:null, lastStages:{}, ringDone:false };
+
+/* ---------- Cycle math ---------- */
+function cycle(){
+  const t = today(), start = parseKey(S.lastStart), L = S.cycleLen;
+  const since = Math.max(0, diffDays(t,start));
+  const curStart = addDays(start, Math.floor(since / L)*L);
+  const day = diffDays(t, curStart) + 1;
+  const next = addDays(curStart, L);
+  const untilNext = diffDays(next, t);
+  const ov = L - 14;
+  let phase;
+  if (day <= S.periodLen) phase = 'Period';
+  else if (day < ov - 1) phase = 'Follicular';
+  else if (day <= ov + 1) phase = 'Ovulation';
+  else phase = 'Luteal';
+  return {day, curStart, next, untilNext, phase, ov};
+}
+function dayType(d){
+  const start = parseKey(S.lastStart);
+  const off0 = diffDays(d, start);
+  if (off0 < 0) return '';
+  const off = off0 % S.cycleLen;
+  const cycStart = addDays(start, off0 - off);
+  if (off < S.periodLen) return cycStart <= today() ? 'period' : 'predicted';
+  const ov = S.cycleLen - 15;
+  if (off === ov) return 'ovulation';
+  if (off >= ov - 5 && off <= ov + 1) return 'fertile';
+  return '';
+}
+function nextBoxDate(){
+  let arrive = addDays(cycle().next, -3);
+  if (arrive < today()) arrive = addDays(arrive, S.cycleLen);
+  return arrive;
+}
+const PHASE = {
+  Period:     {a:'#FFE4EB', b:'#FBC9D7', c:'#E0567A', tip:'Heat and water help more than you think.'},
+  Follicular: {a:'#FFF1E4', b:'#FFD9BF', c:'#E0844A', tip:'Energy is climbing. Good week to start things.'},
+  Ovulation:  {a:'#E7F6ED', b:'#C8E9D6', c:'#3E9A6A', tip:'Peak energy for a lot of people.'},
+  Luteal:     {a:'#F0EAFC', b:'#DACEF5', c:'#8A63C9', tip:'Cravings are hormonal. Dark chocolate counts.'},
+};
+
+/* ---------- Orders ---------- */
+function orderElapsed(o){ return (Date.now() - o.placedAt)/1000 * (S.demoFast ? 1 : 0.02); }
+function orderStage(o){ const e = orderElapsed(o); let i = 0; STAGES.forEach((s,idx)=>{ if (e >= s.t) i = idx; }); return i; }
+function boxLines(){
+  const q = {Light:10, Regular:16, Heavy:22}[S.flow];
+  const map = { pads:['pads','Pads',`${q} count`], tampons:['tampons','Tampons',`${q} count`], liners:['liners','Liners','12 count'], cup:['cup','Cup care','Wash + wipes'] };
+  return S.products.map(p=>map[p]);
+}
+function boxTotal(){ return BOX_PRICE + ADDONS.filter(a=>S.addons[a.id]).reduce((s,a)=>s+a.price,0); }
+function pickBuddy(){
+  const pool = BUDDIES.map(b=>[b, {common:10, rare:4, secret:1}[b.rarity] * (S.owned[b.id] ? 0.15 : 1)]);
+  let r = Math.random() * pool.reduce((s,[,w])=>s+w,0);
+  for (const [b,w] of pool){ if ((r-=w) <= 0) return b.id; }
+  return pool[0][0].id;
+}
+function placeOrder(kind){
+  const o = {
+    id: 'LN-' + Math.floor(10000 + Math.random()*89999),
+    kind, placedAt: Date.now(),
+    items: kind==='box'
+      ? [...boxLines().map(l=>`${l[1]} · ${l[2]}`), ...ADDONS.filter(a=>S.addons[a.id]).map(a=>a.name), 'Mystery buddy']
+      : [`${S.products.includes('tampons')?'Tampons':'Pads'} · 8 count`, 'Heat patch', 'Stash pouch'],
+    total: kind==='box' ? boxTotal() : TOPUP_PRICE,
+    buddy: kind==='box' ? pickBuddy() : null,
+    state: kind==='box' ? 'sealed' : null,
+  };
+  S.orders.unshift(o);
+  if (kind==='box'){ S.plan='box'; S.paused=false; }
+  ui.lastStages[o.id] = 0;
+  save();
+  return o;
+}
+const findOrder = id => S.orders.find(o=>o.id===id);
+const pendingReveal = () => S.orders.find(o=>o.kind==='box' && o.state!=='revealed' && orderStage(o)===4);
+const inTransit = () => S.orders.find(o=>orderStage(o)<4);
+
+/* ---------- Feedback: toast, particles, haptics ---------- */
+function buzz(ms=8){ try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} }
+function toast(msg, icon=I.sparkle){
+  const wrap = $('#toasts');
+  wrap.querySelectorAll('.toast').forEach(old=>{ old.classList.add('hide'); setTimeout(()=>old.remove(), 280); });
+  const el = document.createElement('div');
+  el.className = 'toast'; el.setAttribute('role','status');
+  el.innerHTML = `<span class="t-ic">${icon}</span><span>${msg}</span>`;
+  wrap.appendChild(el);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
+  setTimeout(()=>{ el.classList.add('hide'); setTimeout(()=>el.remove(), 300); }, 2600);
+  el.onclick = ()=>el.classList.add('hide');
+}
+function burst(x, y, n=18, colors=['#F6C84C','#F49AB0','#C9B8F0','#9CC7E8','#B23A6E']){
+  if (reduced()) return;
+  const app = $('#app'), r = app.getBoundingClientRect();
+  for (let i=0;i<n;i++){
+    const p = document.createElement('i');
+    p.className = 'particle';
+    const s = 5 + Math.random()*6;
+    p.style.cssText = `width:${s}px;height:${s*(Math.random()>.5?1:1.8)}px;background:${colors[i%colors.length]}`;
+    app.appendChild(p);
+    const a = Math.random()*Math.PI*2, d = 70 + Math.random()*110;
+    const x0 = x - r.left, y0 = y - r.top, x1 = x0 + Math.cos(a)*d, y1 = y0 + Math.sin(a)*d - 40;
+    p.animate([
+      {transform:`translate(${x0}px,${y0}px) rotate(0) scale(1)`, opacity:1},
+      {transform:`translate(${x1}px,${y1}px) rotate(${Math.random()*540}deg) scale(.9)`, opacity:1, offset:.6},
+      {transform:`translate(${x1}px,${y1+60}px) rotate(${Math.random()*720}deg) scale(.4)`, opacity:0},
+    ], {duration: 900 + Math.random()*400, easing:'cubic-bezier(.2,.8,.3,1)'}).onfinish = ()=>p.remove();
+  }
+}
+function centerOf(el){ const b = el.getBoundingClientRect(); return [b.left + b.width/2, b.top + b.height/2]; }
+function flyStar(fromEl, toEl, done){
+  if (!fromEl || !toEl || reduced()){ done(); return; }
+  const app = $('#app'), r = app.getBoundingClientRect();
+  const [x0,y0] = centerOf(fromEl), [x1,y1] = centerOf(toEl);
+  const f = document.createElement('div'); f.className='fly'; f.innerHTML = I.star; app.appendChild(f);
+  const ax = x0-r.left-13, ay = y0-r.top-13, bx = x1-r.left-13, by = y1-r.top-13;
+  f.animate([
+    {transform:`translate(${ax}px,${ay}px) scale(.4) rotate(0)`},
+    {transform:`translate(${(ax+bx)/2 + 40}px,${Math.min(ay,by)-70}px) scale(1.5) rotate(160deg)`, offset:.5},
+    {transform:`translate(${bx}px,${by}px) scale(1) rotate(360deg)`},
+  ], {duration:760, easing:'cubic-bezier(.45,0,.2,1)'}).onfinish = ()=>{ f.remove(); done(); };
+}
+function countUp(el, to, dur=1000){
+  if (!el || reduced()) return;
+  const t0 = performance.now(), from = Math.max(1, to - 14);
+  const step = t => { const p = Math.min(1,(t-t0)/dur), e = 1-Math.pow(1-p,3); el.textContent = Math.round(from + (to-from)*e); if (p<1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+function replay(el, anim){ if (!el) return; el.style.animation='none'; void el.offsetWidth; el.style.animation=anim; }
+
+/* ---------- Sheets ---------- */
+let sheet = null;
+function openSheet(render, opts={}){
+  closeSheet(true);
+  const root = $('#sheet-root');
+  const bd = document.createElement('div'); bd.className = 'backdrop';
+  const sh = document.createElement('div'); sh.className = 'sheet';
+  sh.setAttribute('role','dialog'); sh.setAttribute('aria-modal','true');
+  sh.innerHTML = `<div class="grab" aria-hidden="true"><i></i></div><div class="sheet-body stagger"></div>`;
+  root.append(bd, sh);
+  sheet = {bd, sh, render, opts, body: sh.querySelector('.sheet-body')};
+  sheet.body.innerHTML = render();
+  opts.onMount && opts.onMount(sheet.body);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ bd.classList.add('show'); sh.classList.add('show'); }));
+  const opened = performance.now();
+  bd.addEventListener('click', ()=>{ if (performance.now() - opened > 350) closeSheet(); });  // ignore ghost taps from the opening tap
+  enableDrag(sh);
+}
+function refreshSheet(){
+  if (!sheet || sheet.opts.static) return;
+  sheet.body.classList.remove('stagger');
+  sheet.body.innerHTML = sheet.render();
+  sheet.opts.onMount && sheet.opts.onMount(sheet.body);
+}
+function closeSheet(instant){
+  if (!sheet) return;
+  const {bd, sh, opts} = sheet; sheet = null;
+  opts.onClose && opts.onClose();
+  if (instant){ bd.remove(); sh.remove(); return; }
+  bd.classList.remove('show'); sh.classList.remove('show'); sh.style.transform = '';
+  setTimeout(()=>{ bd.remove(); sh.remove(); }, 500);
+}
+function enableDrag(sh){
+  let y0=null, t0=0, dy=0; const body = sh.querySelector('.sheet-body');
+  const move = e=>{
+    if (y0===null) return;
+    dy = e.clientY - y0;
+    sh.classList.add('dragging');
+    sh.style.transform = `translateY(${dy > 0 ? dy : dy*0.12}px)`;
+  };
+  const up = ()=>{
+    window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up);
+    if (y0===null) return;
+    const v = dy / Math.max(1, performance.now()-t0);
+    sh.classList.remove('dragging');
+    if (dy > 110 || v > 0.6) closeSheet(); else sh.style.transform = '';
+    y0 = null;
+  };
+  sh.addEventListener('pointerdown', e=>{
+    const onGrab = e.target.closest('.grab');
+    if (!onGrab && (body.scrollTop > 0 || e.target.closest('button,input,a,.seg,.pouch,.tilt'))) return;
+    y0 = e.clientY; t0 = performance.now(); dy = 0;
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+  });
+}
+function sheetHead(title, sub=''){
+  return `<div class="sheet-head"><div><h2 class="h2" style="font-size:24px">${title}</h2>${sub?`<p class="small muted" style="margin-top:3px">${sub}</p>`:''}</div>
+    <button class="x-btn" data-act="close" aria-label="Close">${I.close}</button></div>`;
+}
+
+/* ---------- Shell ---------- */
+const TABS = [['today','Today',I.today],['calendar','Calendar',I.cal],['box','Box',I.box],['shelf','Shelf',I.shelf]];
+function render(anim=false){
+  const app = $('#app'), tb = $('#tabbar'), sc = $('#scroller');
+  if (!S.onboarded){
+    tb.style.display='none'; sc.style.display='none';
+    let ob = $('#ob');
+    if (!ob){ ob = document.createElement('div'); ob.id='ob'; ob.className='ob'; app.insertBefore(ob, tb); }
+    ob.innerHTML = renderOnboarding();
+    return;
+  }
+  $('#ob')?.remove();
+  tb.style.display=''; sc.style.display='';
+  renderTabs();
+  renderScreen(anim);
+}
+function renderTabs(){
+  const tb = $('#tabbar');
+  const i = TABS.findIndex(t=>t[0]===ui.tab);
+  const dot = !!pendingReveal();
+  if (!tb.querySelector('.tab-ind')){
+    tb.innerHTML = `<span class="tab-ind" style="width:calc((100% - 20px) / 4)"></span>` + TABS.map(([id,l,ic])=>`<button class="tab" data-act="tab" data-v="${id}">${ic}<span>${l}</span></button>`).join('');
+  }
+  tb.querySelectorAll('.tab').forEach((b,j)=>{
+    if (j===i) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+    const has = b.querySelector('.badge'), want = TABS[j][0]==='box' && dot;
+    if (want && !has) b.insertAdjacentHTML('beforeend','<span class="badge"></span>');
+    if (!want && has) has.remove();
+  });
+  tb.querySelector('.tab-ind').style.transform = `translateX(${i*100}%)`;
+}
+function renderScreen(anim=false){
+  const el = $('#screen');
+  el.classList.remove('in');
+  el.innerHTML = ({today:renderToday, calendar:renderCalendar, box:renderBox, shelf:renderShelf})[ui.tab]();
+  if (anim){ void el.offsetWidth; el.classList.add('in'); }
+  if (ui.tab==='today') animateRing();
+}
+function animateRing(){
+  const prog = $('#ring-prog'), knob = $('#ring-knob'); if (!prog) return;
+  const target = prog.dataset.target, deg = knob.dataset.deg;
+  if (!ui.ringDone && !reduced()){
+    ui.ringDone = true;
+    countUp($('#ring-num'), +$('#ring-num').dataset.v);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ prog.style.strokeDashoffset = target; knob.style.transform = `rotate(${deg}deg)`; }));
+  } else {
+    prog.style.transition='none'; knob.style.transition='none';
+    prog.style.strokeDashoffset = target; knob.style.transform = `rotate(${deg}deg)`;
+  }
+}
+const avatarBtn = () => `<button class="avatar" data-act="profile" aria-label="Profile and settings">${esc((S.name||'L')[0].toUpperCase())}</button>`;
+function seg(name, opts, val){
+  const i = Math.max(0, opts.indexOf(val));
+  return `<div class="seg" role="group">
+    <span class="thumb" style="width:calc((100% - 8px)/${opts.length});transform:translateX(${i*100}%)"></span>
+    ${opts.map(o=>`<button data-act="seg" data-seg="${name}" data-v="${o}" aria-pressed="${o===val}">${o}</button>`).join('')}
+  </div>`;
+}
+
+/* ---------- Onboarding ---------- */
+function renderOnboarding(){
+  const step = ui.obStep, dir = ui.obDir;
+  const dots = `<div class="ob-dots">${[0,1,2,3].map(i=>`<i class="${i===step?'on':''}"></i>`).join('')}</div>`;
+  const back = step>0 ? `<button class="link" data-act="ob-back">Back</button>` : `<span></span>`;
+  const head = `<div class="row between" style="height:28px;flex:none">${back}${dots}<span style="width:34px"></span></div>`;
+  let body = '';
+  if (step===0){
+    body = `<div class="welcome-bg"></div><div class="ob-body ${dir}" style="text-align:center">
+      <div style="flex:.6"></div>
+      <div class="hero-art">
+        <span class="float">${buddySVG(BUDDIES[1],{eyesClass:'eyes'})}</span>
+        <span class="float d2">${buddySVG(BUDDIES[0],{eyesClass:'eyes'})}</span>
+        <span class="float d3">${buddySVG(BUDDIES[2],{eyesClass:'eyes'})}</span>
+      </div>
+      <h1 class="title" style="font-size:36px;margin-top:24px">Your period kit shows up before your period does.</h1>
+      <p class="muted" style="margin:12px auto 0;max-width:280px;font-size:16px">Free cycle tracking. A box of your stuff 3 days early, if you want it.</p>
+      <div style="flex:1;min-height:24px"></div>
+      <button class="btn block" data-act="ob-next">Get started</button>
+      <p class="small muted" style="margin-top:12px">No card needed</p>
+    </div>`;
+  } else if (step===1){
+    body = `<div class="ob-body ${dir}">
+      <h1 class="title" style="margin-top:30px">Tell us about your cycle</h1>
+      <p class="muted" style="margin-top:8px">A guess is fine. Lune gets sharper every month.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:22px">
+        <label class="field"><span class="lbl">First name</span><input id="ob-name" autocomplete="given-name" placeholder="What should we call you?" value="${esc(S.name)}" maxlength="24"></label>
+        <label class="field"><span class="lbl">Last period started</span><input id="ob-date" type="date" value="${S.lastStart}" max="${key(today())}" min="${key(addDays(today(),-60))}"></label>
+        <div class="field row between" style="padding:14px 16px">
+          <div><span class="lbl">Cycle length</span><div style="font-size:17px;margin-top:2px" class="tnum">${S.cycleLen} days</div></div>
+          <div class="stepper"><button data-act="ob-len" data-v="-1" aria-label="Shorter">−</button><span class="tnum">${S.cycleLen}</span><button data-act="ob-len" data-v="1" aria-label="Longer">+</button></div>
+        </div>
+      </div>
+      <p class="small muted" style="margin-top:10px">Not sure? Most people start with 28.</p>
+      <div style="flex:1;min-height:24px"></div>
+      <button class="btn block" data-act="ob-next">Continue</button>
+    </div>`;
+  } else if (step===2){
+    body = `<div class="ob-body ${dir}">
+      <h1 class="title" style="margin-top:30px">What do you use?</h1>
+      <p class="muted" style="margin-top:8px">Pick all that apply.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+        ${PRODUCTS.map(p=>`<button class="option" data-act="ob-prod" data-v="${p.id}" aria-pressed="${S.products.includes(p.id)}">
+          <span class="art">${ART[p.id]}</span>
+          <div><div style="font-weight:600">${p.name}</div><div class="small muted">${p.desc}</div></div><span class="tick">${I.check}</span></button>`).join('')}
+      </div>
+      <p class="eyebrow" style="margin-top:22px;margin-bottom:8px">Usual flow</p>
+      ${seg('flow', FLOWS, S.flow)}
+      <div style="flex:1;min-height:24px"></div>
+      <button class="btn block" data-act="ob-next" ${S.products.length?'':'disabled'}>Continue</button>
+    </div>`;
+  } else {
+    const c = cycle();
+    body = `<div class="ob-body ${dir}" style="text-align:center">
+      <div style="width:124px;margin:30px auto 0" class="float">${buddySVG(BUDDIES[0],{eyesClass:'eyes'})}</div>
+      <h1 class="title" style="margin-top:14px">You're all set${S.name?', '+esc(S.name):''}</h1>
+      <div class="card" style="margin-top:22px;text-align:left;padding:4px 18px">
+        <div class="list-row"><span class="grow muted">Next period</span><strong>${fmtDow(c.next)}</strong></div>
+        <div class="list-row"><span class="grow muted">A box could land</span><strong>${fmtDow(nextBoxDate())}</strong></div>
+      </div>
+      <div class="row" style="margin-top:12px;background:var(--lilac);border-radius:18px;padding:14px 16px;text-align:left">
+        <div class="moons" style="gap:4px">${[0,1,2,3,4].map(i=>`<i class="moon ${i<4?'on':''}" style="width:16px;height:16px"></i>`).join('')}</div>
+        <div class="small" style="color:var(--lilac-ink);font-weight:600">4 of 5 stars on us. Check in once to open a free buddy.</div>
+      </div>
+      <div style="flex:1;min-height:24px"></div>
+      <button class="btn block" data-act="ob-finish">Let's go</button>
+    </div>`;
+  }
+  return head + body;
+}
+
+/* ---------- Today ---------- */
+function greeting(){ const h = new Date().getHours(); return h<12?'Morning':h<18?'Afternoon':'Evening'; }
+function renderToday(){
+  const c = cycle(), P = PHASE[c.phase], app = $('#app');
+  app.style.setProperty('--ph-a', P.a); app.style.setProperty('--ph-b', P.b); app.style.setProperty('--ph', P.c);
+  const done = S.checkins[key(today())];
+  if (!ui.draft) ui.draft = done ? {mood:done.mood, sym:[...done.sym], editing:false} : {mood:null, sym:[], editing:true};
+  return `
+  <header class="topbar">
+    <div><p class="small muted">${fmt(today(),{weekday:'long',month:'short',day:'numeric'})}</p><h1 class="h2" style="font-size:24px">${greeting()}${S.name?', '+esc(S.name):''}</h1></div>
+    ${avatarBtn()}
+  </header>
+  ${renderHero(c)}
+  <div id="t-box">${renderBoxStrip()}</div>
+  <section class="card" id="t-ci">${renderCheckin()}</section>
+  <section class="card" id="t-stars">${renderStars()}</section>
+  `;
+}
+function renderHero(c){
+  const P = PHASE[c.phase];
+  const pct = Math.min(1, c.day / S.cycleLen);
+  const R = 92, C = 2*Math.PI*R;
+  const perFrac = S.periodLen / S.cycleLen;
+  const fertStart = (c.ov - 6) / S.cycleLen, fertLen = 7 / S.cycleLen;
+  const countdown = c.phase==='Period' ? `Period day ${c.day}` :
+    c.untilNext===0 ? 'Period due today' : c.untilNext===1 ? 'Period tomorrow' : `Period in ${c.untilNext} days`;
+  return `<section class="hero">
+    <i class="blob" style="width:180px;height:180px;left:-40px;top:-50px"></i><i class="blob b2" style="width:160px;height:160px;right:-40px;bottom:-30px"></i>
+    <div class="mascot" id="mascot">${buddySVG(BUDDIES[0],{eyesClass:'eyes'})}</div>
+    <div class="ring">
+      <svg viewBox="0 0 212 212">
+        <circle cx="106" cy="106" r="${R}" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="14"/>
+        <circle cx="106" cy="106" r="${R}" fill="none" stroke="rgba(224,86,122,.28)" stroke-width="14" stroke-dasharray="${C*perFrac} ${C}" transform="rotate(-90 106 106)"/>
+        <circle cx="106" cy="106" r="${R}" fill="none" stroke="rgba(62,154,106,.25)" stroke-width="14" stroke-dasharray="${C*fertLen} ${C}" stroke-dashoffset="${-C*fertStart}" transform="rotate(-90 106 106)"/>
+        <circle id="ring-prog" class="prog" cx="106" cy="106" r="${R}" fill="none" stroke="${P.c}" stroke-width="14" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}" data-target="${C*(1-pct)}" transform="rotate(-90 106 106)"/>
+        <g id="ring-knob" class="knob" data-deg="${pct*360}"><circle cx="106" cy="${106-R}" r="11" fill="#fff" stroke="${P.c}" stroke-width="4"/></g>
+      </svg>
+      <div class="ring-center">
+        <span class="lbl">Day</span>
+        <span class="big tnum" id="ring-num" data-v="${c.day}">${c.day}</span>
+        <span class="phase-pill"><i class="dot" style="background:${P.c}"></i>${c.phase}</span>
+      </div>
+    </div>
+    <div class="countdown">${countdown}</div>
+    <div class="small" style="color:var(--ink-2);margin-top:2px">${P.tip}</div>
+    <button class="btn sm glass" style="margin-top:14px;width:100%" data-act="log-period" data-v="${key(today())}">${I.drop} My period started</button>
+  </section>`;
+}
+function renderBoxStrip(){
+  const rev = pendingReveal();
+  if (rev){
+    const irl = rev.state==='irl';
+    return `<section class="here">
+      <div class="gift">${ART.mystery.replace('viewBox','style="width:100%" viewBox')}</div>
+      <p class="eyebrow" style="color:rgba(255,255,255,.65)">Delivered</p>
+      <h2 class="h2" style="margin-top:4px;color:#fff;font-size:24px">${irl?'Opened it yet?':'Your box is here'}</h2>
+      <p class="muted small" style="margin-top:4px;max-width:200px">${irl?'Add your buddy once it is out of the pouch.':'There is a sealed buddy inside.'}</p>
+      <div class="row" style="margin-top:14px;gap:8px">
+        ${irl?`<button class="btn sm white" data-act="reveal" data-v="${rev.id}">Add to my shelf</button>`
+             :`<button class="btn sm white" data-act="reveal" data-v="${rev.id}">Reveal it here</button><button class="btn sm" style="background:rgba(255,255,255,.14)" data-act="irl" data-v="${rev.id}">Save for IRL</button>`}
+      </div>
+    </section>`;
+  }
+  const tr = inTransit();
+  if (tr){
+    const st = orderStage(tr);
+    return `<button class="strip dark" style="display:block" data-act="order" data-v="${tr.id}" data-live="${tr.id}">
+      <div class="row between"><span class="eyebrow" style="color:rgba(255,255,255,.6)">${tr.kind==='box'?'Lune Box':'Top-up kit'}</span><span class="small" style="opacity:.7">Track</span></div>
+      <div class="row between" style="margin-top:4px"><div class="h2" style="color:#fff" data-live-label>${STAGES[st].label}</div><span class="small muted" data-live-sub>${STAGES[st].sub}</span></div>
+      <div class="track"><span class="fill" data-live-fill style="width:${st/4*100}%"></span><span class="truck" data-live-truck style="left:${Math.max(6,st/4*100)}%">${I.truck}</span></div>
+    </button>`;
+  }
+  if (S.plan==='box'){
+    const d = nextBoxDate(), n = diffDays(d, today());
+    return `<button class="strip" data-act="tab" data-v="box">
+      <span class="ic" style="background:var(--lilac);color:var(--lilac-ink)">${I.box.replace('viewBox','width="24" height="24" viewBox')}</span>
+      <div class="grow"><div style="font-weight:600">${S.paused?'Box skipped this cycle':`Next box in ${plural(n,'day')}`}</div><div class="small muted">${S.paused?'Tap to resume':`Lands ${fmtDow(d)}`}</div></div>${I.chevR}
+    </button>`;
+  }
+  return `<button class="strip" data-act="tab" data-v="box">
+    <span class="ic">${ART.mystery}</span>
+    <div class="grow"><div style="font-weight:600">Never get caught out</div><div class="small muted">Your stuff, 3 days early · from $16</div></div>${I.chevR}
+  </button>`;
+}
+function renderCheckin(){
+  const done = S.checkins[key(today())], d = ui.draft;
+  if (done && !d.editing){
+    return `<div class="row between">
+        <div class="row" style="gap:12px;min-width:0"><span style="width:44px;flex:none">${moodFace(done.mood)}</span>
+          <div class="grow"><div style="font-weight:600">Feeling ${done.mood.toLowerCase()}</div><div class="small muted">${done.sym.length?esc(done.sym.join(', ')):'Nothing else logged'}</div></div></div>
+        <button class="link" data-act="ci-edit">Edit</button>
+      </div>`;
+  }
+  return `<div class="row between"><h2 class="h2">How's today?</h2>${done?'':'<span class="pill gold">+1 star</span>'}</div>
+    <div class="moods ${d.mood?'picked':''}">${MOODS.map(m=>`<button class="mood" data-act="ci-mood" data-v="${m}" aria-pressed="${d.mood===m}">${moodFace(m)}<span>${m}</span></button>`).join('')}</div>
+    <div class="reveal-rows ${d.mood?'open':''}" id="ci-more"><div>
+      <p class="small muted" style="margin:18px 0 8px">Anything else?</p>
+      <div class="chips">${SYMPTOMS.map(s=>`<button class="chip" data-act="ci-sym" data-v="${s}" aria-pressed="${d.sym.includes(s)}">${s}</button>`).join('')}</div>
+      <button class="btn block dark" style="margin-top:16px" data-act="ci-save">${done?'Update':'Log it'}</button>
+    </div></div>`;
+}
+function renderStars(){
+  const full = S.stars>=5, left = 5 - S.stars;
+  return `<div class="row between">
+    <div><div style="font-weight:600">${full?'Free pouch unlocked':`${left} more check-in${left===1?'':'s'} to a free buddy`}</div>
+      <div class="small muted">${S.streak} day streak</div></div>
+    ${full?`<button class="btn sm pouch-ready" data-act="free-pouch">${I.gift} Open</button>`:''}
+  </div>
+  <div class="moons" style="margin-top:12px" id="moons">${[0,1,2,3,4].map(i=>`<i class="moon ${i<S.stars?'on':''}"></i>`).join('')}</div>`;
+}
+
+/* ---------- Calendar ---------- */
+function renderCalendar(){
+  if (!ui.calMonth){ const t = today(); ui.calMonth = new Date(t.getFullYear(), t.getMonth(), 1); }
+  const m = ui.calMonth, y = m.getFullYear(), mo = m.getMonth();
+  const days = new Date(y, mo+1, 0).getDate(), lead = new Date(y, mo, 1).getDay();
+  const boxDay = S.plan==='box' && !S.paused ? key(nextBoxDate()) : null;
+  const tk = key(today());
+  let cells = '';
+  for (let i=0;i<lead;i++) cells += `<span class="day out"></span>`;
+  for (let d=1; d<=days; d++){
+    const dt = new Date(y, mo, d), k = key(dt), t = dayType(dt);
+    const lbl = `${fmt(dt,{month:'long',day:'numeric'})}${k===boxDay?', box arrives':''}${t?', '+({period:'period',predicted:'predicted period',fertile:'fertile window',ovulation:'ovulation'})[t]:''}`;
+    cells += `<button class="day ${k===boxDay?'boxday':t} ${k===tk?'today':''}" data-act="day" data-v="${k}" aria-label="${lbl}">${d}${S.checkins[k]?'<i class="mk"></i>':''}</button>`;
+  }
+  const c = cycle();
+  const ovDate = addDays(c.curStart, c.ov - 1);
+  const ovNext = ovDate < today() ? addDays(ovDate, S.cycleLen) : ovDate;
+  const dir = ui.calDir; ui.calDir = '';
+  return `
+  <header class="topbar"><h1 class="title">Calendar</h1>${avatarBtn()}</header>
+  <section class="card">
+    <div class="row between" style="margin-bottom:14px">
+      <button class="icon-btn" data-act="cal-nav" data-v="-1" aria-label="Previous month">${I.chevL}</button>
+      <h2 class="h2">${fmt(m,{month:'long',year:'numeric'})}</h2>
+      <button class="icon-btn" data-act="cal-nav" data-v="1" aria-label="Next month"><span style="transform:scaleX(-1)">${I.chevL}</span></button>
+    </div>
+    <div class="cal-head">${['S','M','T','W','T','F','S'].map(x=>`<span>${x}</span>`).join('')}</div>
+    <div class="cal-grid ${dir}">${cells}</div>
+    <div class="legend" style="margin-top:14px">
+      <span><i class="dot" style="background:var(--period)"></i>Period</span>
+      <span><i class="dot" style="background:var(--predicted)"></i>Predicted</span>
+      <span><i class="dot" style="background:#9FD2B4"></i>Fertile</span>
+      ${boxDay?`<span><i class="dot" style="background:var(--plum)"></i>Box</span>`:''}
+    </div>
+  </section>
+  <section class="card" style="padding:4px 18px">
+    <div class="list-row"><i class="dot" style="background:var(--period);width:10px;height:10px"></i><span class="grow">Next period</span><strong>${fmtDow(c.next)}</strong></div>
+    <div class="list-row"><i class="dot" style="background:#9FD2B4;width:10px;height:10px"></i><span class="grow">Ovulation</span><strong>${fmtDow(ovNext)}</strong></div>
+    ${S.plan==='box'?`<div class="list-row"><i class="dot" style="background:var(--plum);width:10px;height:10px"></i><span class="grow">Box lands</span><strong>${S.paused?'Skipped':fmtDow(nextBoxDate())}</strong></div>`:''}
+  </section>
+  <p class="small muted" style="text-align:center">Tap a day to log it</p>
+  `;
+}
+
+/* ---------- Box ---------- */
+function renderBox(){
+  const d = nextBoxDate(), n = diffDays(d, today());
+  const member = S.plan==='box';
+  const live = pendingReveal() || inTransit();
+  const tiles = [
+    ...boxLines().map(([art,name,sub])=>`<div class="tile"><span class="art">${ART[art]}</span><span class="nm">${name}</span><span class="sub">${sub}</span></div>`),
+    `<div class="tile" style="background:var(--plum);color:#fff"><span class="art">${ART.mystery}</span><span class="nm">Mystery buddy</span><span class="sub" style="color:rgba(255,255,255,.65)">Sealed</span></div>`,
+    ...ADDONS.map(a=>`<button class="tile addon" data-act="addon" data-v="${a.id}" aria-pressed="${!!S.addons[a.id]}"><span class="tick">${S.addons[a.id]?I.check:I.plus}</span><span class="art">${ART[a.id]}</span><span class="nm">${a.name}</span><span class="sub">+${money(a.price)}</span></button>`),
+  ].join('');
+  return `
+  <header class="topbar"><h1 class="title">${member?'Your box':'Lune Box'}</h1>${avatarBtn()}</header>
+  ${live?`<div id="t-box">${renderBoxStrip()}</div>`:''}
+  <section class="box-hero">
+    <i class="blob" style="width:200px;height:200px;left:-50px;top:-60px"></i>
+    ${BOX_ART}
+    ${member ? `
+      ${S.paused ? `<div class="h2" style="margin-top:8px">Skipping this cycle</div><p class="small muted" style="margin-top:2px">No charge until you resume</p>`
+        : `<div class="big-count tnum" style="margin-top:6px">${n}</div><div style="font-weight:600;margin-top:2px">${n===1?'day':'days'} until it lands</div><p class="small muted">${fmtDow(d)} · 3 days before your period</p>`}
+      <div class="row" style="justify-content:center;margin-top:14px;gap:8px">
+        <button class="btn sm white" data-act="skip">${S.paused?'Resume':'Skip this one'}</button>
+        <button class="btn sm glass" data-act="ship-now">Ship now (demo)</button>
+      </div>`
+    : `<h2 class="h2" style="font-size:25px;margin-top:6px">Your stuff, 3 days early</h2>
+      <p class="small" style="color:var(--ink-2);margin-top:4px">Timed to your cycle. A mystery buddy in every box.</p>
+      <div class="perks"><span class="pill" style="background:#fff">Next one lands ${fmt(d)}</span><span class="pill" style="background:#fff">Skip anytime</span></div>`}
+  </section>
+  <section>
+    <div class="row between" style="padding:0 4px 8px"><span class="eyebrow">In the box</span><button class="link" data-act="edit-products">Edit</button></div>
+    <div class="tiles">${tiles}</div>
+  </section>
+  <section class="card">
+    <p class="eyebrow" style="margin-bottom:8px">Flow</p>
+    ${seg('flow', FLOWS, S.flow)}
+  </section>
+  <button class="strip" data-act="checkout" data-v="topup">
+    <span class="ic" style="background:var(--berry-soft);color:var(--berry)">${I.truckLg}</span>
+    <div class="grow"><div style="font-weight:600">Running low right now?</div><div class="small muted">Top-up kit tomorrow · ${money(TOPUP_PRICE)}</div></div>${I.chevR}
+  </button>
+  ${S.orders.length ? `<section>
+    <p class="eyebrow" style="padding:6px 4px 8px">Orders</p>
+    <div class="card" style="padding:4px 18px">${S.orders.map(o=>{
+      const st = orderStage(o);
+      const tag = st===4 ? (o.kind==='box' && o.state!=='revealed' ? `<span class="pill berry">Unopened</span>` : `<span class="pill green">Delivered</span>`) : `<span class="pill lilac">${STAGES[st].label}</span>`;
+      return `<button class="list-row" data-act="order" data-v="${o.id}">
+        <div class="grow"><div style="font-weight:600">${o.kind==='box'?'Lune Box':'Top-up kit'}</div><div class="small muted tnum">${fmt(o.placedAt)} · ${money(o.total)}</div></div>${tag}</button>`;
+    }).join('')}</div>
+  </section>` : ''}
+  ${!member ? `<div class="sticky-cta"><button class="btn block" data-act="checkout" data-v="box">Start my box · ${money(boxTotal())}</button></div>` : ''}
+  `;
+}
+
+/* ---------- Shelf ---------- */
+function renderShelf(){
+  const owned = BUDDIES.filter(b=>S.owned[b.id]).length;
+  return `
+  <header class="topbar"><div><h1 class="title">Your shelf</h1><p class="muted small" style="margin-top:2px">Night Garden · Series 1</p></div>${avatarBtn()}</header>
+  <section class="card">
+    <div class="row between"><span style="font-weight:600" class="tnum">${owned} of ${BUDDIES.length} found</span><span class="small muted">${owned===BUDDIES.length?'Complete':''}</span></div>
+    <div class="progress" style="margin-top:10px"><i style="width:${owned/BUDDIES.length*100}%"></i></div>
+  </section>
+  <div class="shelf">
+    ${BUDDIES.map((b,i)=>{
+      const o = S.owned[b.id];
+      return `<button class="buddy-tile ${o?'':'locked'}" data-act="buddy" data-v="${b.id}" aria-label="${o?b.name:'Not found yet'}">
+        <span class="fig" style="animation-delay:${-i*0.4}s">${buddySVG(b,{locked:!o})}</span>
+        <span class="nm">${o?b.name:(b.rarity==='secret'?'Secret':'???')}</span>
+        <span class="flags">${o&&o.physical?'<span class="flag p">Real</span>':''}${o&&o.digital?'<span class="flag d">Digital</span>':''}${!o&&b.rarity!=='common'?`<span class="flag r">${RARITY_LABEL[b.rarity]}</span>`:''}</span>
+      </button>`;
+    }).join('')}
+  </div>
+  <p class="small muted" style="text-align:center">Series 2 drops next season. Members pull first.</p>
+  `;
+}
+
+/* ---------- Sheets ---------- */
+function openCheckout(kind){
+  let phase = 'review', placed = null;
+  const isBox = kind==='box';
+  const renderIt = () => {
+    if (phase==='done'){
+      return `<div style="text-align:center;padding-top:8px">
+          <div class="check-anim"><svg width="38" height="38" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="var(--fertile-ink)" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h2 class="title" style="margin-top:16px;font-size:28px">${isBox?'Your first box is coming':'Top-up is coming'}</h2>
+          <p class="muted" style="margin-top:6px">${isBox?'After this, one lands 3 days before every period.':'Tomorrow, in a plain mailer.'}</p>
+        </div>
+        <span class="pill lilac" style="align-self:center">Demo: it arrives in about 25 seconds</span>
+        <button class="btn block" data-act="order-from-done" data-v="${placed.id}">Track it</button>
+        <button class="btn block ghost" data-act="close" style="margin-top:-4px">Done</button>`;
+    }
+    const lines = isBox ? [['Lune Box', BOX_PRICE], ...ADDONS.filter(a=>S.addons[a.id]).map(a=>[a.name, a.price])] : [['Top-up kit', TOPUP_PRICE]];
+    const total = lines.reduce((s,[,p])=>s+p,0);
+    return `${sheetHead(isBox?'Start your box':'Top-up kit', isBox?`Ships today, then every ${S.cycleLen} days`:'Arrives tomorrow')}
+      <div class="card" style="padding:4px 18px">
+        ${lines.map(([n,p])=>`<div class="list-row"><span class="grow">${n}</span><span class="tnum">${money(p)}</span></div>`).join('')}
+        <div class="list-row"><span class="grow">Shipping</span><span class="pill green">Free</span></div>
+        <div class="list-row"><strong class="grow">${isBox?'Per box':'Total'}</strong><strong class="tnum" style="font-size:18px">${money(total)}</strong></div>
+      </div>
+      <div class="card" style="padding:4px 18px">
+        <div class="list-row"><span class="small muted" style="width:56px">Ship to</span><span class="grow" style="font-weight:500">214 Alder St, Apt 3B</span></div>
+        <div class="list-row"><span class="small muted" style="width:56px">Pay</span><span class="grow tnum" style="font-weight:500">Visa •••• 4242</span></div>
+      </div>
+      <button class="btn block" data-act="pay" style="margin-top:4px">${phase==='paying'?'<span class="spinner"></span>':`Place order · ${money(total)}`}</button>
+      <p class="small muted" style="text-align:center;margin-top:-4px">Demo. No real charge.</p>`;
+  };
+  openSheet(renderIt);
+  sheet.pay = () => {
+    if (phase!=='review') return;
+    phase='paying'; refreshSheet(); buzz(10);
+    setTimeout(()=>{
+      placed = placeOrder(kind);
+      phase='done';
+      if (sheet){
+        sheet.body.classList.add('stagger'); sheet.body.innerHTML = renderIt();
+        const ck = sheet.body.querySelector('.check-anim'); setTimeout(()=>{ const [x,y] = centerOf(ck); burst(x,y,22); }, 350);
+      }
+      render(); buzz(20);
+    }, 1100);
+  };
+}
+function openOrder(id){
+  openSheet(()=>{
+    const o = findOrder(id); if (!o) return '';
+    const st = orderStage(o);
+    const b = o.buddy && BUDDIES.find(x=>x.id===o.buddy);
+    return `${sheetHead(o.kind==='box'?'Lune Box':'Top-up kit', `${o.id} · ${fmt(o.placedAt,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}`)}
+      <div class="card" data-live="${o.id}">
+        <div class="row between"><div class="h2" data-live-label>${STAGES[st].label}</div><span class="small muted" data-live-sub>${STAGES[st].sub}</span></div>
+        <div class="track" style="margin:16px 4px 22px"><span class="fill" data-live-fill style="width:${st/4*100}%"></span><span class="truck" data-live-truck style="left:${Math.max(4,st/4*100)}%">${I.truck}</span></div>
+        <div class="timeline">
+          ${STAGES.map((s,i)=>`<div class="tl-item ${i<st||st===4?'done':''} ${i===st&&st<4?'current':''}" data-live-step="${i}">
+            <span class="tl-dot"></span><div class="tl-label">${s.label}</div></div>`).join('')}
+        </div>
+      </div>
+      ${st===4 && o.kind==='box' && o.state!=='revealed' ? `
+        <div class="row" style="gap:8px">
+          <button class="btn" style="flex:1" data-act="reveal" data-v="${o.id}">${o.state==='irl'?'Add to shelf':'Reveal buddy'}</button>
+          ${o.state!=='irl'?`<button class="btn ghost" style="flex:1" data-act="irl" data-v="${o.id}">Save for IRL</button>`:''}
+        </div>`:''}
+      ${o.state==='revealed' && b ? `<div class="card row"><span style="width:48px;flex:none">${buddySVG(b)}</span><div><div class="small muted">In this box</div><div style="font-weight:600">${b.name} · ${RARITY_LABEL[b.rarity]}</div></div></div>` : ''}
+      <div class="card" style="padding:4px 18px">
+        ${o.items.map(x=>`<div class="list-row"><span class="grow">${esc(x)}</span></div>`).join('')}
+        <div class="list-row"><strong class="grow">Total</strong><strong class="tnum">${money(o.total)}</strong></div>
+      </div>`;
+  });
+  sheet.orderId = id;
+}
+function patchLive(o){
+  const st = orderStage(o);
+  document.querySelectorAll(`[data-live="${o.id}"]`).forEach(root=>{
+    const set = (s, f) => { const el = root.querySelector(s); if (el) f(el); };
+    set('[data-live-label]', el=>el.textContent = STAGES[st].label);
+    set('[data-live-sub]', el=>el.textContent = STAGES[st].sub);
+    set('[data-live-fill]', el=>el.style.width = `${st/4*100}%`);
+    set('[data-live-truck]', el=>el.style.left = `${Math.max(4,st/4*100)}%`);
+    root.querySelectorAll('[data-live-step]').forEach(el=>{
+      const i = +el.dataset.liveStep;
+      el.classList.toggle('done', i<st); el.classList.toggle('current', i===st);
+    });
+  });
+}
+function openReveal(id){
+  const o = findOrder(id); if (!o) return;
+  openRevealSheet(BUDDIES.find(x=>x.id===o.buddy), {physical:true, onDone:()=>{ o.state='revealed'; }});
+}
+function openRevealSheet(b, {physical, onDone}){
+  let taps = 0, opened = false;
+  const isNew = !S.owned[b.id];
+  openSheet(()=>`
+    ${sheetHead(physical?'Your mystery buddy':'Free pouch', 'Night Garden · Series 1')}
+    <div class="reveal-stage" id="stage" style="--ray:${RAY[b.rarity]}">
+      <div class="rays"></div>
+      <div class="revealed"><div class="fig">${buddySVG(b,{eyesClass:'eyes'})}</div></div>
+      <button class="pouch" id="pouch" aria-label="Tap to tear open">
+        <svg viewBox="0 0 170 210" width="170" height="210" style="overflow:visible">
+          <defs>
+            <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6E3470"/><stop offset=".45" stop-color="#B23A6E"/><stop offset=".55" stop-color="#D66A93"/><stop offset="1" stop-color="#5C2A55"/></linearGradient>
+            <linearGradient id="shine" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+            <clipPath id="pclip"><path d="M8 50h154v142q0 10-10 10H18q-10 0-10-10z"/></clipPath>
+          </defs>
+          <g class="bottom">
+            <path d="M8 50h154v142q0 10-10 10H18q-10 0-10-10z" fill="url(#foil)"/>
+            <g clip-path="url(#pclip)"><rect x="-60" y="40" width="50" height="180" fill="url(#shine)" transform="skewX(-15)"><animate attributeName="x" values="-60;220" dur="2.6s" repeatCount="indefinite"/></rect></g>
+            <circle cx="85" cy="122" r="30" fill="rgba(255,255,255,.12)"/>
+            <text x="85" y="133" text-anchor="middle" font-family="Fraunces,Georgia,serif" font-size="32" font-weight="700" fill="#fff">?</text>
+            <text x="85" y="184" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" font-weight="700" letter-spacing="2.5" fill="rgba(255,255,255,.7)">LUNE · SERIES 1</text>
+          </g>
+          <g class="top">
+            <path d="M8 50V18q0-10 10-10h134q10 0 10 10v32l-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5z" fill="url(#foil)"/>
+            <path d="M24 22h122" stroke="rgba(255,255,255,.25)" stroke-width="6" stroke-linecap="round"/>
+          </g>
+          <path class="rip" d="M4 52 L166 52" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div id="rv-copy" style="text-align:center;min-height:128px">
+      <p style="font-weight:600">Tap to tear it open</p>
+      <div class="taps" style="margin-top:12px"><i></i><i></i><i></i></div>
+    </div>
+  `, {static:true, onMount:(body)=>{
+    const pouch = body.querySelector('#pouch'), stage = body.querySelector('#stage'), rip = pouch.querySelector('.rip');
+    pouch.addEventListener('click', ()=>{
+      if (opened) return;
+      taps++; buzz(8 + taps*6);
+      body.querySelectorAll('.taps i').forEach((d,i)=>d.classList.toggle('on', i<taps));
+      rip.style.strokeDashoffset = 162 - taps*54;
+      pouch.classList.remove('shake1','shake2'); void pouch.offsetWidth;
+      pouch.classList.add(taps>=2?'shake2':'shake1');
+      if (taps>=3){
+        opened = true;
+        setTimeout(()=>{
+          stage.classList.add('opened'); buzz(30);
+          const [x,y] = centerOf(stage); burst(x, y, b.rarity==='common'?22:36);
+          const own = S.owned[b.id] || {physical:0, digital:0};
+          if (physical) own.physical++; else own.digital++;
+          S.owned[b.id] = own;
+          onDone && onDone();
+          save(); render();
+          body.querySelector('#rv-copy').innerHTML = `<div style="animation:rise 500ms var(--ease-out) 350ms both">
+            <div class="row" style="justify-content:center;gap:6px"><span class="pill ${b.rarity==='common'?'lilac':'gold'}">${RARITY_LABEL[b.rarity]} · ${RARITY_ODDS[b.rarity]}</span>${isNew?'<span class="pill berry">New</span>':'<span class="pill">Repeat</span>'}</div>
+            <h2 class="title" style="margin-top:10px;font-size:34px">${b.name}</h2>
+            <p class="muted" style="margin-top:2px">${b.blurb}</p>
+            <button class="btn block" style="margin-top:16px" data-act="goto-shelf">See your shelf</button>
+          </div>`;
+        }, 380);
+      }
+    });
+  }});
+}
+function openBuddy(id){
+  const b = BUDDIES.find(x=>x.id===id), o = S.owned[id];
+  openSheet(()=> o ? `
+    ${sheetHead(b.name, `${RARITY_LABEL[b.rarity]} · ${RARITY_ODDS[b.rarity]}`)}
+    <div class="tilt" id="tilt" style="width:210px;margin:0 auto">${buddySVG(b,{eyesClass:'eyes'})}</div>
+    <p style="text-align:center;font-size:17px">${b.blurb}</p>
+    <div class="row" style="justify-content:center;gap:8px">
+      ${o.physical?`<span class="pill" style="background:var(--ink);color:#fff">Real × ${o.physical}</span>`:`<span class="pill">Real one: in boxes</span>`}
+      ${o.digital?`<span class="pill lilac">Digital × ${o.digital}</span>`:''}
+    </div>
+  ` : `
+    ${sheetHead('Still a mystery', `${RARITY_LABEL[b.rarity]} · ${RARITY_ODDS[b.rarity]}`)}
+    <div style="width:170px;margin:0 auto">${buddySVG(b,{locked:true})}</div>
+    <p class="muted" style="text-align:center">Comes sealed in Lune Boxes.</p>
+    <button class="btn block" data-act="goto-box">${S.plan==='box'?'See my next box':'Get a box'}</button>
+  `, {onMount:(body)=>{
+    const t = body.querySelector('#tilt'); if (!t) return;
+    t.addEventListener('pointermove', e=>{ const r = t.getBoundingClientRect(); const x = (e.clientX - r.left)/r.width - .5, y = (e.clientY - r.top)/r.height - .5;
+      t.style.transform = `perspective(600px) rotateY(${x*24}deg) rotateX(${-y*24}deg) scale(1.04)`; });
+    t.addEventListener('pointerleave', ()=>{ t.style.transform=''; });
+  }});
+}
+function openDay(k){
+  const d = parseKey(k), t = dayType(d), ci = S.checkins[k], future = d > today();
+  const isBox = S.plan==='box' && !S.paused && k===key(nextBoxDate());
+  const label = isBox ? 'Your box lands' : {period:'Period', predicted:'Predicted period', fertile:'Fertile window', ovulation:'Likely ovulation', '':''}[t];
+  openSheet(()=>`
+    ${sheetHead(fmt(d,{weekday:'long',month:'long',day:'numeric'}), label)}
+    ${ci?`<div class="card row"><span style="width:44px;flex:none">${moodFace(ci.mood)}</span><div><div style="font-weight:600">Felt ${ci.mood.toLowerCase()}</div><div class="small muted">${ci.sym.length?esc(ci.sym.join(', ')):'Nothing else logged'}</div></div></div>`
+       :`<p class="muted">${future?'Nothing here yet.':'No check-in this day.'}</p>`}
+    ${!future?`<button class="btn block" data-act="log-period" data-v="${k}" ${k===S.lastStart?'disabled':''}>${k===S.lastStart?'Marked as period start':'Period started this day'}</button>`:''}
+  `);
+}
+function openProducts(){
+  openSheet(()=>`
+    ${sheetHead('What goes in')}
+    ${PRODUCTS.map(p=>`<button class="option" data-act="prod-toggle" data-v="${p.id}" aria-pressed="${S.products.includes(p.id)}">
+      <span class="art">${ART[p.id]}</span><div><div style="font-weight:600">${p.name}</div><div class="small muted">${p.desc}</div></div><span class="tick">${I.check}</span></button>`).join('')}
+    <button class="btn block" data-act="close">Done</button>
+  `);
+}
+function openProfile(){
+  openSheet(()=>`
+    ${sheetHead(esc(S.name||'You'), S.plan==='box'?`Box member · ${money(boxTotal())} per box`:'Free plan')}
+    <div class="card" style="padding:4px 18px">
+      <div class="list-row"><span class="grow">Cycle length</span><div class="stepper"><button data-act="len" data-v="-1" aria-label="Shorter">−</button><span class="tnum">${S.cycleLen}</span><button data-act="len" data-v="1" aria-label="Longer">+</button></div></div>
+      <div class="list-row"><span class="grow">Period length</span><div class="stepper"><button data-act="plen" data-v="-1" aria-label="Shorter">−</button><span class="tnum">${S.periodLen}</span><button data-act="plen" data-v="1" aria-label="Longer">+</button></div></div>
+    </div>
+    ${S.plan==='box'?`<div class="card" style="padding:4px 18px">
+      <div class="list-row"><span class="grow">${S.paused?'Box skipped':'Skip next box'}</span><button class="btn sm ghost" data-act="skip">${S.paused?'Resume':'Skip'}</button></div>
+      <div class="list-row"><span class="grow">Cancel membership</span><button class="btn sm ghost" data-act="cancel">Cancel</button></div>
+    </div>`:''}
+    <p class="eyebrow" style="margin:6px 4px -4px">Demo controls</p>
+    <div class="card" style="padding:4px 18px">
+      <div class="list-row"><span class="grow">Fast shipping</span><button class="switch" role="switch" aria-label="Fast shipping" aria-checked="${S.demoFast}" data-act="fast"></button></div>
+      <div class="list-row"><span class="grow">Fill my stars</span><button class="btn sm ghost" data-act="demo-stars">Fill</button></div>
+      <div class="list-row"><span class="grow">Start over</span><button class="btn sm ghost" data-act="reset">Reset</button></div>
+    </div>
+    <p class="small muted" style="text-align:center">Not a medical device or birth control.<br>Predictions are estimates.</p>
+  `);
+}
+function confirmSheet(title, msg, yes, onYes){
+  openSheet(()=>`${sheetHead(title)}<p class="muted">${msg}</p>
+    <button class="btn block" data-act="confirm-yes">${yes}</button>
+    <button class="btn block ghost" data-act="close" style="margin-top:-4px">Keep it</button>`);
+  sheet.onYes = onYes;
+}
+
+/* ---------- Actions ---------- */
+function setTab(v){
+  const same = ui.tab===v; ui.tab=v;
+  if (v==='calendar' && !same) ui.calMonth=null;
+  closeSheet(); renderTabs(); renderScreen(!same);
+  if (!same) $('#scroller').scrollTop=0;
+}
+function readOb(){ const n = $('#ob-name'); if (n) S.name = n.value.trim(); const dv = $('#ob-date')?.value; if (dv && parseKey(dv) <= today()) S.lastStart = dv; }
+const A = {
+  'tab':(el,v)=>setTab(v),
+  'ob-next':()=>{ readOb(); ui.obStep++; ui.obDir='fwd'; save(); render(); },
+  'ob-back':()=>{ readOb(); ui.obStep=Math.max(0,ui.obStep-1); ui.obDir='back'; render(); },
+  'ob-len':(el,v)=>{
+    readOb(); S.cycleLen = clamp(S.cycleLen + +v, 21, 40);
+    const row = el.closest('.field'); row.querySelector('.stepper span').textContent = S.cycleLen; row.querySelector('.tnum').textContent = `${S.cycleLen} days`;
+  },
+  'ob-prod':(el,v)=>{ toggleProduct(v); el.setAttribute('aria-pressed', S.products.includes(v)); const nx = $('#ob [data-act="ob-next"]'); if (nx) nx.disabled = !S.products.length; },
+  'ob-finish':()=>{ S.onboarded=true; ui.tab='today'; save(); render(true); },
+  'seg':(el,v)=>{
+    if (el.dataset.seg==='flow'){ S.flow = v; save(); }
+    const wrap = el.closest('.seg'), btns=[...wrap.querySelectorAll('button')], i=btns.indexOf(el);
+    wrap.querySelector('.thumb').style.transform = `translateX(${i*100}%)`;
+    btns.forEach(b=>b.setAttribute('aria-pressed', b===el));
+    if (S.onboarded && ui.tab==='box') document.querySelectorAll('.tiles .tile:not(.addon) .sub').forEach((s,j)=>{ const l = boxLines()[j]; if (l){ s.textContent = l[2]; replay(s,'pop 360ms var(--spring)'); } });
+  },
+  'ci-mood':(el,v)=>{
+    ui.draft.mood=v; buzz(6);
+    const wrap = el.closest('.moods'); wrap.classList.add('picked');
+    wrap.querySelectorAll('.mood').forEach(m=>m.setAttribute('aria-pressed', m===el));
+    $('#ci-more').classList.add('open');
+  },
+  'ci-sym':(el,v)=>{ const s=ui.draft.sym, i=s.indexOf(v); i>=0?s.splice(i,1):s.push(v); el.setAttribute('aria-pressed', i<0); },
+  'ci-edit':()=>{ ui.draft.editing=true; const c = $('#t-ci'); c.innerHTML = renderCheckin(); replay(c,'rise 360ms var(--ease-out)'); },
+  'ci-save':(el)=>{
+    if (!ui.draft.mood) return;
+    const k = key(today()), first = !S.checkins[k];
+    S.checkins[k] = {mood:ui.draft.mood, sym:[...ui.draft.sym]};
+    ui.draft.editing=false;
+    const slot = first && S.stars<5 ? document.querySelectorAll('#moons .moon')[S.stars] : null;
+    const [fx,fy] = centerOf(el);
+    const ghost = document.createElement('div'); ghost.style.cssText=`position:fixed;left:${fx}px;top:${fy}px;width:1px;height:1px`; document.body.appendChild(ghost);
+    if (first){ S.stars=Math.min(5,S.stars+1); S.streak++; }
+    save();
+    const c = $('#t-ci'); c.innerHTML = renderCheckin(); replay(c,'rise 360ms var(--ease-out)');
+    const m = $('#mascot'); if (m){ m.classList.remove('happy'); void m.offsetWidth; m.classList.add('happy'); }
+    flyStar(slot ? ghost : null, slot, ()=>{
+      ghost.remove();
+      const st = $('#t-stars'); if (st) st.innerHTML = renderStars();
+      if (S.stars>=5 && first){ const btn = $('#t-stars .btn'); if (btn){ const [x,y]=centerOf(btn); burst(x,y,16); } toast('Free pouch unlocked', I.gift); }
+    });
+    buzz(12);
+    if (!first) toast('Check-in updated', I.check);
+  },
+  'free-pouch':()=>{ if (S.stars<5) return; openRevealSheet(BUDDIES.find(x=>x.id===pickBuddy()), {physical:false, onDone:()=>{ S.stars=0; }}); },
+  'log-period':(el,v)=>{
+    if (S.lastStart===v){ closeSheet(); toast('Already logged', I.check); return; }
+    S.lastStart=v; ui.ringDone=false; save(); closeSheet(); renderScreen();
+    toast(`Logged for ${fmt(parseKey(v))}. Predictions updated.`, I.drop);
+  },
+  'profile':()=>openProfile(),
+  'close':()=>closeSheet(),
+  'cal-nav':(el,v)=>{ ui.calMonth = new Date(ui.calMonth.getFullYear(), ui.calMonth.getMonth() + +v, 1); ui.calDir = +v>0?'from-r':'from-l'; renderScreen(); },
+  'day':(el,v)=>openDay(v),
+  'checkout':(el,v)=>openCheckout(v),
+  'pay':()=>sheet && sheet.pay && sheet.pay(),
+  'order':(el,v)=>openOrder(v),
+  'order-from-done':(el,v)=>{ ui.tab='box'; render(); openOrder(v); },
+  'reveal':(el,v)=>openReveal(v),
+  'irl':(el,v)=>{ const o=findOrder(v); o.state='irl'; save(); closeSheet(); render(); toast('Saved. No spoilers.', I.gift); },
+  'goto-shelf':()=>{ closeSheet(); setTab('shelf'); },
+  'goto-box':()=>{ closeSheet(); setTab('box'); },
+  'buddy':(el,v)=>openBuddy(v),
+  'addon':(el,v)=>{
+    S.addons[v]=!S.addons[v]; save(); buzz(6);
+    el.setAttribute('aria-pressed', S.addons[v]); el.querySelector('.tick').innerHTML = S.addons[v]?I.check:I.plus;
+    const cta = $('.sticky-cta .btn'); if (cta){ cta.textContent = `Start my box · ${money(boxTotal())}`; replay(cta,'pop 320ms var(--spring)'); }
+  },
+  'edit-products':()=>openProducts(),
+  'prod-toggle':(el,v)=>{ toggleProduct(v); el.setAttribute('aria-pressed', S.products.includes(v)); renderScreen(); },
+  'skip':()=>{ S.paused=!S.paused; save(); refreshSheet(); renderScreen(); toast(S.paused?'Skipped. No charge this cycle.':'Box is back on', I.check); },
+  'ship-now':()=>{ const o = placeOrder('box'); render(); openOrder(o.id); },
+  'cancel':()=>confirmSheet('Cancel your box?', 'Tracking stays free. Your shelf stays yours.', 'Cancel box', ()=>{ S.plan='free'; S.paused=false; save(); render(); toast('Box cancelled', I.check); }),
+  'confirm-yes':()=>{ const f = sheet && sheet.onYes; closeSheet(); f && f(); },
+  'len':(el,v)=>{ S.cycleLen=clamp(S.cycleLen + +v,21,40); ui.ringDone=false; save(); refreshSheet(); renderScreen(); },
+  'plen':(el,v)=>{ S.periodLen=clamp(S.periodLen + +v,2,9); save(); refreshSheet(); renderScreen(); },
+  'fast':(el)=>{
+    const next = !S.demoFast;
+    S.orders.forEach(o=>{ const e = orderElapsed(o); o.placedAt = Date.now() - e*1000/(next?1:0.02); });
+    S.demoFast = next; save(); el.setAttribute('aria-checked', next);
+  },
+  'demo-stars':()=>{ S.stars=5; save(); closeSheet(); setTab('today'); renderScreen(); toast('Stars filled', I.sparkle); },
+  'reset':()=>confirmSheet('Start over?', 'This clears the demo on this device.', 'Reset', ()=>{ S=freshState(); ui.obStep=0; ui.obDir='fwd'; ui.draft=null; ui.tab='today'; ui.ringDone=false; $('#tabbar').innerHTML=''; save(); render(); }),
+};
+document.addEventListener('click', e=>{
+  const el = e.target.closest('[data-act]'); if (!el || el.disabled) return;
+  const f = A[el.dataset.act]; if (f) f(el, el.dataset.v);
+});
+document.addEventListener('keydown', e=>{ if (e.key==='Escape') closeSheet(); });
+function toggleProduct(id){
+  const i = S.products.indexOf(id);
+  if (i>=0){ if (S.products.length>1 || !S.onboarded) S.products.splice(i,1); else toast('Keep at least one'); }
+  else S.products.push(id);
+  save();
+}
+
+/* ---------- Shipping clock ---------- */
+setInterval(()=>{
+  if (!S.onboarded) return;
+  S.orders.forEach(o=>{
+    const st = orderStage(o), prev = ui.lastStages[o.id];
+    if (prev===undefined){ ui.lastStages[o.id]=st; return; }
+    if (st===prev) return;
+    ui.lastStages[o.id]=st;
+    if (st<4){ patchLive(o); if (st===2) toast('Your order shipped', I.truck); return; }
+    toast(o.kind==='box'?'Your box was delivered':'Top-up delivered', I.gift); buzz(20);
+    renderTabs();
+    if (ui.tab==='today'){ const b = $('#t-box'); if (b){ b.innerHTML = renderBoxStrip(); replay(b,'pop 520ms var(--spring)'); } }
+    if (ui.tab==='box') renderScreen();
+    if (sheet && sheet.orderId===o.id) refreshSheet();
+  });
+}, 1000);
+
+render(true);
+</script>
+</body>
+</html>

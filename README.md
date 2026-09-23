@@ -1,49 +1,52 @@
-# Lune: concept demo
+# Loop: concept demo
 
-> **Your period kit shows up before your period does.**
+> **Meet Loop, the crochet app that keeps your place in every pattern and mails you a hand-dyed colorway each month. You only find out the color when you open it.**
 
-A clickable, front-end-only mobile web demo to pitch a product idea. Nothing talks to a server. Orders, deliveries and payments are simulated on the device.
+A clickable, front-end-only mobile web demo made to pitch an idea. Nothing talks to a server. Orders, deliveries and payments are simulated on the device.
 
-**Run it:** open `index.html` in any browser. It looks best on a phone, or in a desktop browser, which shows a phone frame. There's no build step and no dependencies. It uses Google Fonts and falls back to system fonts offline.
+**Run it:** open `index.html` in a browser. It looks best on a phone; on desktop it shows inside a phone frame. There's no build step.
+
+An earlier concept (Lune, a period tracker) is kept in [`lune/`](lune/) for reference.
 
 ---
 
 ## The lane
 
-**Problem.** Almost every woman has been caught without supplies at some point: at work, on a trip, or at 11pm with an empty box under the sink. Period tracking apps already predict the date, but they stop at a notification. You still have to remember, go to the store, and buy the stuff.
+**Who it's for:** people who crochet, a hobby that has exploded with women in their 20s and 30s.
 
-**Solution.** Lune is a free cycle tracker that can also send supplies. If you opt in, it ships your products timed to your cycle (not the calendar) so the box lands **3 days before your period**. The Discord blind-box story is the fun part: **every box has a sealed mystery collectible** from a numbered series. You can reveal it in the app, or tap "Open it IRL" and keep the surprise for the real unboxing.
+**The annoying part:** you lose your place in a pattern. You tally rows on scrap paper, keep three unfinished projects in three tote bags, and guess how much yarn you need for a project.
 
-**Mission statement.** *Take the chore out of every cycle, and put a small moment of delight in its place.*
+**What Loop does:** it's a free row counter that *follows the pattern for you*. Tap when a round is done and it moves to the next instruction, shows the stitch count, and flags notes like "place safety eyes now". Around that sits a stash, free patterns, and a community feed.
 
-## Why everyone wins
+**The surprise, done naturally:** hand-dyed yarn clubs are already a big part of this hobby, and part of their appeal is not knowing the colorway until the parcel arrives. Crocheters also collect stitch-marker charms. Loop's **Yarn Club** is a monthly parcel with a secret colorway, a pattern designed for it, and one charm from a seasonal set. That's the blind-box mechanic from the Discord story, but it reads as a yarn club, not a loot box. There are no odds, no rarity labels, and no re-rolls. There's one special gold charm, mentioned once in small print.
 
-| | Free | Lune Box ($16/cycle + optional extras) |
-|---|---|---|
-| Cycle tracking, predictions, calendar | ✅ | ✅ |
-| Daily check-in + phase tips | ✅ | ✅ |
-| Moon stars → free **digital** buddy pouch | ✅ | ✅ |
-| Products delivered 3 days before your period | | ✅ |
-| Sealed **real** collectible in every box | | ✅ |
-| Add-ons: heat patches, chocolate, tea | | ✅ |
-| One-off next-day top-up kit ($9) | ✅ | ✅ |
+**Mission:** *Keep people making. Take the counting off their hands, and put something lovely in the mailbox.*
 
-- **The user** gets a genuinely useful free tracker, never runs out, and gets a small treat on the worst week of the month. Skip and cancel each take two taps, with no guilt trips.
-- **The business** gets recurring revenue on a need that never goes away (about 13 cycles a year, not 12 months). Add-ons raise the order value, and a collectible series drives retention ("I only need Twinkle and Prism"). New series drop each season.
-- **Ethics guardrails built in:** published pull odds for each rarity, no pay-to-reroll, the free tier never paywalls health info, and a medical disclaimer.
+## Business model
+
+| | Free | Yarn Club ($24/month) | Kits (one-off) |
+|---|---|---|---|
+| Row counter that follows the pattern | ✅ | ✅ | ✅ |
+| Free pattern library, stash, time tracking | ✅ | ✅ | ✅ |
+| Monthly hand-dyed colorway (surprise) | | ✅ | |
+| Pattern designed for that colorway | | ✅ | |
+| Marker charm in every parcel | | ✅ | ✅ |
+| Everything for one project | | | $18–32 |
+
+- Free tools get people in and keep them opening the app every time they crochet.
+- The Club is recurring revenue. Skip a month or leave in two taps.
+- Kits are the natural impulse buy from any pattern page, and every kit also carries a charm, so free users collect too.
+- Colorways lean toward the palettes you pick during onboarding.
 
 ## What's in the demo
 
-1. **Onboarding** (4 screens): name, last period date, cycle length, products, flow. No paywall at the start.
-2. **Today:** cycle ring with phase, period countdown, box status card, daily check-in (mood + symptoms), moon-star streak, and a phase tip.
-3. **Calendar:** logged, predicted and fertile days, plus the box arrival day. Tap any day to log a period start.
-4. **Box:** "how it works" pitch, contents built from your products and flow, add-on toggles, checkout, a simulated order timeline (placed → packed → shipped → out for delivery → delivered in about 25s), order history, skip/resume, cancel.
-5. **Mystery reveal:** tap the foil pouch 3 times to tear it open. Rarity and odds are shown, and the buddy goes to your shelf. Or choose **Open it IRL** and add it later.
-6. **Shelf:** 12-buddy "Night Garden" series with Common, Rare and Secret tiers. Tiles show whether you own the real figure, the digital one, or both.
-7. **Profile:** cycle and period length, skip or cancel the box, plus **demo controls** (fast shipping toggle, "give me 5 stars", reset demo).
+1. **Onboarding:** your name, skill level, what you like to make, and the colors you're drawn to. You start with a real beginner pattern (Strawberry Pal).
+2. **Home:** your current project with its progress, minutes crocheted this week, next month's colorway (a secret) and a feed of things members made with last month's colorway.
+3. **Make → Counter:** the current round in big type, the stitch count, pattern notes, a large tap target, undo, the next rounds, and a session timer. Finishing a project gets its own celebration.
+4. **Club:** a countdown to the next drop and what comes in it, kits, orders, skip or join. Checkout → order tracking (placed, packed, on the way, delivered in about 25s) → **unwrap**: untie the twine, open the paper, the colorway is revealed and a charm drops in.
+   - **Save for IRL** keeps it wrapped in the app, so the real parcel is still a surprise.
+5. **Stash:** your yarn (tap a skein to see which patterns it has enough yardage for), plus the **Marker tin** holding your charm set.
+6. **Profile:** skip the Club or leave, plus demo controls (fast shipping, reset).
 
-### Demo script (≈90 seconds)
-Onboard → do a check-in (earns the 5th star) → **Open pouch** on Today → **Box** tab → **Start my box** → **Track order** → wait about 25s for "Delivered" → **Reveal now** (or **Open it IRL**) → **Shelf**.
-
-## Design notes
-Motion follows design-engineering practice: custom ease-out curves, UI transitions under 300ms, a 0.97 press scale on buttons, drag-to-dismiss bottom sheets on a drawer curve, and no animation on high-frequency actions like tab switches. Hover effects are limited to fine pointers, and everything respects `prefers-reduced-motion`. QA was done in headless Chromium at 390×844 and 375×667, plus a desktop frame: no console errors and no horizontal overflow.
+### Demo script (about 2 minutes)
+Onboard → **Pick up where you left off** → tap the counter a few times (watch R8's safety-eye note appear) → **Club** → **Join** → **Track it** → wait about 25s → **Unwrap it here** → **See stash** → **Markers**.

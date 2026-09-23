@@ -3,556 +3,679 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#FBF6F1">
-<title>Lune</title>
-<meta name="description" content="Lune: a free cycle tracker, plus a period kit that shows up before your period does, with a mystery collectible inside.">
+<meta name="theme-color" content="#F6F2EC">
+<title>Loop</title>
+<meta name="description" content="Loop: the crochet app that keeps your place in every pattern and mails you a surprise hand-dyed colorway each month.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <style>
 :root{
   color-scheme: light;
-  --bg:#FBF6F1;
+  --bg:#F6F2EC;
   --surface:#FFFFFF;
-  --surface-2:#F5EEE8;
-  --ink:#2A1B2E;
-  --ink-2:#5E4E62;
-  --muted:#8C7D8F;
-  --line:#EDE3DC;
-  --berry:#B23A6E;
-  --berry-ink:#FFFFFF;
-  --berry-soft:#F8E1EA;
-  --period:#E0567A;
-  --predicted:#F7CAD6;
-  --fertile:#D3EBDD;
-  --fertile-ink:#2F6B4B;
-  --lilac:#EDE4F6;
-  --gold:#C99A2E;
-  --ok:#2F8F5B;
-  --radius:20px;
+  --surface-2:#EFE9E1;
+  --ink:#231F2B;
+  --ink-2:#554E5C;
+  --muted:#8A8290;
+  --line:#E7E0D7;
+  --rasp:#D6336C;
+  --rasp-soft:#FBE3EB;
+  --moss:#4F7A4E;
+  --moss-soft:#E1ECDC;
+  --butter:#F6C945;
+  --butter-soft:#FCF1CC;
+  --night:#26213A;
+  --radius:22px;
   --ease-out:cubic-bezier(0.23,1,0.32,1);
-  --ease-in-out:cubic-bezier(0.77,0,0.175,1);
   --ease-drawer:cubic-bezier(0.32,0.72,0,1);
-  --shadow:0 1px 2px rgba(42,27,46,.04),0 8px 24px -12px rgba(42,27,46,.12);
+  --spring:cubic-bezier(0.34,1.56,0.64,1);
+  --shadow:0 1px 2px rgba(35,31,43,.04),0 10px 28px -14px rgba(35,31,43,.18);
   --font:"DM Sans",system-ui,-apple-system,sans-serif;
-  --display:"Fraunces",Georgia,serif;
+  --display:"Bricolage Grotesque","DM Sans",system-ui,sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%}
-body{background:#E9E0DA;font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.45}
+body{background:#E4DDD3;font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.45}
 button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
 input{font:inherit;color:inherit}
-h1,h2,h3{margin:0;font-weight:600;text-wrap:balance}
-p{text-wrap:pretty}
-p{margin:0}
+h1,h2,h3{margin:0;font-weight:700;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+svg{display:block}
 .tnum{font-variant-numeric:tabular-nums}
 
-/* ---------- phone frame ---------- */
-.app{position:relative;height:100dvh;width:100%;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+/* ---------- frame ---------- */
+.app{position:relative;height:100dvh;width:100%;background:var(--bg);overflow:hidden;display:flex;flex-direction:column;isolation:isolate}
 @media (min-width:520px){
   body{display:grid;place-items:center;min-height:100vh;padding:24px 0}
-  .app{width:390px;height:844px;max-height:calc(100vh - 48px);border-radius:44px;box-shadow:0 0 0 10px #1d1420,0 30px 80px -20px rgba(29,20,32,.55)}
+  .app{width:390px;height:844px;max-height:calc(100vh - 48px);border-radius:46px;box-shadow:0 0 0 10px #1c1824,0 30px 80px -20px rgba(28,24,36,.55)}
 }
-.scroller{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none}
+.scroller{flex:1;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:none}
 .scroller::-webkit-scrollbar{display:none}
-.screen{padding:calc(env(safe-area-inset-top) + 16px) 16px 24px}
+.screen{padding:calc(env(safe-area-inset-top) + 14px) 16px 28px;display:flex;flex-direction:column;gap:14px}
+.screen.in>*{animation:rise 440ms var(--ease-out) both}
+.screen.in>*:nth-child(2){animation-delay:40ms}
+.screen.in>*:nth-child(3){animation-delay:80ms}
+.screen.in>*:nth-child(4){animation-delay:120ms}
+.screen.in>*:nth-child(5){animation-delay:160ms}
+.screen.in>*:nth-child(n+6){animation-delay:200ms}
+.screen.push>*{animation:pushIn 420ms var(--ease-out) both}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pushIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:none;opacity:1}}
 
 /* ---------- primitives ---------- */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:52px;padding:0 22px;border-radius:16px;font-weight:600;font-size:16px;background:var(--berry);color:var(--berry-ink);transition:transform 160ms var(--ease-out),background-color 200ms ease,opacity 200ms ease;user-select:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:54px;padding:0 22px;border-radius:18px;font-weight:700;font-size:16px;background:var(--ink);color:#fff;transition:transform 160ms var(--ease-out),opacity 200ms ease,filter 200ms ease;user-select:none;white-space:nowrap}
 .btn:active{transform:scale(.97)}
 .btn.block{width:100%}
+.btn.rasp{background:var(--rasp)}
 .btn.ghost{background:var(--surface-2);color:var(--ink)}
-.btn.outline{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--ink)}
-.btn.sm{height:38px;padding:0 14px;font-size:14px;border-radius:12px}
-.btn[disabled]{opacity:.45;pointer-events:none}
-.link{color:var(--berry);font-weight:600;font-size:14px;transition:opacity 150ms ease}
+.btn.white{background:#fff;color:var(--ink)}
+.btn.clear{background:rgba(255,255,255,.14);color:#fff}
+.btn.sm{height:40px;padding:0 16px;font-size:14px;border-radius:13px}
+.btn[disabled]{opacity:.35;pointer-events:none}
+.link{color:var(--rasp);font-weight:700;font-size:14px;transition:opacity 150ms ease}
 .link:active{opacity:.6}
 .card{background:var(--surface);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
-.stack>*+*{margin-top:12px}
 .row{display:flex;align-items:center;gap:12px}
 .between{justify-content:space-between}
-.eyebrow{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.grow{flex:1;min-width:0}
+.label{font-size:13px;font-weight:700;color:var(--muted)}
 .muted{color:var(--muted)}
 .small{font-size:13px}
-.title{font-family:var(--display);font-size:28px;line-height:1.1;letter-spacing:-.01em;font-weight:600}
-.h2{font-family:var(--display);font-size:20px;line-height:1.2;font-weight:600}
-.pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
-.pill.berry{background:var(--berry-soft);color:var(--berry)}
-.pill.green{background:var(--fertile);color:var(--fertile-ink)}
-.pill.gold{background:#FBEFD0;color:#8A6412}
-.pill.lilac{background:var(--lilac);color:#5B3F86}
-.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.title{font-family:var(--display);font-size:32px;line-height:1;letter-spacing:-.02em;font-weight:800}
+.h2{font-family:var(--display);font-size:21px;line-height:1.1;font-weight:700;letter-spacing:-.01em}
+.h3{font-family:var(--display);font-size:17px;line-height:1.15;font-weight:700}
+.pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:99px;font-size:12px;font-weight:700;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.pill.rasp{background:var(--rasp-soft);color:var(--rasp)}
+.pill.moss{background:var(--moss-soft);color:var(--moss)}
+.pill.butter{background:var(--butter-soft);color:#8A6A0C}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;padding:4px 2px 0}
+.chev{color:var(--muted);flex:none}
 
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{height:38px;padding:0 14px;border-radius:12px;background:var(--surface-2);font-size:14px;font-weight:500;color:var(--ink-2);transition:transform 160ms var(--ease-out),background-color 180ms ease,color 180ms ease,box-shadow 180ms ease}
-.chip:active{transform:scale(.96)}
-.chip[aria-pressed="true"]{background:var(--ink);color:#fff}
+.chip{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px 0 8px;border-radius:14px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);font-weight:600;transition:transform 240ms var(--spring),box-shadow 180ms ease,background-color 180ms ease}
+.chip:active{transform:scale(.95)}
+.chip .ic{width:30px;height:30px;border-radius:9px;overflow:hidden}
+.chip[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--ink);background:var(--surface)}
 
 .seg{display:flex;background:var(--surface-2);border-radius:14px;padding:4px;position:relative}
-.seg button{flex:1;height:38px;border-radius:10px;font-size:14px;font-weight:600;color:var(--muted);position:relative;z-index:1;transition:color 200ms ease}
+.seg button{flex:1;height:38px;border-radius:10px;font-size:14px;font-weight:700;color:var(--muted);position:relative;z-index:1;transition:color 200ms ease}
 .seg button[aria-pressed="true"]{color:var(--ink)}
-.seg .thumb{position:absolute;top:4px;bottom:4px;left:4px;border-radius:10px;background:var(--surface);box-shadow:0 1px 3px rgba(42,27,46,.12);transition:transform 260ms var(--ease-out)}
+.seg .thumb{position:absolute;top:4px;bottom:4px;left:4px;border-radius:10px;background:var(--surface);box-shadow:0 1px 3px rgba(35,31,43,.12);transition:transform 360ms var(--ease-drawer)}
 
-.stepper{display:flex;align-items:center;gap:4px;background:var(--surface-2);border-radius:12px;padding:3px}
-.stepper button{width:34px;height:32px;border-radius:9px;font-size:18px;font-weight:600;color:var(--ink-2);transition:transform 140ms var(--ease-out),background-color 150ms ease}
-.stepper button:active{transform:scale(.9);background:var(--surface)}
-.stepper span{min-width:28px;text-align:center;font-weight:600}
+.switch{width:50px;height:30px;border-radius:99px;background:#D8D0C6;position:relative;transition:background-color 220ms ease;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform 300ms var(--spring)}
+.switch[aria-checked="true"]{background:var(--moss)}
+.switch[aria-checked="true"]::after{transform:translateX(20px)}
 
-.switch{width:48px;height:30px;border-radius:99px;background:#DCD1CA;position:relative;transition:background-color 200ms ease;flex:none}
-.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform 240ms var(--ease-out)}
-.switch[aria-checked="true"]{background:var(--berry)}
-.switch[aria-checked="true"]::after{transform:translateX(18px)}
-
-.list-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.list-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--line);width:100%;text-align:left}
 .list-row:first-child{border-top:0}
-.icon-btn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--surface);box-shadow:var(--shadow);transition:transform 160ms var(--ease-out)}
-.icon-btn:active{transform:scale(.94)}
-.avatar{width:40px;height:40px;border-radius:50%;background:var(--berry-soft);color:var(--berry);display:grid;place-items:center;font-weight:600;font-family:var(--display);font-size:18px;transition:transform 160ms var(--ease-out)}
-.avatar:active{transform:scale(.94)}
+.icon-btn{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--surface);box-shadow:var(--shadow);transition:transform 160ms var(--ease-out);flex:none}
+.icon-btn:active{transform:scale(.92)}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--butter);color:var(--ink);display:grid;place-items:center;font-weight:800;font-family:var(--display);font-size:18px;transition:transform 160ms var(--ease-out);flex:none}
+.avatar:active{transform:scale(.92)}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
+.art-bg{border-radius:18px;display:grid;place-items:center;overflow:hidden;flex:none}
 
 /* ---------- tab bar ---------- */
-.tabbar{flex:none;display:flex;background:rgba(251,246,241,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:6px 8px calc(env(safe-area-inset-bottom) + 6px)}
+.tabbar{flex:none;position:relative;display:flex;background:rgba(246,242,236,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:6px 10px calc(env(safe-area-inset-bottom) + 6px)}
 @media (min-width:520px){.tabbar{padding-bottom:18px}}
-.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:11px;font-weight:600;color:var(--muted);transition:color 180ms ease,transform 160ms var(--ease-out);position:relative}
-.tab:active{transform:scale(.94)}
-.tab svg{width:24px;height:24px}
-.tab[aria-current="page"]{color:var(--berry)}
-.tab .badge{position:absolute;top:3px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:var(--period);box-shadow:0 0 0 2px var(--bg)}
+.tab-ind{position:absolute;top:6px;left:10px;height:50px;border-radius:16px;background:var(--ink);transition:transform 440ms var(--ease-drawer);z-index:0}
+.tab{flex:1;height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:700;color:var(--muted);transition:color 240ms ease;position:relative;z-index:1}
+.tab svg{width:23px;height:23px;transition:transform 300ms var(--spring)}
+.tab:active svg{transform:scale(.85)}
+.tab[aria-current="page"]{color:#fff}
+.tab .badge{position:absolute;top:7px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:var(--rasp);box-shadow:0 0 0 2px var(--bg);animation:pop 400ms var(--spring)}
 
 /* ---------- home ---------- */
-.ring-wrap{position:relative;width:196px;height:196px;margin:4px auto 0}
-.ring-wrap svg{position:absolute;inset:0}
-.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.ring-center .big{font-family:var(--display);font-size:44px;line-height:1;font-weight:600;letter-spacing:-.02em}
-.progress{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
-.progress>i{display:block;height:100%;border-radius:inherit;background:var(--berry);transition:width 600ms var(--ease-out)}
-.stars{display:flex;gap:6px}
-.stars svg{width:22px;height:22px}
-.star-on{animation:starPop 420ms var(--ease-out)}
-@keyframes starPop{0%{transform:scale(.6);opacity:.3}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.wip{position:relative;border-radius:28px;padding:18px;background:var(--night);color:#fff;overflow:hidden;isolation:isolate}
+.wip .muted{color:rgba(255,255,255,.62)}
+.wip .art{position:absolute;right:-8px;top:-4px;width:150px;z-index:-1;animation:bob 4.4s ease-in-out infinite}
+.wip .glow{position:absolute;right:-40px;top:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(214,51,108,.45),transparent 65%);z-index:-2}
+.bar{height:8px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden}
+.card .bar,.sheet .bar{background:var(--surface-2)}
+.bar>i{display:block;height:100%;border-radius:inherit;background:var(--butter);transition:width 700ms var(--ease-out)}
+.card .bar>i{background:var(--rasp)}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;height:84px;margin-top:14px}
+.week .col{display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.week .b{width:100%;border-radius:8px;background:var(--surface-2);transform-origin:bottom;animation:grow 700ms var(--ease-out) both}
+.week .b.today{background:var(--rasp)}
+.week .d{font-size:11px;font-weight:700;color:var(--muted)}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.hscroll{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 16px 10px;margin:0 -16px;scrollbar-width:none;scroll-padding:0 16px}
+.hscroll::-webkit-scrollbar{display:none}
+.make{flex:none;width:148px;scroll-snap-align:start;background:var(--surface);border-radius:20px;padding:8px;box-shadow:var(--shadow);text-align:left}
+.make .pic{height:120px;border-radius:14px;display:grid;place-items:center;overflow:hidden}
+.make .pic svg{width:92px}
+.heart{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--muted);transition:color 200ms ease}
+.heart svg{transition:transform 360ms var(--spring)}
+.heart[aria-pressed="true"]{color:var(--rasp)}
+.heart[aria-pressed="true"] svg{transform:scale(1.25)}
+.drop-card{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--butter-soft);border-radius:var(--radius);padding:14px 16px;transition:transform 160ms var(--ease-out)}
+.drop-card:active{transform:scale(.98)}
 
-.box-hero{background:linear-gradient(160deg,#3A2140 0%,#5C2A55 55%,#8E3767 100%);color:#fff;border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
-.box-hero .muted{color:rgba(255,255,255,.72)}
-.box-hero .btn{background:#fff;color:var(--ink)}
-.box-hero .btn.ghost{background:rgba(255,255,255,.14);color:#fff}
-.box-hero::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.18),transparent 70%)}
+/* ---------- projects & counter ---------- */
+.proj{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow);transition:transform 160ms var(--ease-out)}
+.proj:active{transform:scale(.98)}
+.lib{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lib-card{background:var(--surface);border-radius:20px;padding:8px 8px 12px;box-shadow:var(--shadow);text-align:left;transition:transform 160ms var(--ease-out)}
+.lib-card:active{transform:scale(.97)}
+.lib-card .pic{height:110px;border-radius:14px;display:grid;place-items:center;margin-bottom:8px}
+.lib-card .pic svg{width:84px}
+.counter-wrap{display:grid;place-items:center;padding:6px 0 2px;position:relative}
+.counter{width:210px;height:210px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;position:relative;transition:transform 180ms var(--ease-out);box-shadow:0 18px 40px -16px rgba(35,31,43,.6);touch-action:manipulation}
+.counter:active{transform:scale(.95)}
+.counter .ring{position:absolute;inset:-12px}
+.counter .ring circle{transition:stroke-dashoffset 600ms var(--ease-out)}
+.counter .num{font-family:var(--display);font-size:74px;font-weight:800;line-height:1;letter-spacing:-.03em;display:block;height:74px;overflow:hidden}
+.counter .num span{display:block}
+.counter .num.flip span{animation:flip 380ms var(--ease-out)}
+@keyframes flip{from{transform:translateY(60%);opacity:0}to{transform:none;opacity:1}}
+.counter .cap{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.ripple{position:absolute;inset:0;border-radius:50%;border:3px solid var(--rasp);pointer-events:none;animation:ripple 600ms var(--ease-out) forwards}
+@keyframes ripple{from{transform:scale(1);opacity:.8}to{transform:scale(1.35);opacity:0}}
+.step-card{background:var(--surface);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+.step-card.swap{animation:swap 360ms var(--ease-out)}
+@keyframes swap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.instr{font-family:var(--display);font-size:24px;font-weight:700;line-height:1.15;letter-spacing:-.01em}
+.note{display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--butter-soft);font-size:13px;font-weight:600;color:#6E5409}
+.upnext{display:flex;flex-direction:column}
+.upnext .list-row{padding:10px 0}
+.abbr{font-weight:700;color:var(--ink)}
+.timer{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:99px;background:var(--surface);box-shadow:var(--shadow);font-weight:700;font-size:13px}
+.timer i{width:7px;height:7px;border-radius:50%;background:var(--rasp);animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
 
-/* ---------- timeline ---------- */
-.timeline{position:relative;padding-left:28px}
-.tl-item{position:relative;padding-bottom:18px}
-.tl-item:last-child{padding-bottom:0}
-.tl-item::before{content:"";position:absolute;left:-21px;top:18px;bottom:-2px;width:2px;background:var(--line)}
-.tl-item:last-child::before{display:none}
-.tl-item.done::before{background:var(--berry)}
-.tl-dot{position:absolute;left:-28px;top:2px;width:16px;height:16px;border-radius:50%;background:var(--surface);box-shadow:inset 0 0 0 2px var(--line);transition:background-color 300ms ease,box-shadow 300ms ease}
-.tl-item.done .tl-dot{background:var(--berry);box-shadow:none}
-.tl-item.current .tl-dot{background:var(--berry);box-shadow:0 0 0 5px var(--berry-soft)}
-.tl-item.current .tl-dot::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--berry);opacity:0;animation:ping 1.6s var(--ease-out) infinite}
-@keyframes ping{0%{transform:scale(.6);opacity:.6}100%{transform:scale(1.5);opacity:0}}
-.tl-label{font-weight:600}
-.tl-item:not(.done):not(.current) .tl-label{color:var(--muted)}
+/* ---------- club ---------- */
+.club-hero{position:relative;border-radius:30px;padding:22px 20px 20px;background:linear-gradient(170deg,#FCEFD2,#F9DCE5);overflow:hidden;text-align:center;isolation:isolate}
+.club-hero .parcel{width:190px;margin:0 auto;animation:bob 4.4s ease-in-out infinite}
+.big-count{font-family:var(--display);font-size:60px;font-weight:800;line-height:1;letter-spacing:-.03em}
+.inside{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.inside>div{background:var(--surface);border-radius:18px;padding:12px 8px;text-align:center;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:6px}
+.inside .pic{width:58px;height:58px;display:grid;place-items:center}
+.inside .nm{font-size:13px;font-weight:700;line-height:1.2}
+.kit{flex:none;width:200px;scroll-snap-align:start;background:var(--surface);border-radius:22px;padding:8px 8px 14px;box-shadow:var(--shadow);text-align:left}
+.kit .pic{height:130px;border-radius:16px;display:grid;place-items:center;margin-bottom:10px}
+.kit .pic svg{width:96px}
+.sticky-cta{position:sticky;bottom:0;margin:0 -16px -28px;padding:16px;background:linear-gradient(to top,var(--bg) 72%,rgba(246,242,236,0));z-index:5}
+.past{display:flex;gap:10px}
+.past>div{width:calc((100% - 20px)/3);text-align:center}
+.past svg{width:100%}
 
-.mini-steps{display:flex;gap:4px}
-.mini-steps i{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.2);overflow:hidden;position:relative}
-.mini-steps i.on{background:#fff}
-.card .mini-steps i{background:var(--surface-2)}
-.card .mini-steps i.on{background:var(--berry)}
-
-/* ---------- calendar ---------- */
-.cal-head{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.day{aspect-ratio:1;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:15px;font-weight:500;position:relative;transition:transform 140ms var(--ease-out)}
-.day:active{transform:scale(.9)}
-.day.out{visibility:hidden}
-.day.period{background:var(--period);color:#fff}
-.day.predicted{background:var(--predicted);color:#8B2446}
-.day.fertile{background:var(--fertile);color:var(--fertile-ink)}
-.day.ovulation{background:var(--fertile);color:var(--fertile-ink);box-shadow:inset 0 0 0 2px #7BBF98}
-.day.today{box-shadow:inset 0 0 0 2px var(--ink)}
-.day .mk{position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:var(--ink)}
-.day.period .mk{background:#fff}
-.day.boxday{background:#3A2140;color:#fff}
-.day.boxday .mk{background:#fff}
-.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--ink-2)}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-
-/* ---------- collection ---------- */
-.shelf{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.buddy-tile{background:var(--surface);border-radius:18px;padding:10px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:var(--shadow);position:relative;transition:transform 160ms var(--ease-out)}
-.buddy-tile:active{transform:scale(.96)}
-.buddy-tile svg{width:72px;height:72px}
-.buddy-tile .nm{font-size:12px;font-weight:600}
-.buddy-tile.locked .nm{color:var(--muted)}
-.buddy-tile .flags{display:flex;gap:3px;height:14px;align-items:center}
-.flag{font-size:9px;font-weight:700;letter-spacing:.04em;padding:1px 5px;border-radius:5px;text-transform:uppercase}
-.flag.p{background:var(--ink);color:#fff}
-.flag.d{background:var(--lilac);color:#5B3F86}
-.flag.r{background:#FBEFD0;color:#8A6412}
+/* ---------- stash ---------- */
+.yarns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.yarn{background:var(--surface);border-radius:20px;padding:12px;box-shadow:var(--shadow);text-align:left;transition:transform 160ms var(--ease-out)}
+.yarn:active{transform:scale(.97)}
+.yarn svg{width:100%;margin-bottom:6px}
+.tin{background:linear-gradient(170deg,#3A3350,#26213A);border-radius:28px;padding:18px;color:#fff}
+.tin .muted{color:rgba(255,255,255,.6)}
+.charms{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.charm{aspect-ratio:3/4;border-radius:16px;background:rgba(255,255,255,.07);display:grid;place-items:center;transition:transform 200ms var(--ease-out)}
+.charm:active{transform:scale(.94)}
+.charm svg{width:70%}
+.charm.have svg{animation:sway 3.2s ease-in-out infinite;transform-origin:50% 12%}
+.charm.missing svg{opacity:.28}
+@keyframes sway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
 
 /* ---------- sheets ---------- */
-.backdrop{position:absolute;inset:0;background:rgba(29,20,32,.4);opacity:0;transition:opacity 400ms var(--ease-drawer);z-index:40}
+.backdrop{position:absolute;inset:0;background:rgba(28,24,36,.42);opacity:0;transition:opacity 420ms var(--ease-drawer);z-index:40}
 .backdrop.show{opacity:1}
-.sheet{position:absolute;left:0;right:0;bottom:0;max-height:92%;background:var(--bg);border-radius:28px 28px 0 0;z-index:41;transform:translateY(100%);transition:transform 480ms var(--ease-drawer);display:flex;flex-direction:column;box-shadow:0 -10px 40px -10px rgba(29,20,32,.25);touch-action:none}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:92%;background:var(--bg);border-radius:30px 30px 0 0;z-index:41;transform:translateY(100%);transition:transform 500ms var(--ease-drawer);display:flex;flex-direction:column;box-shadow:0 -10px 40px -10px rgba(28,24,36,.25);touch-action:none}
 .sheet.show{transform:translateY(0)}
 .sheet.dragging{transition:none}
 .grab{padding:10px 0 4px;display:grid;place-items:center;cursor:grab;flex:none}
-.grab i{width:40px;height:5px;border-radius:99px;background:#D7CBC4}
-.sheet-body{overflow-y:auto;padding:8px 20px calc(env(safe-area-inset-bottom) + 24px);touch-action:pan-y;scrollbar-width:none}
+.grab i{width:40px;height:5px;border-radius:99px;background:#D3CABF}
+.sheet-body{overflow-y:auto;padding:6px 20px calc(env(safe-area-inset-bottom) + 24px);touch-action:pan-y;scrollbar-width:none;display:flex;flex-direction:column;gap:12px}
 .sheet-body::-webkit-scrollbar{display:none}
+.sheet.show .sheet-body.stagger>*{animation:rise 460ms var(--ease-out) both}
+.sheet.show .sheet-body.stagger>*:nth-child(2){animation-delay:50ms}
+.sheet.show .sheet-body.stagger>*:nth-child(3){animation-delay:90ms}
+.sheet.show .sheet-body.stagger>*:nth-child(4){animation-delay:130ms}
+.sheet.show .sheet-body.stagger>*:nth-child(n+5){animation-delay:170ms}
 @media (min-width:520px){.sheet-body{padding-bottom:32px}}
+.sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:2px}
+.x-btn{width:34px;height:34px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;flex:none;transition:transform 160ms var(--ease-out)}
+.x-btn:active{transform:scale(.9)}
+
+/* ---------- timeline ---------- */
+.track{position:relative;height:6px;border-radius:99px;background:var(--surface-2);margin:18px 6px 22px}
+.dark .track{background:rgba(255,255,255,.16);margin:14px 0 4px}
+.track .fill{position:absolute;inset:0 auto 0 0;border-radius:inherit;background:var(--rasp);transition:width 900ms var(--ease-out)}
+.dark .track .fill{background:var(--butter)}
+.track .van{position:absolute;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:#fff;display:grid;place-items:center;color:var(--ink);box-shadow:0 4px 12px rgba(0,0,0,.2);transition:left 900ms var(--ease-out)}
+.track .van svg{animation:rumble 600ms ease-in-out infinite}
+@keyframes rumble{50%{transform:translateY(-1px)}}
+.timeline{position:relative;padding-left:28px}
+.tl-item{position:relative;padding-bottom:14px}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{content:"";position:absolute;left:-21px;top:18px;bottom:-2px;width:2px;background:var(--line);transition:background-color 400ms ease}
+.tl-item:last-child::before{display:none}
+.tl-item.done::before{background:var(--rasp)}
+.tl-dot{position:absolute;left:-28px;top:2px;width:16px;height:16px;border-radius:50%;background:var(--surface);box-shadow:inset 0 0 0 2px var(--line);transition:background-color 300ms ease,box-shadow 300ms ease}
+.tl-item.done .tl-dot,.tl-item.current .tl-dot{background:var(--rasp);box-shadow:none}
+.tl-item.current .tl-dot{box-shadow:0 0 0 5px var(--rasp-soft)}
+.tl-label{font-weight:700}
+.tl-item:not(.done):not(.current) .tl-label{color:var(--muted)}
+.live-strip{display:block;width:100%;text-align:left;background:var(--night);color:#fff;border-radius:var(--radius);padding:16px;transition:transform 160ms var(--ease-out)}
+.live-strip:active{transform:scale(.98)}
+.live-strip .muted{color:rgba(255,255,255,.62)}
 
 /* ---------- toast ---------- */
-.toast-wrap{position:absolute;top:calc(env(safe-area-inset-top) + 12px);left:12px;right:12px;z-index:60;pointer-events:none;display:flex;justify-content:center}
-.toast{pointer-events:auto;background:var(--ink);color:#fff;border-radius:16px;padding:12px 16px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 12px 30px -10px rgba(0,0,0,.4);transform:translateY(-140%);opacity:0;transition:transform 420ms var(--ease-out),opacity 300ms ease;max-width:100%}
-.toast.show{transform:translateY(0);opacity:1}
-@media (min-width:520px){.toast-wrap{top:20px}}
+.toast-wrap{position:absolute;top:calc(env(safe-area-inset-top) + 10px);left:0;right:0;z-index:80;pointer-events:none;display:flex;justify-content:center}
+@media (min-width:520px){.toast-wrap{top:14px}}
+.toast{position:absolute;pointer-events:auto;background:#1c1824;color:#fff;border-radius:22px;padding:10px 16px 10px 10px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px;box-shadow:0 14px 30px -10px rgba(0,0,0,.45);transform:translateY(-16px) scale(.6);opacity:0;transition:transform 520ms var(--spring),opacity 220ms ease;max-width:calc(100% - 32px)}
+.toast.show{transform:none;opacity:1}
+.toast.hide{transform:translateY(-12px) scale(.85);opacity:0;transition:transform 260ms var(--ease-out),opacity 200ms ease}
+.toast .t-ic{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.12);display:grid;place-items:center;flex:none;color:var(--butter)}
 
 /* ---------- onboarding ---------- */
-.ob{flex:1;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 20px);overflow-y:auto}
-@media (min-width:520px){.ob{padding-top:36px;padding-bottom:28px}}
+.ob{flex:1;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 18px) 20px calc(env(safe-area-inset-bottom) + 20px);overflow-y:auto;overflow-x:hidden;position:relative;isolation:isolate}
+@media (min-width:520px){.ob{padding-top:34px;padding-bottom:28px}}
 .ob-dots{display:flex;gap:6px}
-.ob-dots i{height:6px;width:6px;border-radius:99px;background:var(--line);transition:width 300ms var(--ease-out),background-color 300ms ease}
-.ob-dots i.on{width:22px;background:var(--berry)}
+.ob-dots i{height:6px;width:6px;border-radius:99px;background:var(--line);transition:width 400ms var(--ease-drawer),background-color 300ms ease}
+.ob-dots i.on{width:22px;background:var(--ink)}
 .ob-body{flex:1;display:flex;flex-direction:column}
-.enter>*{animation:rise 520ms var(--ease-out) both}
-.enter>*:nth-child(2){animation-delay:50ms}
-.enter>*:nth-child(3){animation-delay:100ms}
-.enter>*:nth-child(4){animation-delay:150ms}
-.enter>*:nth-child(5){animation-delay:200ms}
-.enter>*:nth-child(6){animation-delay:250ms}
-@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.field{display:block;background:var(--surface);border-radius:16px;padding:12px 16px;box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow 180ms ease}
-.field.row{display:flex}
-.field:focus-within{box-shadow:inset 0 0 0 2px var(--berry)}
-.field .lbl{display:block;font-size:12px;font-weight:600;color:var(--muted)}
+.ob-body.fwd>*{animation:pushIn 480ms var(--ease-out) both}
+.ob-body.back>*{animation:pushBack 480ms var(--ease-out) both}
+.ob-body>*:nth-child(2){animation-delay:40ms!important}
+.ob-body>*:nth-child(3){animation-delay:80ms!important}
+.ob-body>*:nth-child(4){animation-delay:120ms!important}
+.ob-body>*:nth-child(5){animation-delay:160ms!important}
+@keyframes pushBack{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:none}}
+.field{display:block;background:var(--surface);border-radius:18px;padding:12px 16px;box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow 180ms ease}
+.field:focus-within{box-shadow:inset 0 0 0 2px var(--ink)}
+.field .lbl{display:block;font-size:12px;font-weight:700;color:var(--muted)}
 .field input{border:0;outline:0;background:none;width:100%;font-size:17px;padding:2px 0 0;min-height:28px}
-.option{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border-radius:16px;padding:14px 16px;box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow 180ms ease,transform 160ms var(--ease-out)}
+.option{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border-radius:18px;padding:14px 16px;box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow 180ms ease,transform 160ms var(--ease-out)}
 .option:active{transform:scale(.98)}
-.option[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--berry)}
-.option .tick{margin-left:auto;width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line);display:grid;place-items:center;transition:background-color 180ms ease,box-shadow 180ms ease;flex:none}
-.option[aria-pressed="true"] .tick{background:var(--berry);box-shadow:none}
-.option .tick svg{opacity:0;transform:scale(.6);transition:opacity 160ms ease,transform 200ms var(--ease-out)}
-.option[aria-pressed="true"] .tick svg{opacity:1;transform:none}
-.hero-art{display:flex;justify-content:center;gap:0;margin:8px 0 4px}
-.hero-art svg{width:88px;height:88px;margin:0 -8px}
-.hero-art svg:nth-child(2){width:112px;height:112px;margin-top:-12px;position:relative;z-index:1}
-.float{animation:float 4s ease-in-out infinite}
-.float.d2{animation-delay:-1.3s}.float.d3{animation-delay:-2.6s}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.option[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--ink)}
+.palettes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pal{border-radius:20px;padding:10px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--line);text-align:left;transition:box-shadow 180ms ease,transform 240ms var(--spring)}
+.pal:active{transform:scale(.96)}
+.pal[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--ink)}
+.pal .sw{display:flex;height:54px;border-radius:12px;overflow:hidden;margin-bottom:8px}
+.pal .sw i{flex:1;transition:flex 400ms var(--ease-out)}
+.pal[aria-pressed="true"] .sw i:nth-child(2){flex:1.6}
+.pal .nm{font-weight:700;font-size:14px}
+.welcome-art{position:relative;height:280px}
+.welcome-art>*{position:absolute}
+.welcome-bg{position:absolute;inset:0;z-index:-1;background:radial-gradient(90% 50% at 50% 18%,#FBE3EB 0%,rgba(246,242,236,0) 70%)}
 
 /* ---------- reveal ---------- */
-.reveal-stage{height:280px;display:grid;place-items:center;position:relative}
-.pouch{width:170px;height:210px;position:relative;cursor:pointer;transition:transform 160ms var(--ease-out)}
-.pouch:active{transform:scale(.97)}
-.pouch.wiggle{animation:wiggle 420ms var(--ease-out)}
-@keyframes wiggle{0%{transform:rotate(0)}20%{transform:rotate(-6deg) scale(1.02)}45%{transform:rotate(5deg)}70%{transform:rotate(-3deg)}100%{transform:rotate(0)}}
-.pouch .top,.pouch .bottom{position:absolute;left:0;right:0;transition:transform 600ms var(--ease-out),opacity 500ms ease}
-.pouch.open .top{transform:translate(30px,-90px) rotate(18deg);opacity:0}
-.pouch.open .bottom{transform:translateY(80px);opacity:0}
-.tear-hint{position:absolute;left:0;right:0;top:44px;height:0;border-top:2px dashed rgba(255,255,255,.55)}
-.revealed{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
-.revealed svg{width:190px;height:190px;opacity:0;transform:scale(.8);filter:blur(10px);transition:opacity 500ms var(--ease-out) 180ms,transform 700ms cubic-bezier(.34,1.56,.64,1) 180ms,filter 500ms var(--ease-out) 180ms}
-.revealed.show svg{opacity:1;transform:none;filter:blur(0)}
-.glow{position:absolute;width:260px;height:260px;border-radius:50%;opacity:0;transform:scale(.6);transition:opacity 600ms ease 150ms,transform 900ms var(--ease-out) 150ms}
-.revealed.show .glow{opacity:1;transform:none}
-.spark{position:absolute;width:8px;height:8px;border-radius:2px;opacity:0}
-.revealed.show .spark{animation:spark 900ms var(--ease-out) forwards}
-@keyframes spark{0%{opacity:1;transform:translate(0,0) rotate(0) scale(1)}100%{opacity:0;transform:translate(var(--x),var(--y)) rotate(200deg) scale(.4)}}
-.reveal-copy{text-align:center;min-height:120px}
-.fade-in{animation:rise 480ms var(--ease-out) both}
-
-.check-anim{width:72px;height:72px;border-radius:50%;background:var(--fertile);display:grid;place-items:center;margin:8px auto 0;animation:popIn 480ms cubic-bezier(.34,1.56,.64,1) both}
-.check-anim path{stroke-dasharray:40;stroke-dashoffset:40;animation:draw 400ms var(--ease-out) 200ms forwards}
-@keyframes popIn{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
+.stage{height:300px;display:grid;place-items:center;position:relative}
+.stage>*{grid-area:1/1}
+.stage .glow{width:300px;height:300px;border-radius:50%;opacity:0;transform:scale(.5);transition:opacity 700ms ease,transform 1000ms var(--ease-out)}
+.stage.open .glow{opacity:1;transform:none}
+.wrapbox{position:relative;width:220px;height:170px;cursor:pointer;z-index:3}
+.wrapbox svg{width:100%;height:100%;overflow:visible}
+.wrapbox .twine,.wrapbox .bow{transition:transform 600ms var(--ease-out),opacity 400ms ease;transform-box:fill-box;transform-origin:center}
+.untied .twine{opacity:0;transform:scale(1.2)}
+.untied .bow{opacity:0;transform:translateY(-40px) rotate(-40deg) scale(.6)}
+.wrapbox .paperL,.wrapbox .paperR,.wrapbox .tag{transition:transform 750ms var(--ease-out),opacity 500ms ease 150ms}
+.stage.open .paperL{transform:translateX(-150px) rotate(-14deg);opacity:0}
+.stage.open .paperR{transform:translateX(150px) rotate(14deg);opacity:0}
+.stage.open .base{opacity:0!important}
+.wrapbox .base{transition:opacity 500ms ease 250ms}
+.stage.open .tag{transform:translateY(80px) rotate(30deg);opacity:0}
+.stage.open .wrapbox{pointer-events:none}
+.wrapbox.nudge{animation:nudge2 420ms var(--ease-out)}
+@keyframes nudge2{25%{transform:rotate(-4deg) scale(1.02)}60%{transform:rotate(3deg)}}
+.reveal-skein{width:230px;opacity:0;transform:translateY(40px) scale(.7);filter:blur(8px);transition:opacity 500ms var(--ease-out) 300ms,transform 900ms var(--spring) 300ms,filter 500ms var(--ease-out) 300ms;z-index:2}
+.stage.open .reveal-skein{opacity:1;transform:none;filter:none}
+.reveal-charm{width:64px;z-index:4;align-self:start;justify-self:end;margin:10px 18px 0 0;opacity:0;transform:translateY(-120px) rotate(-30deg)}
+.stage.open .reveal-charm{animation:drop 900ms var(--spring) 900ms forwards}
+@keyframes drop{0%{opacity:0;transform:translateY(-120px) rotate(-30deg)}60%{opacity:1}100%{opacity:1;transform:none}}
+.stage.open .reveal-charm svg{animation:sway 3s ease-in-out 1.8s infinite;transform-origin:50% 12%}
+.particle{position:absolute;left:0;top:0;pointer-events:none;z-index:90;border-radius:3px}
+.check-anim{width:84px;height:84px;border-radius:50%;background:var(--moss-soft);display:grid;place-items:center;margin:4px auto 0;animation:pop 520ms var(--spring) both}
+.check-anim path{stroke-dasharray:40;stroke-dashoffset:40;animation:draw 420ms var(--ease-out) 220ms forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
-.spinner{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin 700ms linear infinite}
+.spinner{width:20px;height:20px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin 700ms linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.swatch-name{font-family:var(--display);font-size:34px;font-weight:800;letter-spacing:-.02em;line-height:1}
 
 @media (hover:hover) and (pointer:fine){
-  .btn:hover{filter:brightness(1.05)}
-  .chip:hover{background:#EEE4DD}
-  .chip[aria-pressed="true"]:hover{background:var(--ink)}
-  .buddy-tile:hover,.icon-btn:hover{transform:translateY(-1px)}
-  .tab:hover{color:var(--ink-2)}
-  .tab[aria-current="page"]:hover{color:var(--berry)}
+  .btn:hover{filter:brightness(1.1)}
+  .proj:hover,.lib-card:hover,.yarn:hover,.icon-btn:hover,.make:hover,.kit:hover{transform:translateY(-2px)}
+  .tab:not([aria-current]):hover{color:var(--ink-2)}
 }
 @media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:1ms!important;animation-iteration-count:1!important;transition-duration:1ms!important;transition-delay:0ms!important}
-  .float{animation:none}
+  *,*::before,*::after{animation-duration:1ms!important;animation-iteration-count:1!important;transition-duration:1ms!important;transition-delay:0ms!important;animation-delay:0ms!important}
 }
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-:focus-visible{outline:2px solid var(--berry);outline-offset:2px;border-radius:10px}
+:focus-visible{outline:2px solid var(--rasp);outline-offset:2px;border-radius:12px}
 </style>
 </head>
 <body>
 <div class="app" id="app">
   <div class="scroller" id="scroller"><main class="screen" id="screen"></main></div>
   <nav class="tabbar" id="tabbar" aria-label="Main"></nav>
-  <div class="toast-wrap" id="toasts"></div>
+  <div class="toast-wrap" id="toasts" aria-live="polite"></div>
   <div id="sheet-root"></div>
 </div>
 
 <script>
-/* =========================================================
-   Lune: front-end-only demo. All data is local, all
-   "shipping" is simulated on a sped-up clock.
-   ========================================================= */
+/* Loop: front-end-only demo. Everything is stored on this device; shipping runs on a sped-up clock. */
 
-const DAY = 86400000;
-const STORE_KEY = 'lune-demo-v1';
-const BOX_PRICE = 16;
-const TOPUP_PRICE = 9;
-const ADDONS = [
-  {id:'heat', name:'Heat patches', note:'3 stick-on warmers', price:4},
-  {id:'choc', name:'Dark chocolate', note:'70% sea salt bar', price:3},
-  {id:'tea',  name:'Sleepy tea',    note:'Chamomile + ginger, 10 bags', price:3},
+const STORE_KEY = 'loop-demo-v1';
+const CLUB_PRICE = 24;
+
+/* ---------- Colorways ---------- */
+const COLORWAYS = {
+  seaglass:  {name:'Sea Glass',       c:['#9ED8CF','#D2EEE7','#62B0A7'], fam:'cool'},
+  peach:     {name:'Peach Fuzz',      c:['#F7B89A','#FCDCC8','#EA8B70'], fam:'warm'},
+  moss:      {name:'Moss & Mist',     c:['#8FAF7E','#CCDBBB','#5C7E53'], fam:'earthy'},
+  blueberry: {name:'Blueberry Jam',   c:['#5E63BE','#9597DB','#3E4192'], fam:'cool'},
+  lavender:  {name:'Lavender Haze',   c:['#B9A6E0','#DED4F3','#9A82CE'], fam:'soft'},
+  honey:     {name:'Honeycomb',       c:['#F2C14E','#F9E0A0','#D69F2A'], fam:'warm'},
+  cherry:    {name:'Cherry Cola',     c:['#C23B4E','#E88392','#861F31'], fam:'bold'},
+  fig:       {name:'Fig Jam',         c:['#7A4A6B','#B98DAA','#52304A'], fam:'bold'},
+  oat:       {name:'Oat Milk',        c:['#E6D8C3','#F4ECE0','#CDBB9F'], fam:'soft'},
+  tomato:    {name:'Sun Tomato',      c:['#E5553A','#F3957F','#B83A23'], fam:'warm'},
+};
+const PALETTES = [
+  {id:'warm',   name:'Warm',   ways:['peach','honey','tomato']},
+  {id:'cool',   name:'Cool',   ways:['seaglass','blueberry']},
+  {id:'earthy', name:'Earthy', ways:['moss','oat']},
+  {id:'soft',   name:'Soft',   ways:['lavender','oat']},
+  {id:'bold',   name:'Bold',   ways:['cherry','fig']},
 ];
-const PRODUCTS = [
-  {id:'pads',    name:'Pads',              desc:'Organic cotton, with wings'},
-  {id:'tampons', name:'Tampons',           desc:'Organic cotton, applicator'},
-  {id:'liners',  name:'Liners',            desc:'For light days & backup'},
-  {id:'cup',     name:'Cup care',          desc:'Cup wash + travel wipes'},
-];
-const FLOWS = ['Light','Regular','Heavy'];
-const MOODS = ['Great','Good','Okay','Low','Rough'];
-const SYMPTOMS = ['Cramps','Bloating','Headache','Cravings','Tired','Acne','Tender','Moody','Back pain'];
-// Demo clock: seconds after order for each stage
-const STAGES = [
-  {k:'placed',    label:'Order placed',      sub:'We got it: thank you!',            t:0},
-  {k:'packed',    label:'Packed with care',  sub:'Mystery buddy sealed inside',       t:6},
-  {k:'shipped',   label:'Shipped',           sub:'On its way in a discreet box',     t:12},
-  {k:'out',       label:'Out for delivery',  sub:'Arriving today',                   t:18},
-  {k:'delivered', label:'Delivered',         sub:'Left at your door',                t:24},
+const MAKES = [
+  {id:'ami',   name:'Amigurumi'},
+  {id:'wear',  name:'Hats & wearables'},
+  {id:'blank', name:'Blankets'},
+  {id:'bags',  name:'Bags & totes'},
 ];
 
-/* ---------- Collectibles: "Night Garden", Series 1 ---------- */
-const BUDDIES = [
-  {id:'luna',   name:'Luna',      color:'#C9B8F0', top:'moon',   rarity:'common', blurb:'Stays up with you on the sleepless nights.'},
-  {id:'berry',  name:'Berry',     color:'#F49AB0', top:'leaf',   rarity:'common', blurb:'Sweet, a little tart, always shows up.'},
-  {id:'cham',   name:'Chamomile', color:'#F6D78B', top:'steam',  rarity:'common', blurb:'Puts the kettle on before you ask.'},
-  {id:'snug',   name:'Snug',      color:'#E2C3A6', top:'ears',   rarity:'common', blurb:'Professional blanket burrito.'},
-  {id:'drizzle',name:'Drizzle',   color:'#9CC7E8', top:'drop',   rarity:'common', blurb:'Cries at dog commercials. Valid.'},
-  {id:'peachy', name:'Peachy',    color:'#F7B89A', top:'leaf',   rarity:'common', blurb:'Soft on the outside, tough on cramps.'},
-  {id:'tulip',  name:'Tulip',     color:'#F5A3C7', top:'petals', rarity:'common', blurb:'Blooms a little more every cycle.'},
-  {id:'cocoa',  name:'Cocoa',     color:'#B08468', top:'ears',   rarity:'common', blurb:'Dark chocolate evangelist.'},
-  {id:'sprout', name:'Sprout',    color:'#A8D5A2', top:'leaf2',  rarity:'common', blurb:'Small, stubborn, growing anyway.'},
-  {id:'twinkle',name:'Twinkle',   color:'#FFE08A', top:'star',   rarity:'rare',   blurb:'Grants one (1) wish per cycle.'},
-  {id:'ribbon', name:'Ribbon',    color:'#E48FA8', top:'bow',    rarity:'rare',   blurb:'Wraps up bad days and returns them.'},
-  {id:'prism',  name:'Prism',     color:'url(#rainbow)', top:'star', rarity:'secret', blurb:'Only 1 in 96 boxes. You lucky thing.'},
+/* ---------- Patterns (real crochet notation) ---------- */
+function steps(list, prefix='R'){
+  const out = [];
+  list.forEach(([a,b,text,st,note])=>{ for (let r=a; r<=b; r++) out.push({label:`${prefix}${r}`, text, st, note: r===a ? note : null}); });
+  return out;
+}
+const PATTERNS = {
+  strawberry: {name:'Strawberry Pal', kind:'Amigurumi', level:'Beginner', hrs:2, yarn:'Worsted · 60 yds', hook:'4 mm', art:'berry', way:'cherry',
+    steps:[...steps([
+      [1,1,'6 sc in a magic ring',6],
+      [2,2,'inc in each st',12],
+      [3,3,'(sc, inc) × 6',18],
+      [4,4,'(2 sc, inc) × 6',24],
+      [5,5,'(3 sc, inc) × 6',30],
+      [6,10,'sc around',30,'Place safety eyes between R8 and R9, 6 sts apart.'],
+      [11,11,'(3 sc, dec) × 6',24,'Start stuffing now. Firm, not rock hard.'],
+      [12,12,'(2 sc, dec) × 6',18],
+      [13,13,'(sc, dec) × 6',12],
+      [14,14,'dec × 6',6,'Fasten off and weave the tail through the front loops.'],
+    ]), {label:'Leaves', text:'ch 5, sl st back × 5 leaves, sew on top', st:null, note:'Switch to green.'}]},
+  hat: {name:'Weekend Bucket Hat', kind:'Wearables', level:'Easy', hrs:5, yarn:'Worsted · 180 yds', hook:'5 mm', art:'hat', way:'seaglass',
+    steps:steps([
+      [1,1,'12 hdc in a magic ring',12],
+      [2,2,'2 hdc in each st',24],
+      [3,3,'(hdc, 2 hdc in next) × 12',36],
+      [4,4,'(2 hdc, inc) × 12',48],
+      [5,5,'(3 hdc, inc) × 12',60,'Crown done. Try it on your head.'],
+      [6,14,'hdc around',60],
+      [15,15,'(4 hdc, inc) × 12',72,'Brim starts here.'],
+      [16,16,'(5 hdc, inc) × 12',84],
+      [17,19,'hdc around',84],
+      [20,20,'sl st around, fasten off',84],
+    ])},
+  tote: {name:'Market Granny Tote', kind:'Bags', level:'Easy', hrs:8, yarn:'Cotton DK · 300 yds', hook:'4.5 mm', art:'tote', way:'honey',
+    steps:[...steps([[1,8,'4-round granny square',null]], 'Square '),
+      {label:'Join', text:'sc squares together, 2 rows of 4', st:null, note:'Block the squares first. It makes joining way easier.'},
+      {label:'Handles', text:'ch 60, attach, 3 rows of sc', st:null}]},
+  cowl: {name:'Cloud Cowl', kind:'Wearables', level:'Beginner', hrs:3, yarn:'Chunky · 120 yds', hook:'8 mm', art:'cowl', way:'lavender',
+    steps:[{label:'Start', text:'ch 60, join with sl st', st:60, note:'Check the chain is not twisted before joining.'},
+      ...steps([[1,16,'hdc in back loop only',60]])]},
+};
+const KITS = [
+  {id:'kit-hat',   pattern:'hat',        price:32, blurb:'2 skeins, pattern, marker'},
+  {id:'kit-straw', pattern:'strawberry', price:18, blurb:'Yarn, eyes, stuffing, marker'},
+  {id:'kit-tote',  pattern:'tote',       price:28, blurb:'3 cotton skeins, marker'},
 ];
-const RARITY_LABEL = {common:'Common', rare:'Rare', secret:'Secret'};
-const RARITY_ODDS  = {common:'1 in 12', rare:'1 in 24', secret:'1 in 96'};
 
-function buddySVG(b, {locked=false, uid=''}={}){
-  const body = locked ? '#E4DAD4' : b.color;
-  const acc  = locked ? '#D6CBC4' : shade(b.color, -18);
-  const id = 'r' + (uid || b.id) + Math.random().toString(36).slice(2,6);
-  const fill = body.startsWith('url') ? `url(#${id})` : body;
-  const tops = {
-    moon:  `<path d="M58 16a14 14 0 1 0 8 25 16 16 0 0 1-8-25z" fill="${locked?acc:'#FFE7A3'}"/>`,
-    leaf:  `<path d="M50 30c-2-8 2-15 10-17-1 8-4 13-10 17z" fill="${locked?acc:'#7DBE83'}"/><path d="M50 32v-6" stroke="${locked?acc:'#5C9C63'}" stroke-width="3" stroke-linecap="round"/>`,
-    leaf2: `<path d="M50 30c-6-4-10-10-8-17 7 2 10 8 8 17z" fill="${locked?acc:'#5FAE6B'}"/><path d="M50 30c5-5 11-8 17-5-4 6-10 8-17 5z" fill="${locked?acc:'#7DBE83'}"/>`,
-    steam: `<path d="M42 26c-4-5 4-8 0-13M52 26c-4-5 4-8 0-13M62 26c-4-5 4-8 0-13" stroke="${locked?acc:'#fff'}" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".9"/>`,
-    ears:  `<circle cx="30" cy="36" r="10" fill="${fill}"/><circle cx="70" cy="36" r="10" fill="${fill}"/><circle cx="30" cy="36" r="5" fill="${acc}"/><circle cx="70" cy="36" r="5" fill="${acc}"/>`,
-    drop:  `<path d="M50 14c6 9 9 13 9 18a9 9 0 0 1-18 0c0-5 3-9 9-18z" fill="${locked?acc:'#6FA8D6'}"/>`,
-    petals:`<g fill="${locked?acc:'#FFF1F6'}"><circle cx="38" cy="30" r="7"/><circle cx="50" cy="25" r="7"/><circle cx="62" cy="30" r="7"/></g><circle cx="50" cy="29" r="4" fill="${locked?acc:'#F6C84C'}"/>`,
-    star:  `<path d="M50 10l5.3 10.7 11.8 1.7-8.5 8.3 2 11.7L50 36.9l-10.6 5.5 2-11.7-8.5-8.3 11.8-1.7z" fill="${locked?acc:(b.rarity==='secret'?'#fff':'#F6C84C')}"/>`,
-    bow:   `<path d="M50 32l-16-9v18zM50 32l16-9v18z" fill="${locked?acc:'#fff'}"/><circle cx="50" cy="32" r="5" fill="${locked?acc:'#fff'}"/>`,
-  };
-  const face = locked
-    ? `<text x="50" y="72" text-anchor="middle" font-family="Fraunces,Georgia,serif" font-size="26" font-weight="600" fill="#BFB2AA">?</text>`
-    : `<ellipse cx="40" cy="60" rx="3.6" ry="4.4" fill="#2A1B2E"/><ellipse cx="60" cy="60" rx="3.6" ry="4.4" fill="#2A1B2E"/>
-       <circle cx="41.2" cy="58.4" r="1.2" fill="#fff"/><circle cx="61.2" cy="58.4" r="1.2" fill="#fff"/>
-       <ellipse cx="33" cy="68" rx="5" ry="3" fill="#F26D8F" opacity=".35"/><ellipse cx="67" cy="68" rx="5" ry="3" fill="#F26D8F" opacity=".35"/>
-       <path d="M46 68q4 4 8 0" stroke="#2A1B2E" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
-  const sparkle = (!locked && b.rarity!=='common')
-    ? `<path d="M84 22l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#F6C84C"/><path d="M14 50l1.4 3.5 3.5 1.4-3.5 1.4L14 60l-1.4-3.5-3.5-1.4 3.5-1.4z" fill="#F6C84C" opacity=".8"/>` : '';
-  return `<svg viewBox="0 0 100 100" aria-hidden="true">
-    <defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#F9A8C9"/><stop offset=".35" stop-color="#C9B8F0"/><stop offset=".7" stop-color="#9CD7E8"/><stop offset="1" stop-color="#FFE08A"/></linearGradient></defs>
-    <ellipse cx="50" cy="90" rx="26" ry="4" fill="#2A1B2E" opacity=".08"/>
-    ${b.top==='ears'?tops.ears:''}
-    <path d="M50 30c20 0 33 14 33 32 0 16-13 26-33 26S17 78 17 62c0-18 13-32 33-32z" fill="${fill}"/>
-    <path d="M30 44c4-6 10-9 16-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity="${locked?0:.45}"/>
-    ${b.top!=='ears'?tops[b.top]:''}
-    ${face}${sparkle}
+/* ---------- Stitch marker charms: Autumn Market set ---------- */
+const CHARMS = [
+  {id:'strawberry', name:'Strawberry'},
+  {id:'acorn',      name:'Acorn'},
+  {id:'mushroom',   name:'Toadstool'},
+  {id:'leaf',       name:'Maple leaf'},
+  {id:'pumpkin',    name:'Pumpkin'},
+  {id:'bee',        name:'Bee'},
+  {id:'moon',       name:'Harvest moon'},
+  {id:'gold',       name:'Gold acorn', special:true},
+];
+
+/* ---------- Community ---------- */
+const FEED = [
+  {who:'june.makes',   what:'Bucket hat',      art:'hat',   way:'seaglass', likes:214},
+  {who:'crochetkat',   what:'Granny tote',     art:'tote',  way:'seaglass', likes:388},
+  {who:'ellie_loops',  what:'Strawberry pals', art:'berry', way:'seaglass', likes:97},
+  {who:'hooked.on.mo', what:'Cloud cowl',      art:'cowl',  way:'seaglass', likes:156},
+];
+
+/* ---------- Art ---------- */
+let _uid = 0;
+function skeinSVG(wayId, {label=true}={}){
+  const w = COLORWAYS[wayId], id = 'sk'+(++_uid), [a,b,c] = w.c;
+  let stripes = '', x = -60, i = 0;
+  const seq = [a,b,a,c,b,a,c,a,b,c];
+  while (x < 200){ const wd = 6 + ((i*7)%5); stripes += `<rect x="${x}" y="-40" width="${wd+1}" height="180" fill="${seq[i%seq.length]}"/>`; x += wd; i++; }
+  return `<svg viewBox="0 0 140 90" aria-hidden="true" style="overflow:visible">
+    <defs>
+      <clipPath id="${id}c"><path d="M18 22C40 6 100 6 122 22c14 10 14 36 0 46-22 16-82 16-104 0-14-10-14-36 0-46z"/></clipPath>
+      <radialGradient id="${id}s" cx=".4" cy=".3" r=".9"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></radialGradient>
+    </defs>
+    <ellipse cx="70" cy="84" rx="50" ry="4" fill="#231F2B" opacity=".08"/>
+    <g clip-path="url(#${id}c)">
+      <g transform="rotate(-38 70 45)">${stripes}</g>
+      <g stroke="rgba(0,0,0,.08)" stroke-width="1.2" fill="none">${[20,34,48,62,76,90,104,118].map(xx=>`<path d="M${xx} 0q10 45 0 90"/>`).join('')}</g>
+      <rect width="140" height="90" fill="url(#${id}s)"/>
+    </g>
+    ${label?`<g><rect x="58" y="10" width="24" height="70" rx="4" fill="#F7F1E7" transform="rotate(6 70 45)"/><text x="70" y="49" text-anchor="middle" font-family="Bricolage Grotesque,DM Sans,sans-serif" font-size="8" font-weight="800" fill="#231F2B" transform="rotate(-84 70 45)" letter-spacing="1">LOOP</text></g>`:''}
   </svg>`;
 }
-function shade(hex, pct){
-  if(!hex.startsWith('#')) return '#E7B8D8';
-  const n = parseInt(hex.slice(1),16);
-  const f = v => Math.max(0,Math.min(255, Math.round(v + v*pct/100)));
-  return '#' + [f(n>>16), f((n>>8)&255), f(n&255)].map(x=>x.toString(16).padStart(2,'0')).join('');
+function projArt(kind, way){
+  const [a,b,c] = COLORWAYS[way].c;
+  if (kind==='berry') return `<svg viewBox="0 0 100 100" aria-hidden="true" style="overflow:visible">
+    <ellipse cx="50" cy="93" rx="26" ry="4" fill="#231F2B" opacity=".1"/>
+    <path d="M50 92C28 92 16 70 18 52c2-16 16-22 32-22s30 6 32 22c2 18-10 40-32 40z" fill="${a}"/>
+    <path d="M26 50c3-8 10-12 18-13" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none" opacity=".35"/>
+    ${[[34,62],[50,72],[66,62],[42,80],[58,80],[30,74],[70,74]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="1.6" ry="2.4" fill="#FCE7A8"/>`).join('')}
+    <g fill="#6FAE63"><path d="M50 34c-10-10-22-6-24 2 10 2 18 2 24-2z"/><path d="M50 34c10-10 22-6 24 2-10 2-18 2-24-2z"/><path d="M50 34c-4-8-2-16 4-20 2 8 0 14-4 20z"/></g>
+    <circle cx="42" cy="56" r="3.4" fill="#231F2B"/><circle cx="58" cy="56" r="3.4" fill="#231F2B"/>
+    <path d="M46 62q4 4 8 0" stroke="#231F2B" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <ellipse cx="36" cy="62" rx="4" ry="2.4" fill="#fff" opacity=".3"/><ellipse cx="64" cy="62" rx="4" ry="2.4" fill="#fff" opacity=".3"/>
+  </svg>`;
+  if (kind==='hat') return `<svg viewBox="0 0 100 100" aria-hidden="true" style="overflow:visible">
+    <ellipse cx="50" cy="90" rx="36" ry="4" fill="#231F2B" opacity=".1"/>
+    <path d="M28 64c0-26 8-40 22-40s22 14 22 40z" fill="${a}"/>
+    <path d="M30 44h40M29 52h42" stroke="${c}" stroke-width="2" opacity=".5"/>
+    <path d="M10 70c0-6 18-10 40-10s40 4 40 10-18 12-40 12-40-6-40-12z" fill="${c}"/>
+    <path d="M14 70c4-4 18-7 36-7s32 3 36 7" stroke="${b}" stroke-width="2" fill="none" opacity=".6"/>
+    <path d="M36 32c4-4 9-5 14-5" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none" opacity=".35"/>
+  </svg>`;
+  if (kind==='tote') return `<svg viewBox="0 0 100 100" aria-hidden="true" style="overflow:visible">
+    <ellipse cx="50" cy="93" rx="30" ry="4" fill="#231F2B" opacity=".1"/>
+    <path d="M34 34c0-18 32-18 32 0" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round"/>
+    ${[[22,34],[50,34],[22,62],[50,62]].map(([x,y],i)=>`<g><rect x="${x}" y="${y}" width="28" height="28" rx="3" fill="${[a,b,b,a][i]}"/><rect x="${x+6}" y="${y+6}" width="16" height="16" rx="2" fill="${[b,c,a,c][i]}"/><rect x="${x+11}" y="${y+11}" width="6" height="6" rx="1" fill="${[c,a,c,b][i]}"/></g>`).join('')}
+    <path d="M22 34h56M50 34v56M22 62h56" stroke="#fff" stroke-width="1.5" opacity=".7"/>
+  </svg>`;
+  return `<svg viewBox="0 0 100 100" aria-hidden="true" style="overflow:visible">
+    <ellipse cx="50" cy="90" rx="34" ry="4" fill="#231F2B" opacity=".1"/>
+    <ellipse cx="50" cy="56" rx="36" ry="28" fill="${a}"/>
+    <ellipse cx="50" cy="52" rx="16" ry="9" fill="${c}" opacity=".55"/>
+    ${[0,1,2,3,4,5,6].map(i=>`<path d="M${22+i*9} 36q-4 22 0 44" stroke="${b}" stroke-width="3" fill="none" opacity=".7" stroke-linecap="round"/>`).join('')}
+  </svg>`;
 }
+function charmSVG(id, {dim=false}={}){
+  const gid = 'cg'+(++_uid);
+  const shapes = {
+    strawberry:`<path d="M30 76c-12 0-18-12-16-22 1-8 8-12 16-12s15 4 16 12c2 10-4 22-16 22z" fill="#E0445A"/><g fill="#FCE7A8">${[[24,56],[34,58],[29,65],[36,68],[23,66]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="1.2" ry="1.8"/>`).join('')}</g><path d="M30 44c-6-6-12-3-13 1 5 1 9 1 13-1zM30 44c6-6 12-3 13 1-5 1-9 1-13-1z" fill="#6FAE63"/>`,
+    acorn:`<path d="M18 52c0 14 6 24 12 24s12-10 12-24z" fill="#D9A56A"/><path d="M14 52c0-8 7-12 16-12s16 4 16 12z" fill="#8A5A34"/><path d="M30 40v-5" stroke="#8A5A34" stroke-width="3" stroke-linecap="round"/>`,
+    mushroom:`<rect x="24" y="56" width="12" height="18" rx="5" fill="#F4E9DA"/><path d="M12 58c0-12 8-20 18-20s18 8 18 20z" fill="#E0445A"/><g fill="#fff"><circle cx="22" cy="49" r="2.6"/><circle cx="34" cy="46" r="3"/><circle cx="40" cy="54" r="2"/></g>`,
+    leaf:`<path d="M30 76V46" stroke="#A8552A" stroke-width="2.5" stroke-linecap="round"/><path d="M30 40l5 9 8-4-2 9 9 2-8 7 4 6-10-2-6 7-6-7-10 2 4-6-8-7 9-2-2-9 8 4z" fill="#E98C3A"/>`,
+    pumpkin:`<ellipse cx="22" cy="60" rx="9" ry="13" fill="#E98C3A"/><ellipse cx="38" cy="60" rx="9" ry="13" fill="#E98C3A"/><ellipse cx="30" cy="60" rx="9" ry="14" fill="#F2A24E"/><path d="M30 46c0-4 2-6 5-7" stroke="#6FAE63" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+    bee:`<ellipse cx="22" cy="50" rx="7" ry="9" fill="#fff" opacity=".85"/><ellipse cx="38" cy="50" rx="7" ry="9" fill="#fff" opacity=".85"/><ellipse cx="30" cy="62" rx="12" ry="13" fill="#F6C945"/><path d="M19 58h22M18 65h24" stroke="#231F2B" stroke-width="3.5"/><circle cx="26" cy="54" r="1.5" fill="#231F2B"/><circle cx="34" cy="54" r="1.5" fill="#231F2B"/>`,
+    moon:`<path d="M36 42a17 17 0 1 0 8 30 20 20 0 0 1-8-30z" fill="#F8DC8C"/><circle cx="28" cy="58" r="2" fill="#E9C567"/><circle cx="24" cy="66" r="1.4" fill="#E9C567"/>`,
+    gold:`<defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF1B8"/><stop offset=".5" stop-color="#E8B634"/><stop offset="1" stop-color="#B8841A"/></linearGradient></defs><path d="M18 52c0 14 6 24 12 24s12-10 12-24z" fill="url(#${gid})"/><path d="M14 52c0-8 7-12 16-12s16 4 16 12z" fill="#C99522"/><path d="M30 40v-5" stroke="#C99522" stroke-width="3" stroke-linecap="round"/><path d="M46 44l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z" fill="#FFF1B8"/>`,
+  };
+  return `<svg viewBox="0 0 60 84" aria-hidden="true" style="overflow:visible;${dim?'filter:grayscale(1)':''}">
+    <circle cx="30" cy="14" r="9" fill="none" stroke="${id==='gold'?'#E8B634':'#D9C9A8'}" stroke-width="3"/>
+    <path d="M30 23v12" stroke="${id==='gold'?'#E8B634':'#D9C9A8'}" stroke-width="2.5"/>
+    ${shapes[id]}
+  </svg>`;
+}
+const PARCEL = (tag='OCT') => `<svg viewBox="0 0 220 170" aria-hidden="true" class="parcel-svg" style="overflow:visible">
+  <ellipse class="base" cx="110" cy="160" rx="84" ry="7" fill="#231F2B" opacity=".12"/>
+  <rect class="base" x="30" y="40" width="160" height="112" rx="10" fill="#F2B8C8"/>
+  <g class="paperL"><path d="M30 50a10 10 0 0 1 10-10h70v112H40a10 10 0 0 1-10-10z" fill="#E6CDA8"/><path d="M40 60h60M40 80h55M40 100h62M40 120h50" stroke="#D8BB92" stroke-width="1.5" opacity=".6"/></g>
+  <g class="paperR"><path d="M110 40h70a10 10 0 0 1 10 10v92a10 10 0 0 1-10 10h-70z" fill="#EAD3B1"/><path d="M120 60h60M125 80h55M118 100h62M130 120h50" stroke="#D8BB92" stroke-width="1.5" opacity=".6"/></g>
+  <g class="twine"><path d="M30 96h160" stroke="#D6336C" stroke-width="4"/><path d="M30 96h160" stroke="#fff" stroke-width="4" stroke-dasharray="4 6"/><path d="M110 40v112" stroke="#D6336C" stroke-width="4"/><path d="M110 40v112" stroke="#fff" stroke-width="4" stroke-dasharray="4 6"/></g>
+  <g class="bow"><path d="M110 96c-14-22-40-18-32-4 6 8 22 8 32 4zM110 96c14-22 40-18 32-4-6 8-22 8-32 4z" fill="#D6336C"/><path d="M110 96l-12 26M110 96l12 26" stroke="#D6336C" stroke-width="4" stroke-linecap="round"/><circle cx="110" cy="96" r="6" fill="#B02556"/></g>
+  <g class="tag"><path d="M152 118l26 6-4 18-26-6z" fill="#F7F1E7"/><circle cx="156" cy="123" r="2" fill="#D8BB92"/><text x="164" y="136" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="9" font-weight="800" fill="#231F2B" transform="rotate(13 164 132)">${tag}</text></g>
+</svg>`;
+function artTile(inner, bg, size=56, r=16){ return `<span class="art-bg" style="width:${size}px;height:${size}px;background:${bg};border-radius:${r}px">${inner}</span>`; }
+const tint = way => COLORWAYS[way].c[1];
 
 /* ---------- Icons ---------- */
 const I = {
-  today:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>`,
-  cal:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>`,
-  box:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 8 12 4l8.5 4v8.5L12 20.5 3.5 16.5z"/><path d="M3.5 8 12 12l8.5-4M12 12v8.5"/></svg>`,
-  shelf:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 4.5c4.5 0 7.5 3 7.5 7.2 0 3.6-3 6-7.5 6s-7.5-2.4-7.5-6c0-4.2 3-7.2 7.5-7.2z"/><circle cx="9.5" cy="11.5" r=".6" fill="currentColor"/><circle cx="14.5" cy="11.5" r=".6" fill="currentColor"/><path d="M4 20.5h16"/></svg>`,
-  check:`<svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.2 5 8.6l4.5-5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  chevL:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 5-7 7 7 7"/></svg>`,
-  chevR:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 5 7 7-7 7"/></svg>`,
-  star:(on)=>`<svg viewBox="0 0 24 24" class="${on?'star-on':''}"><path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.4 1.1 6.2L12 17l-5.6 3 1.1-6.2L2.9 9.4l6.3-.9z" fill="${on?'#F2B83B':'#E6DCD5'}"/></svg>`,
-  truck:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8" fill="var(--surface)"/><circle cx="17.5" cy="17.5" r="1.8" fill="var(--surface)"/></svg>`,
-  gift:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="9" width="17" height="11.5" rx="2"/><path d="M12 9v11.5M3.5 13h17M12 9C9 9 7 7.5 8 5.5s4 .5 4 3.5c0-3 3-5.5 4-3.5S15 9 12 9z"/></svg>`,
-  close:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>`,
+  home:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20H4z"/><path d="M10 20v-5h4v5"/></svg>`,
+  make:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M18 20 7.5 6.5"/><path d="M7.5 6.5c-.8-1.2-.2-2.6 1-2.9 1-.3 1.8.3 1.8 1.2"/><circle cx="15" cy="15" r="6" stroke-dasharray="3 3"/></svg>`,
+  club:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="3.5" y="8" width="17" height="12.5" rx="2.5"/><path d="M3.5 12h17M12 8v12.5M12 8c-2.5-4-6-3-5-1 .6 1.2 3 1 5 1zm0 0c2.5-4 6-3 5-1-.6 1.2-3 1-5 1z"/></svg>`,
+  stash:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M6 7c4 2 8 8 9 12.5M9.5 4.5c3 3 6 9 6.5 13M4.5 11c4 1 8 5 9.5 8.5"/></svg>`,
+  back:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m15 5-7 7 7 7"/></svg>`,
+  chevR:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="chev"><path d="m9 5 7 7-7 7"/></svg>`,
+  close:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>`,
+  undo:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>`,
+  heart:`<svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z" fill="currentColor"/></svg>`,
+  van:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.5" r="1.8" fill="#fff"/><circle cx="17.5" cy="17.5" r="1.8" fill="#fff"/></svg>`,
+  check:`<svg width="14" height="14" viewBox="0 0 12 12"><path d="M2.5 6.2 5 8.6l4.5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  spark:`<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" fill="currentColor"/></svg>`,
+  gift:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="9" width="17" height="11.5" rx="2"/><path d="M12 9v11.5M3.5 13h17M12 9C9 9 7 7.5 8 5.5s4 .5 4 3.5c0-3 3-5.5 4-3.5S15 9 12 9z"/></svg>`,
+  pin:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>`,
 };
 
-/* ---------- Dates ---------- */
+/* ---------- Helpers ---------- */
+const DAY = 86400000;
 const sod = d => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return sod(x); };
 const diffDays = (a,b) => Math.round((sod(a)-sod(b))/DAY);
-const key = d => { const x = sod(d); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`; };
-const parseKey = k => { const [y,m,dd] = k.split('-').map(Number); return new Date(y,m-1,dd); };
 const fmt = (d,o={month:'short',day:'numeric'}) => new Date(d).toLocaleDateString('en-US',o);
-const fmtDow = d => fmt(d,{weekday:'short',month:'short',day:'numeric'});
 const today = () => sod(new Date());
-const money = n => '$' + n.toFixed(2);
-const plural = (n,w) => `${n} ${w}${n===1?'':'s'}`;
+const money = n => '$' + n;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = (s, r=document) => r.querySelector(s);
+const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const hm = m => m >= 60 ? `${Math.floor(m/60)}h ${m%60 ? (m%60)+'m' : ''}`.trim() : `${m}m`;
+function nextDropDate(){ const t = today(); let d = new Date(t.getFullYear(), t.getMonth()+1, 1); return d; }
+const monthName = d => fmt(d,{month:'long'});
 
 /* ---------- State ---------- */
 function freshState(){
+  const t = today().getDay();
+  const week = [40,0,55,25,70,0,30]; week[(t+6)%7] = 20;
   return {
-    onboarded:false,
-    name:'',
-    lastStart: key(addDays(today(), -18)),
-    cycleLen:28, periodLen:5,
-    products:['pads'], flow:'Regular',
-    plan:'free', paused:false,
-    addons:{heat:true, choc:false, tea:false},
-    stars:4, streak:3,
-    checkins:{},
-    orders:[],
-    owned:{},              // buddyId -> {physical:n, digital:n}
-    demoFast:true,
+    onboarded:false, name:'', level:'', loves:['ami'], palettes:['warm','bold'],
+    projects:[{pid:'strawberry', step:6, minutes:95, done:false}],
+    club:false, skip:false,
+    stash:[{way:'cherry', weight:'Worsted', yds:190, from:'Starter'}, {way:'oat', weight:'Worsted', yds:210, from:'Starter'}],
+    charms:{}, liked:{}, orders:[],
+    week, demoFast:true,
   };
 }
 let S;
 try { S = JSON.parse(localStorage.getItem(STORE_KEY)) || freshState(); } catch(e){ S = freshState(); }
 S = Object.assign(freshState(), S);
 function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }catch(e){} }
-
-const ui = { tab:'today', obStep:0, calMonth:null, draft:null, lastStages:{} };
-
-/* ---------- Cycle math ---------- */
-function cycle(){
-  const t = today(), start = parseKey(S.lastStart), L = S.cycleLen;
-  const since = Math.max(0, diffDays(t,start));
-  const n = Math.floor(since / L);
-  const curStart = addDays(start, n*L);
-  const day = diffDays(t, curStart) + 1;
-  const next = addDays(curStart, L);
-  const untilNext = diffDays(next, t);
-  const ov = L - 14; // ovulation day (1-indexed offset from start)
-  let phase;
-  if (day <= S.periodLen) phase = 'Period';
-  else if (day < ov - 1) phase = 'Follicular';
-  else if (day <= ov + 1) phase = 'Ovulation';
-  else phase = 'Luteal';
-  return {day, curStart, next, untilNext, phase, ov};
-}
-function dayType(d){
-  const start = parseKey(S.lastStart);
-  const off0 = diffDays(d, start);
-  if (off0 < 0) return '';
-  const off = off0 % S.cycleLen;
-  const cycStart = addDays(start, off0 - off);
-  if (off < S.periodLen) return cycStart <= today() ? 'period' : 'predicted';
-  const ov = S.cycleLen - 14 - 1; // 0-indexed
-  if (off === ov) return 'ovulation';
-  if (off >= ov - 5 && off <= ov + 1) return 'fertile';
-  return '';
-}
-function nextBoxDate(){
-  const c = cycle();
-  let arrive = addDays(c.next, -3);
-  if (arrive < today()) arrive = addDays(arrive, S.cycleLen);
-  return arrive;
-}
-const PHASE_COPY = {
-  Period:     {tip:'Heat, water and rest do real work today. Iron-rich foods like lentils and spinach help you recover.', color:'var(--period)'},
-  Follicular: {tip:'Energy usually climbs this week. A good window for workouts and plans you have been putting off.', color:'#E59A63'},
-  Ovulation:  {tip:'Peak energy for many people. Some notice a little one-sided twinge, and that is normal.', color:'#4E9E72'},
-  Luteal:     {tip:'Cravings and a shorter fuse are real here. Magnesium (dark chocolate counts) can take the edge off.', color:'#8F6BC4'},
-};
+const ui = { tab:'home', obStep:0, obDir:'fwd', open:null, stashView:'Yarn', lastStages:{}, sessionStart:0 };
 
 /* ---------- Orders ---------- */
-function orderElapsed(o){ return (Date.now() - o.placedAt)/1000 * (S.demoFast ? 1 : 0.02); }
-function orderStage(o){
-  const e = orderElapsed(o); let i = 0;
-  STAGES.forEach((s,idx)=>{ if (e >= s.t) i = idx; });
-  return i;
+const STAGES = [
+  {label:'Order in',          sub:'Thanks!',              t:0},
+  {label:'Packed',            sub:'Wrapped in tissue',    t:6},
+  {label:'On the way',        sub:'Tracking live',        t:12},
+  {label:'Out for delivery',  sub:'Arriving today',       t:18},
+  {label:'Delivered',         sub:'At your door',         t:24},
+];
+function orderElapsed(o){ return (Date.now() - o.placedAt)/1000 * (S.demoFast ? 1 : 0.01); }
+function orderStage(o){ const e = orderElapsed(o); let i = 0; STAGES.forEach((s,idx)=>{ if (e >= s.t) i = idx; }); return i; }
+function pickWay(){
+  const fams = S.palettes.length ? S.palettes : PALETTES.map(p=>p.id);
+  const pool = PALETTES.filter(p=>fams.includes(p.id)).flatMap(p=>p.ways).filter(w=>!S.stash.some(s=>s.way===w));
+  const list = pool.length ? pool : Object.keys(COLORWAYS);
+  return list[Math.floor(Math.random()*list.length)];
 }
-function boxItems(){
-  const qty = {Light:'10', Regular:'16', Heavy:'22'}[S.flow];
-  const map = {
-    pads:`${qty} organic pads (${S.flow.toLowerCase()} mix)`,
-    tampons:`${qty} organic tampons (${S.flow.toLowerCase()} mix)`,
-    liners:'12 cotton liners',
-    cup:'Cup wash + 6 travel wipes',
-  };
-  return S.products.map(p=>map[p]);
+function pickCharm(){
+  const missing = CHARMS.filter(c=>!S.charms[c.id]);
+  const common = missing.filter(c=>!c.special);
+  if (missing.some(c=>c.special) && Math.random() < 0.08) return 'gold';
+  const list = common.length ? common : CHARMS;
+  return list[Math.floor(Math.random()*list.length)].id;
 }
-function boxTotal(){ return BOX_PRICE + ADDONS.filter(a=>S.addons[a.id]).reduce((s,a)=>s+a.price,0); }
-function pickBuddy(){
-  const pool = [];
-  BUDDIES.forEach(b=>{
-    const w = {common:10, rare:4, secret:1}[b.rarity];
-    const ownedPenalty = S.owned[b.id] ? 0.15 : 1;  // demo: bias toward new ones
-    pool.push([b, w*ownedPenalty]);
-  });
-  const total = pool.reduce((s,[,w])=>s+w,0);
-  let r = Math.random()*total;
-  for (const [b,w] of pool){ if ((r-=w) <= 0) return b.id; }
-  return pool[0][0].id;
-}
-function placeOrder(kind){
+function placeOrder(kind, ref){
+  const month = monthName(new Date());
   const o = {
-    id: 'LN-' + Math.floor(10000 + Math.random()*89999),
-    kind, placedAt: Date.now(),
-    items: kind==='box'
-      ? [...boxItems(), ...ADDONS.filter(a=>S.addons[a.id]).map(a=>a.name), 'Mystery buddy (sealed)']
-      : [`${S.flow==='Heavy'?'12':'8'} ${S.products.includes('tampons')?'tampons':'pads'}`, 'Heat patch', 'Stash pouch'],
-    total: kind==='box' ? boxTotal() : TOPUP_PRICE,
-    buddy: kind==='box' ? pickBuddy() : null,
-    state: kind==='box' ? 'sealed' : null, // sealed | irl | revealed
+    id: 'LP-' + Math.floor(10000 + Math.random()*89999), kind, ref, placedAt: Date.now(),
+    title: kind==='drop' ? `${month} drop` : `${PATTERNS[KITS.find(k=>k.id===ref).pattern].name} kit`,
+    total: kind==='drop' ? CLUB_PRICE : KITS.find(k=>k.id===ref).price,
+    way: kind==='drop' ? pickWay() : PATTERNS[KITS.find(k=>k.id===ref).pattern].way,
+    charm: pickCharm(),
+    state: 'sealed',
   };
   S.orders.unshift(o);
-  if (kind==='box'){ S.plan='box'; S.paused=false; }
+  if (kind==='drop'){ S.club = true; S.skip = false; }
   ui.lastStages[o.id] = 0;
   save();
   return o;
 }
 const findOrder = id => S.orders.find(o=>o.id===id);
-function pendingReveal(){ return S.orders.find(o=>o.kind==='box' && o.state!=='revealed' && orderStage(o)===4); }
-function inTransit(){ return S.orders.find(o=>orderStage(o)<4); }
+const toOpen = () => S.orders.find(o=>o.state!=='opened' && orderStage(o)===4);
+const inTransit = () => S.orders.find(o=>orderStage(o)<4);
 
-/* ---------- Toasts ---------- */
-function toast(msg, icon=''){
-  const wrap = document.getElementById('toasts');
-  wrap.innerHTML = '';
+/* ---------- Feedback ---------- */
+function buzz(ms=8){ try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} }
+function toast(msg, icon=I.spark){
+  const wrap = $('#toasts');
+  wrap.querySelectorAll('.toast').forEach(o=>{ o.classList.add('hide'); setTimeout(()=>o.remove(), 280); });
   const el = document.createElement('div');
   el.className = 'toast'; el.setAttribute('role','status');
-  el.innerHTML = `${icon}<span>${msg}</span>`;
+  el.innerHTML = `<span class="t-ic">${icon}</span><span>${msg}</span>`;
   wrap.appendChild(el);
   requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
-  clearTimeout(toast._t);
-  toast._t = setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(), 450); }, 3200);
-  el.onclick = ()=>{ el.classList.remove('show'); };
+  setTimeout(()=>{ el.classList.add('hide'); setTimeout(()=>el.remove(), 300); }, 2600);
+  el.onclick = ()=>el.classList.add('hide');
 }
+function burst(x, y, n=18, colors=['#F6C945','#D6336C','#9ED8CF','#B9A6E0','#F7B89A']){
+  if (reduced()) return;
+  const app = $('#app'), r = app.getBoundingClientRect();
+  for (let i=0;i<n;i++){
+    const p = document.createElement('i'); p.className = 'particle';
+    const s = 5 + Math.random()*6;
+    p.style.cssText = `width:${s}px;height:${s*(Math.random()>.5?1:1.8)}px;background:${colors[i%colors.length]}`;
+    app.appendChild(p);
+    const a = Math.random()*Math.PI*2, d = 70 + Math.random()*110;
+    const x0 = x - r.left, y0 = y - r.top, x1 = x0 + Math.cos(a)*d, y1 = y0 + Math.sin(a)*d - 40;
+    p.animate([
+      {transform:`translate(${x0}px,${y0}px) rotate(0)`, opacity:1},
+      {transform:`translate(${x1}px,${y1}px) rotate(${Math.random()*540}deg)`, opacity:1, offset:.6},
+      {transform:`translate(${x1}px,${y1+60}px) rotate(${Math.random()*720}deg) scale(.4)`, opacity:0},
+    ], {duration: 900 + Math.random()*400, easing:'cubic-bezier(.2,.8,.3,1)'}).onfinish = ()=>p.remove();
+  }
+}
+const centerOf = el => { const b = el.getBoundingClientRect(); return [b.left + b.width/2, b.top + b.height/2]; };
+function replay(el, anim){ if (!el) return; el.style.animation='none'; void el.offsetWidth; el.style.animation=anim; }
 
-/* ---------- Sheets (drag to dismiss) ---------- */
+/* ---------- Sheets ---------- */
 let sheet = null;
 function openSheet(render, opts={}){
   closeSheet(true);
-  const root = document.getElementById('sheet-root');
+  const root = $('#sheet-root');
   const bd = document.createElement('div'); bd.className = 'backdrop';
   const sh = document.createElement('div'); sh.className = 'sheet';
   sh.setAttribute('role','dialog'); sh.setAttribute('aria-modal','true');
-  sh.innerHTML = `<div class="grab" aria-hidden="true"><i></i></div><div class="sheet-body"></div>`;
+  sh.innerHTML = `<div class="grab" aria-hidden="true"><i></i></div><div class="sheet-body stagger"></div>`;
   root.append(bd, sh);
   sheet = {bd, sh, render, opts, body: sh.querySelector('.sheet-body')};
   sheet.body.innerHTML = render();
@@ -562,487 +685,387 @@ function openSheet(render, opts={}){
   bd.addEventListener('click', ()=>{ if (performance.now() - opened > 350) closeSheet(); });  // ignore ghost taps from the opening tap
   enableDrag(sh);
 }
-function refreshSheet(){ if (sheet && !sheet.opts.static){ sheet.body.innerHTML = sheet.render(); sheet.opts.onMount && sheet.opts.onMount(sheet.body); } }
+function refreshSheet(){
+  if (!sheet || sheet.opts.static) return;
+  sheet.body.classList.remove('stagger');
+  sheet.body.innerHTML = sheet.render();
+  sheet.opts.onMount && sheet.opts.onMount(sheet.body);
+}
 function closeSheet(instant){
   if (!sheet) return;
-  const {bd, sh, opts} = sheet; sheet = null;
-  opts.onClose && opts.onClose();
+  const {bd, sh} = sheet; sheet = null;
   if (instant){ bd.remove(); sh.remove(); return; }
   bd.classList.remove('show'); sh.classList.remove('show'); sh.style.transform = '';
-  setTimeout(()=>{ bd.remove(); sh.remove(); }, 480);
+  setTimeout(()=>{ bd.remove(); sh.remove(); }, 500);
 }
 function enableDrag(sh){
-  let y0=null, t0=0, dy=0, body = sh.querySelector('.sheet-body');
-  sh.addEventListener('pointerdown', e=>{
-    const onGrab = e.target.closest('.grab');
-    if (!onGrab && (body.scrollTop > 0 || e.target.closest('button,input,a,.seg,.pouch'))) return;
-    y0 = e.clientY; t0 = performance.now(); dy = 0;
-  });
-  window.addEventListener('pointermove', e=>{
-    if (y0===null || !sh.isConnected) return;
-    dy = e.clientY - y0;
-    if (dy > 4){ sh.classList.add('dragging'); sh.style.transform = `translateY(${dy}px)`; }
-    else if (dy < 0){ sh.classList.add('dragging'); sh.style.transform = `translateY(${dy*0.15}px)`; }  // resist upward
-  });
-  window.addEventListener('pointerup', ()=>{
-    if (y0===null || !sh.isConnected) { y0=null; return; }
+  let y0=null, t0=0, dy=0; const body = sh.querySelector('.sheet-body');
+  const move = e=>{ if (y0===null) return; dy = e.clientY - y0; sh.classList.add('dragging'); sh.style.transform = `translateY(${dy > 0 ? dy : dy*0.12}px)`; };
+  const up = ()=>{
+    window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up);
+    if (y0===null) return;
     const v = dy / Math.max(1, performance.now()-t0);
     sh.classList.remove('dragging');
     if (dy > 110 || v > 0.6) closeSheet(); else sh.style.transform = '';
     y0 = null;
+  };
+  sh.addEventListener('pointerdown', e=>{
+    if (!e.target.closest('.grab') && (body.scrollTop > 0 || e.target.closest('button,input,a,.seg,.wrapbox'))) return;
+    y0 = e.clientY; t0 = performance.now(); dy = 0;
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
   });
 }
+const sheetHead = (title, sub='') => `<div class="sheet-head"><div><h2 class="h2" style="font-size:25px">${title}</h2>${sub?`<p class="small muted" style="margin-top:3px">${sub}</p>`:''}</div>
+  <button class="x-btn" data-act="close" aria-label="Close">${I.close}</button></div>`;
 
-/* ---------- Render: shell ---------- */
-function render(){
-  const app = document.getElementById('app');
-  const tb = document.getElementById('tabbar');
+/* ---------- Shell ---------- */
+const TABS = [['home','Home',I.home],['make','Make',I.make],['club','Club',I.club],['stash','Stash',I.stash]];
+function render(anim=false){
+  const app = $('#app'), tb = $('#tabbar'), sc = $('#scroller');
   if (!S.onboarded){
-    tb.style.display='none';
-    document.getElementById('scroller').style.display='none';
-    let ob = document.getElementById('ob');
+    tb.style.display='none'; sc.style.display='none';
+    let ob = $('#ob');
     if (!ob){ ob = document.createElement('div'); ob.id='ob'; ob.className='ob'; app.insertBefore(ob, tb); }
     ob.innerHTML = renderOnboarding();
     return;
   }
-  document.getElementById('ob')?.remove();
-  tb.style.display='';
-  document.getElementById('scroller').style.display='';
-  renderTabs();
-  renderScreen();
+  $('#ob')?.remove();
+  tb.style.display=''; sc.style.display='';
+  renderTabs(); renderScreen(anim);
 }
 function renderTabs(){
-  const tabs = [['today','Today',I.today],['calendar','Calendar',I.cal],['box','Box',I.box],['shelf','Shelf',I.shelf]];
-  const dot = !!pendingReveal();
-  document.getElementById('tabbar').innerHTML = tabs.map(([id,l,ic])=>
-    `<button class="tab" data-act="tab" data-v="${id}" ${ui.tab===id?'aria-current="page"':''}>${ic}${l}${id==='box'&&dot?'<span class="badge" aria-label="new"></span>':''}</button>`).join('');
+  const tb = $('#tabbar'), i = TABS.findIndex(t=>t[0]===ui.tab), dot = !!toOpen();
+  if (!tb.querySelector('.tab-ind')){
+    tb.innerHTML = `<span class="tab-ind" style="width:calc((100% - 20px) / 4)"></span>` + TABS.map(([id,l,ic])=>`<button class="tab" data-act="tab" data-v="${id}">${ic}<span>${l}</span></button>`).join('');
+  }
+  tb.querySelectorAll('.tab').forEach((b,j)=>{
+    if (j===i) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+    const has = b.querySelector('.badge'), want = TABS[j][0]==='club' && dot;
+    if (want && !has) b.insertAdjacentHTML('beforeend','<span class="badge"></span>');
+    if (!want && has) has.remove();
+  });
+  tb.querySelector('.tab-ind').style.transform = `translateX(${i*100}%)`;
 }
-function renderScreen(){
-  const el = document.getElementById('screen');
-  el.innerHTML = ({today:renderToday, calendar:renderCalendar, box:renderBox, shelf:renderShelf})[ui.tab]();
+function renderScreen(anim=false){
+  const el = $('#screen');
+  el.classList.remove('in','push');
+  el.innerHTML = ({home:renderHome, make:renderMake, club:renderClub, stash:renderStash})[ui.tab]();
+  if (anim){ void el.offsetWidth; el.classList.add(anim==='push'?'push':'in'); }
+}
+const avatarBtn = () => `<button class="avatar" data-act="profile" aria-label="Profile and settings">${esc((S.name||'L')[0].toUpperCase())}</button>`;
+function seg(name, opts, val){
+  const i = Math.max(0, opts.indexOf(val));
+  return `<div class="seg" role="group"><span class="thumb" style="width:calc((100% - 8px)/${opts.length});transform:translateX(${i*100}%)"></span>
+    ${opts.map(o=>`<button data-act="seg" data-seg="${name}" data-v="${o}" aria-pressed="${o===val}">${o}</button>`).join('')}</div>`;
 }
 
 /* ---------- Onboarding ---------- */
 function renderOnboarding(){
-  const step = ui.obStep;
+  const step = ui.obStep, dir = ui.obDir;
   const dots = `<div class="ob-dots">${[0,1,2,3].map(i=>`<i class="${i===step?'on':''}"></i>`).join('')}</div>`;
-  const back = step>0 ? `<button class="link" data-act="ob-back">Back</button>` : `<span></span>`;
-  const head = `<div class="row between" style="height:28px">${back}${dots}<span style="width:34px"></span></div>`;
+  const head = `<div class="row between" style="height:28px;flex:none">${step>0?`<button class="link" style="color:var(--ink)" data-act="ob-back">Back</button>`:'<span></span>'}${dots}<span style="width:34px"></span></div>`;
   let body = '';
   if (step===0){
-    body = `<div class="ob-body enter" style="text-align:center">
-      <div style="flex:.6"></div>
-      <div class="hero-art">
-        <span class="float">${buddySVG(BUDDIES[1])}</span>
-        <span class="float d2">${buddySVG(BUDDIES[0])}</span>
-        <span class="float d3">${buddySVG(BUDDIES[2])}</span>
+    body = `<div class="welcome-bg"></div><div class="ob-body ${dir}">
+      <div class="welcome-art">
+        <div style="left:4%;top:34px;width:170px;transform:rotate(-8deg)"><div style="animation:bob 4.2s ease-in-out infinite">${skeinSVG('peach')}</div></div>
+        <div style="right:0;top:0;width:150px;transform:rotate(10deg)"><div style="animation:bob 3.8s ease-in-out -1.2s infinite">${skeinSVG('seaglass')}</div></div>
+        <div style="left:30%;top:120px;width:150px;z-index:2"><div style="animation:bob 4s ease-in-out -2s infinite">${projArt('berry','cherry')}</div></div>
+        <div style="right:14%;top:150px;width:44px;z-index:3"><div style="animation:sway 3s ease-in-out infinite;transform-origin:50% 12%">${charmSVG('bee')}</div></div>
       </div>
-      <h1 class="title" style="font-size:34px;margin-top:18px">Your period kit shows up before your period does.</h1>
-      <p class="muted" style="margin:14px auto 0;max-width:300px">Lune tracks your cycle for free. Want supplies on autopilot? We'll time a box to land 3 days early, and every box has a sealed mystery buddy inside.</p>
+      <h1 class="title" style="font-size:40px;margin-top:8px">Never lose your row again.</h1>
+      <p class="muted" style="margin-top:12px;font-size:16px;max-width:320px">A row counter that follows your pattern. Plus a monthly yarn club where the color stays a surprise.</p>
       <div style="flex:1;min-height:24px"></div>
       <button class="btn block" data-act="ob-next">Get started</button>
-      <p class="small muted" style="margin-top:12px">Tracking is free, forever. No card needed.</p>
     </div>`;
   } else if (step===1){
-    const L = S.cycleLen;
-    body = `<div class="ob-body enter">
-      <p class="eyebrow" style="margin-top:28px">Step 1 of 3</p>
-      <h1 class="title" style="margin-top:6px">Let's get to know your cycle</h1>
-      <p class="muted" style="margin-top:8px">A best guess is fine. Lune learns and adjusts every month.</p>
-      <div class="stack" style="margin-top:22px">
-        <label class="field"><span class="lbl">What should we call you?</span><input id="ob-name" autocomplete="given-name" placeholder="Your first name" value="${esc(S.name)}" maxlength="24"></label>
-        <label class="field"><span class="lbl">When did your last period start?</span><input id="ob-date" type="date" value="${S.lastStart}" max="${key(today())}" min="${key(addDays(today(),-60))}"></label>
-        <div class="field row between" style="padding:14px 16px">
-          <div><span class="lbl">Cycle length</span><div style="font-size:17px;margin-top:2px" class="tnum">${L} days</div></div>
-          <div class="stepper"><button data-act="ob-len" data-v="-1" aria-label="Shorter">−</button><span class="tnum">${L}</span><button data-act="ob-len" data-v="1" aria-label="Longer">+</button></div>
-        </div>
-      </div>
-      <p class="small muted" style="margin-top:10px">Not sure? 28 days is a common starting point.</p>
+    const lv = [['new','Just learning','Magic ring still scares me'],['some','A year or two','I can read a pattern'],['pro','Forever','My stash has a stash']];
+    body = `<div class="ob-body ${dir}">
+      <h1 class="title" style="margin-top:28px">Hi! What should we call you?</h1>
+      <label class="field" style="margin-top:18px"><span class="lbl">First name</span><input id="ob-name" autocomplete="given-name" placeholder="Maya" value="${esc(S.name)}" maxlength="24"></label>
+      <p class="label" style="margin:22px 2px 10px">How long have you been crocheting?</p>
+      <div style="display:flex;flex-direction:column;gap:8px">${lv.map(([id,t,s])=>`<button class="option" data-act="ob-level" data-v="${id}" aria-pressed="${S.level===id}"><div class="grow"><div style="font-weight:700">${t}</div><div class="small muted">${s}</div></div></button>`).join('')}</div>
       <div style="flex:1;min-height:24px"></div>
       <button class="btn block" data-act="ob-next">Continue</button>
     </div>`;
   } else if (step===2){
-    body = `<div class="ob-body enter">
-      <p class="eyebrow" style="margin-top:28px">Step 2 of 3</p>
-      <h1 class="title" style="margin-top:6px">What do you usually use?</h1>
-      <p class="muted" style="margin-top:8px">Pick everything that applies. You can change it anytime.</p>
-      <div class="stack" style="margin-top:20px">
-        ${PRODUCTS.map(p=>`<button class="option" data-act="ob-prod" data-v="${p.id}" aria-pressed="${S.products.includes(p.id)}">
-          <div><div style="font-weight:600">${p.name}</div><div class="small muted">${p.desc}</div></div><span class="tick">${I.check}</span></button>`).join('')}
-      </div>
-      <p class="eyebrow" style="margin-top:22px;margin-bottom:8px">Your usual flow</p>
-      ${seg('flow', FLOWS, S.flow)}
+    const art = {ami:['berry','cherry'], wear:['hat','seaglass'], blank:['cowl','lavender'], bags:['tote','honey']};
+    body = `<div class="ob-body ${dir}">
+      <h1 class="title" style="margin-top:28px">What do you love making?</h1>
+      <p class="muted" style="margin-top:8px">We'll pick patterns to match.</p>
+      <div class="chips" style="margin-top:18px">${MAKES.map(m=>`<button class="chip" data-act="ob-love" data-v="${m.id}" aria-pressed="${S.loves.includes(m.id)}"><span class="ic" style="background:${tint(art[m.id][1])};display:grid;place-items:center"><span style="width:24px">${projArt(...art[m.id])}</span></span>${m.name}</button>`).join('')}</div>
+      <p class="label" style="margin:26px 2px 10px">Colors you reach for</p>
+      <div class="palettes">${PALETTES.map(p=>`<button class="pal" data-act="ob-pal" data-v="${p.id}" aria-pressed="${S.palettes.includes(p.id)}"><div class="sw">${[...new Set(p.ways.flatMap(w=>COLORWAYS[w].c))].slice(0,4).map(c=>`<i style="background:${c}"></i>`).join('')}</div><div class="nm">${p.name}</div></button>`).join('')}</div>
+      <p class="small muted" style="margin-top:10px">Club colorways lean toward these.</p>
       <div style="flex:1;min-height:24px"></div>
-      <button class="btn block" data-act="ob-next" ${S.products.length?'':'disabled'}>Continue</button>
+      <button class="btn block" data-act="ob-next">Continue</button>
     </div>`;
   } else {
-    const c = cycle();
-    body = `<div class="ob-body enter" style="text-align:center">
-      <p class="eyebrow" style="margin-top:28px">Step 3 of 3</p>
-      <h1 class="title" style="margin-top:6px">You're all set${S.name?', '+esc(S.name):''}</h1>
-      <div class="card" style="margin-top:22px;text-align:left">
-        <div class="row between"><span class="muted">Next period</span><strong>${fmtDow(c.next)}</strong></div>
-        <div class="row between" style="margin-top:10px"><span class="muted">That's in</span><strong>${plural(c.untilNext,'day')}</strong></div>
-        <div class="row between" style="margin-top:10px"><span class="muted">A box could arrive</span><strong>${fmtDow(nextBoxDate())}</strong></div>
-      </div>
-      <div class="card" style="margin-top:12px;text-align:left;background:var(--lilac);box-shadow:none">
-        <div class="row" style="align-items:flex-start">
-          <div style="width:56px;flex:none">${buddySVG(BUDDIES[0])}</div>
-          <div><div style="font-weight:600">Welcome gift: 4 of 5 moon stars</div><div class="small" style="color:#5B3F86;margin-top:2px">Do your first daily check-in to earn the 5th and open a free digital buddy.</div></div>
-        </div>
+    body = `<div class="ob-body ${dir}" style="text-align:center">
+      <div style="width:170px;margin:30px auto 0;animation:bob 4s ease-in-out infinite">${projArt('berry','cherry')}</div>
+      <h1 class="title" style="margin-top:12px">${S.name?esc(S.name)+', meet':'Meet'} Strawberry Pal</h1>
+      <p class="muted" style="margin-top:10px;max-width:290px;margin-inline:auto">We started you on a quick one. It takes about 2 hours, and you can switch anytime.</p>
+      <div class="card" style="margin-top:20px;text-align:left;padding:4px 18px">
+        <div class="list-row"><span class="grow muted">Yarn</span><strong>${PATTERNS.strawberry.yarn}</strong></div>
+        <div class="list-row"><span class="grow muted">Hook</span><strong>${PATTERNS.strawberry.hook}</strong></div>
       </div>
       <div style="flex:1;min-height:24px"></div>
-      <button class="btn block" data-act="ob-finish">Take me to Today</button>
+      <button class="btn block" data-act="ob-finish">Start crocheting</button>
     </div>`;
   }
   return head + body;
 }
-function seg(name, opts, val){
-  const i = Math.max(0, opts.indexOf(val));
-  return `<div class="seg" data-seg="${name}" role="group">
-    <span class="thumb" style="width:calc((100% - 8px)/${opts.length});transform:translateX(${i*100}%)"></span>
-    ${opts.map(o=>`<button data-act="seg" data-seg="${name}" data-v="${o}" aria-pressed="${o===val}">${o}</button>`).join('')}
-  </div>`;
-}
 
-/* ---------- Today ---------- */
-function greeting(){ const h = new Date().getHours(); return h<12?'Good morning':h<18?'Good afternoon':'Good evening'; }
-function renderToday(){
-  const c = cycle(); const P = PHASE_COPY[c.phase];
-  const pct = Math.min(1, c.day / S.cycleLen);
-  const R = 84, C = 2*Math.PI*R;
-  const periodFrac = S.periodLen / S.cycleLen;
-  const fertStart = (c.ov - 6) / S.cycleLen, fertLen = 7 / S.cycleLen;
-  const k = key(today());
-  const done = S.checkins[k];
-  if (!ui.draft) ui.draft = done ? {mood:done.mood, sym:[...done.sym], editing:false} : {mood:null, sym:[], editing:true};
-  const editing = !done || ui.draft.editing;
-  const countdown = c.phase==='Period' ? `Day ${c.day} of your period` :
-    c.untilNext===0 ? 'Period expected today' : c.untilNext===1 ? 'Period expected tomorrow' : `Period in ${c.untilNext} days`;
-
+/* ---------- Home ---------- */
+function greeting(){ const h = new Date().getHours(); return h<12?'Morning':h<18?'Afternoon':'Evening'; }
+function activeProject(){ return S.projects.find(p=>!p.done); }
+function renderHome(){
+  const p = activeProject();
+  const total = S.week.reduce((a,b)=>a+b,0), max = Math.max(...S.week, 30);
+  const todayIdx = (today().getDay()+6)%7;
+  const drop = nextDropDate(), n = diffDays(drop, today());
   return `
-  <header class="row between" style="margin-bottom:16px">
-    <div><p class="small muted">${fmt(today(),{weekday:'long',month:'long',day:'numeric'})}</p><h1 class="h2" style="font-size:24px">${greeting()}${S.name?', '+esc(S.name):''}</h1></div>
-    <button class="avatar" data-act="profile" aria-label="Profile & settings">${esc((S.name||'L')[0].toUpperCase())}</button>
-  </header>
-
-  <section class="card" style="padding:20px 18px 18px">
-    <div class="ring-wrap">
-      <svg viewBox="0 0 196 196">
-        <circle cx="98" cy="98" r="${R}" fill="none" stroke="var(--surface-2)" stroke-width="12"/>
-        <circle cx="98" cy="98" r="${R}" fill="none" stroke="var(--predicted)" stroke-width="12" stroke-dasharray="${C*periodFrac} ${C}" transform="rotate(-90 98 98)"/>
-        <circle cx="98" cy="98" r="${R}" fill="none" stroke="var(--fertile)" stroke-width="12" stroke-dasharray="${C*fertLen} ${C}" stroke-dashoffset="${-C*fertStart}" transform="rotate(-90 98 98)"/>
-        <circle cx="98" cy="98" r="${R}" fill="none" stroke="${P.color}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${Math.max(1,C*pct)} ${C}" transform="rotate(-90 98 98)" style="transition:stroke-dasharray 800ms var(--ease-out)"/>
-        <circle cx="${98 + R*Math.sin(pct*2*Math.PI)}" cy="${98 - R*Math.cos(pct*2*Math.PI)}" r="9" fill="#fff" stroke="${P.color}" stroke-width="4"/>
-      </svg>
-      <div class="ring-center">
-        <span class="small muted">Cycle day</span>
-        <span class="big tnum">${c.day}</span>
-        <span class="pill" style="margin-top:8px;background:transparent;box-shadow:inset 0 0 0 1.5px ${P.color};color:var(--ink)"><i class="dot" style="background:${P.color}"></i>${c.phase} phase</span>
+  <header class="topbar"><div><p class="small muted">${fmt(today(),{weekday:'long',month:'short',day:'numeric'})}</p><h1 class="h2" style="font-size:25px">${greeting()}${S.name?', '+esc(S.name):''}</h1></div>${avatarBtn()}</header>
+  ${p ? renderWip(p) : `<button class="wip" style="display:block;width:100%;text-align:left" data-act="tab" data-v="make"><div class="glow"></div><p class="small muted">Nothing on the hook</p><h2 class="h2" style="color:#fff;margin-top:4px;font-size:26px">Pick your next make</h2><div class="btn sm white" style="margin-top:16px">Browse patterns</div></button>`}
+  <div id="h-live">${renderLive()}</div>
+  <section class="card">
+    <div class="row between"><div><div class="label">On the hook this week</div><div class="h2 tnum" style="margin-top:2px">${hm(total)}</div></div><span class="pill moss">${S.projects.filter(x=>x.done).length} finished</span></div>
+    <div class="week">${S.week.map((m,i)=>`<div class="col"><div class="b ${i===todayIdx?'today':''}" style="height:${Math.max(6, m/max*62)}px;animation-delay:${i*40}ms"></div><span class="d">${'MTWTFSS'[i]}</span></div>`).join('')}</div>
+  </section>
+  ${!S.club ? `<button class="drop-card" data-act="tab" data-v="club">
+      <span style="width:64px;flex:none">${PARCEL(fmt(drop,{month:'short'}).toUpperCase())}</span>
+      <div class="grow"><div class="h3">${monthName(drop)}'s colorway is a secret</div><div class="small" style="color:#6E5409">Club drops land in ${n} days</div></div>${I.chevR}
+    </button>` : ''}
+  <section>
+    <div class="sec-head"><h2 class="h3">Made with September's Sea Glass</h2><button class="link" data-act="tab" data-v="club">Club</button></div>
+    <div class="hscroll" style="margin-top:8px">${FEED.map((f,i)=>`<div class="make">
+      <div class="pic" style="background:${tint(f.way)}">${projArt(f.art, f.way)}</div>
+      <div style="padding:8px 4px 2px"><div style="font-weight:700;font-size:14px">${f.what}</div>
+      <div class="row between"><span class="small muted">@${f.who}</span><button class="heart" data-act="like" data-v="${i}" aria-pressed="${!!S.liked[i]}" aria-label="Like">${I.heart}<span class="tnum">${f.likes + (S.liked[i]?1:0)}</span></button></div></div>
+    </div>`).join('')}</div>
+  </section>`;
+}
+function renderWip(p){
+  const P = PATTERNS[p.pid], s = P.steps[p.step];
+  return `<button class="wip" style="display:block;width:100%;text-align:left" data-act="open-proj" data-v="${p.pid}">
+    <div class="glow"></div>
+    <div class="art">${projArt(P.art, P.way)}</div>
+    <p class="small muted">On your hook</p>
+    <h2 class="h2" style="color:#fff;margin-top:2px;font-size:26px;max-width:190px">${P.name}</h2>
+    <p class="small" style="margin-top:14px;color:rgba(255,255,255,.85)"><strong>${s.label}</strong> · ${esc(s.text)}</p>
+    <div class="row" style="margin-top:10px;gap:10px"><div class="bar grow"><i style="width:${p.step/P.steps.length*100}%"></i></div><span class="small tnum" style="font-weight:700">${p.step}/${P.steps.length}</span></div>
+    <div class="btn sm white" style="margin-top:16px">Pick up where you left off</div>
+  </button>`;
+}
+function renderLive(){
+  const o = toOpen();
+  if (o){
+    const irl = o.state==='irl';
+    return `<section class="live-strip" style="background:linear-gradient(150deg,#26213A,#5B2A4E)">
+      <div class="row" style="gap:14px">
+        <span style="width:84px;flex:none;animation:bob 3s ease-in-out infinite">${PARCEL('♥')}</span>
+        <div class="grow"><p class="small muted">${o.title} · delivered</p><h2 class="h2" style="color:#fff;margin-top:2px">${irl?'Opened it yet?':'Your parcel is here'}</h2></div>
       </div>
-    </div>
-    <div class="row between" style="margin-top:16px">
-      <div><div style="font-weight:600;font-size:17px">${countdown}</div><div class="small muted">Expected ${fmtDow(c.next)}</div></div>
-      <button class="btn sm ghost" data-act="log-period" data-v="${k}">Period started</button>
-    </div>
-  </section>
-
-  <div style="margin-top:12px">${renderBoxStatus()}</div>
-
-  <section class="card" style="margin-top:12px">
-    <div class="row between">
-      <div><p class="eyebrow">Daily check-in</p><h2 class="h2" style="margin-top:2px">${editing?'How are you feeling?':'Checked in for today'}</h2></div>
-      ${!editing?`<button class="link" data-act="ci-edit">Edit</button>`:''}
-    </div>
-    ${editing ? `
-      <div class="chips" style="margin-top:14px">${MOODS.map(m=>`<button class="chip" data-act="ci-mood" data-v="${m}" aria-pressed="${ui.draft.mood===m}">${m}</button>`).join('')}</div>
-      <p class="small muted" style="margin:14px 0 8px">Anything going on? <span style="opacity:.8">(optional)</span></p>
-      <div class="chips">${SYMPTOMS.map(s=>`<button class="chip" data-act="ci-sym" data-v="${s}" aria-pressed="${ui.draft.sym.includes(s)}">${s}</button>`).join('')}</div>
-      <button class="btn block" style="margin-top:16px" data-act="ci-save" ${ui.draft.mood?'':'disabled'}>${done?'Update check-in':'Save check-in · +1 star'}</button>
-    ` : `
-      <div class="chips" style="margin-top:12px"><span class="pill berry">${esc(done.mood)}</span>${done.sym.map(s=>`<span class="pill">${esc(s)}</span>`).join('')}</div>
-      <p class="small muted" style="margin-top:10px">${symptomTip(done)}</p>
-    `}
-  </section>
-
-  <section class="card" style="margin-top:12px">
-    <div class="row between">
-      <div><p class="eyebrow">Moon stars</p><div style="font-weight:600;margin-top:2px">${S.stars>=5?'Your free pouch is ready':`${5-S.stars} more to a free digital buddy`}</div></div>
-      <span class="pill gold">${S.streak}-day streak</span>
-    </div>
-    <div class="row between" style="margin-top:12px">
-      <div class="stars">${[0,1,2,3,4].map(i=>I.star(i<S.stars)).join('')}</div>
-      ${S.stars>=5?`<button class="btn sm" data-act="free-pouch">Open pouch</button>`:`<span class="small muted">1 per check-in</span>`}
-    </div>
-  </section>
-
-  <section class="card" style="margin-top:12px;background:var(--surface-2);box-shadow:none">
-    <p class="eyebrow" style="color:${P.color}">${c.phase} phase · general tip</p>
-    <p style="margin-top:6px">${P.tip}</p>
-  </section>
-  <p class="small muted" style="text-align:center;margin-top:18px;padding:0 20px">Lune is not a medical device or birth control. Predictions are estimates.</p>
-  `;
-}
-function symptomTip(ci){
-  if (ci.sym.includes('Cramps')) return 'Cramps logged. A heat patch and some slow stretching can help. We add heat patches to boxes if you want them.';
-  if (ci.sym.includes('Cravings')) return 'Cravings are hormonal, not a lack of willpower. Be nice to yourself.';
-  if (ci.mood==='Low'||ci.mood==='Rough') return 'Rough day noted. It gets counted, so Lune can spot patterns across cycles.';
-  return 'Logged. After a few cycles Lune starts spotting your patterns.';
-}
-function renderBoxStatus(){
-  const rev = pendingReveal();
-  if (rev){
-    const irl = rev.state==='irl';
-    return `<section class="box-hero">
-      <p class="eyebrow" style="color:rgba(255,255,255,.7)">Delivered · ${rev.id}</p>
-      <h2 class="h2" style="margin-top:4px;color:#fff">${irl?'Opened it yet?':'Your box is here'}</h2>
-      <p class="muted small" style="margin-top:6px">${irl?'Tap below once you have opened it and we will add your buddy to your shelf.':'A sealed mystery buddy is inside. Reveal it here, or save the surprise for when you open the real thing.'}</p>
-      <div class="row" style="margin-top:14px">
-        ${irl?`<button class="btn sm" data-act="reveal" data-v="${rev.id}">I opened it: add to shelf</button>`
-             :`<button class="btn sm" data-act="reveal" data-v="${rev.id}">Reveal now</button><button class="btn sm ghost" data-act="irl" data-v="${rev.id}">Open it IRL</button>`}
+      <div class="row" style="margin-top:14px;gap:8px">
+        <button class="btn sm white" data-act="unwrap" data-v="${o.id}">${irl?'Add to my stash':'Unwrap it here'}</button>
+        ${irl?'':`<button class="btn sm clear" data-act="irl" data-v="${o.id}">Save for IRL</button>`}
       </div>
     </section>`;
   }
   const tr = inTransit();
   if (tr){
     const st = orderStage(tr);
-    return `<button class="box-hero" style="display:block;width:100%;text-align:left" data-act="order" data-v="${tr.id}">
-      <div class="row between"><p class="eyebrow" style="color:rgba(255,255,255,.7)">${tr.kind==='box'?'Lune Box':'Top-up kit'} · ${tr.id}</p><span class="small" style="opacity:.8">Track ›</span></div>
-      <h2 class="h2" style="margin-top:4px;color:#fff">${STAGES[st].label}</h2>
-      <p class="muted small" style="margin-top:4px">${STAGES[st].sub}</p>
-      <div class="mini-steps" style="margin-top:14px">${STAGES.slice(1).map((s,i)=>`<i class="${i<st?'on':''}"></i>`).join('')}</div>
+    return `<button class="live-strip dark" data-act="order" data-v="${tr.id}" data-live="${tr.id}">
+      <div class="row between"><span class="small muted">${tr.title}</span><span class="small" style="opacity:.7">Track</span></div>
+      <div class="row between" style="margin-top:2px"><div class="h2" style="color:#fff" data-live-label>${STAGES[st].label}</div><span class="small muted" data-live-sub>${STAGES[st].sub}</span></div>
+      <div class="track"><span class="fill" data-live-fill style="width:${st/4*100}%"></span><span class="van" data-live-van style="left:${Math.min(94,Math.max(6,st/4*100))}%">${I.van}</span></div>
     </button>`;
   }
-  if (S.plan==='box'){
-    const d = nextBoxDate();
-    return `<button class="card" style="display:block;width:100%;text-align:left" data-act="tab" data-v="box">
-      <div class="row between"><p class="eyebrow">Next Lune Box</p>${S.paused?'<span class="pill">Skipped</span>':'<span class="pill green">On schedule</span>'}</div>
-      <div class="row" style="margin-top:8px;gap:14px">
-        <div style="width:48px;height:48px;border-radius:14px;background:var(--lilac);display:grid;place-items:center;color:#5B3F86">${I.box.replace('viewBox','width="26" height="26" viewBox')}</div>
-        <div><div style="font-weight:600">${S.paused?'Skipping this cycle':`Arrives ${fmtDow(d)}`}</div><div class="small muted">${S.paused?'Tap to resume anytime':`3 days before your period · ${money(boxTotal())}`}</div></div>
-      </div>
-    </button>`;
-  }
-  return `<section class="box-hero">
-    <p class="eyebrow" style="color:rgba(255,255,255,.7)">Lune Box · ${money(BOX_PRICE)}/cycle</p>
-    <h2 class="h2" style="margin-top:4px;color:#fff">Never get caught without supplies again</h2>
-    <p class="muted small" style="margin-top:6px">Your products, timed to arrive ${fmt(nextBoxDate())}, 3 days before your period. Plus a sealed mystery buddy.</p>
-    <div class="row" style="margin-top:14px"><button class="btn sm" data-act="tab" data-v="box">See what's inside</button></div>
-  </section>`;
+  return '';
 }
 
-/* ---------- Calendar ---------- */
-function renderCalendar(){
-  if (!ui.calMonth){ const t = today(); ui.calMonth = new Date(t.getFullYear(), t.getMonth(), 1); }
-  const m = ui.calMonth, y = m.getFullYear(), mo = m.getMonth();
-  const first = new Date(y, mo, 1), days = new Date(y, mo+1, 0).getDate();
-  const lead = first.getDay();
-  const boxDay = S.plan==='box' && !S.paused ? key(nextBoxDate()) : null;
-  const tk = key(today());
-  let cells = '';
-  for (let i=0;i<lead;i++) cells += `<span class="day out"></span>`;
-  for (let d=1; d<=days; d++){
-    const dt = new Date(y, mo, d), k = key(dt), t = dayType(dt);
-    const lbl = `${fmt(dt,{month:'long',day:'numeric'})}${k===boxDay?', Lune Box arrives':''}${t?', '+({period:'period',predicted:'predicted period',fertile:'fertile window',ovulation:'estimated ovulation'})[t]:''}`;
-    cells += `<button class="day ${k===boxDay?'boxday':t} ${k===tk?'today':''}" data-act="day" data-v="${k}" aria-label="${lbl}">${d}${S.checkins[k]?'<i class="mk"></i>':''}</button>`;
-  }
-  const c = cycle();
-  const ovDate = addDays(c.curStart, c.ov - 1);
-  const ovNext = ovDate < today() ? addDays(ovDate, S.cycleLen) : ovDate;
-  const logged = Object.keys(S.checkins).length;
+/* ---------- Make ---------- */
+function renderMake(){
+  if (ui.open) return renderCounter(ui.open);
+  const wips = S.projects.filter(p=>!p.done), done = S.projects.filter(p=>p.done);
+  const lib = Object.keys(PATTERNS).filter(id=>!S.projects.some(p=>p.pid===id && !p.done));
   return `
-  <header class="row between" style="margin-bottom:16px">
-    <h1 class="title">Calendar</h1>
-    <button class="avatar" data-act="profile" aria-label="Profile & settings">${esc((S.name||'L')[0].toUpperCase())}</button>
-  </header>
-  <section class="card">
-    <div class="row between" style="margin-bottom:14px">
-      <button class="icon-btn" data-act="cal-nav" data-v="-1" aria-label="Previous month">${I.chevL}</button>
-      <h2 class="h2">${fmt(m,{month:'long',year:'numeric'})}</h2>
-      <button class="icon-btn" data-act="cal-nav" data-v="1" aria-label="Next month">${I.chevR}</button>
-    </div>
-    <div class="cal-head">${['S','M','T','W','T','F','S'].map(x=>`<span>${x}</span>`).join('')}</div>
-    <div class="cal-grid">${cells}</div>
-    <div class="legend" style="margin-top:14px">
-      <span><i class="dot" style="background:var(--period)"></i>Period</span>
-      <span><i class="dot" style="background:var(--predicted)"></i>Predicted</span>
-      <span><i class="dot" style="background:#9FD2B4"></i>Fertile</span>
-      ${boxDay?`<span><svg width="12" height="12" viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="4" fill="#3A2140"/></svg>Box arrives</span>`:''}
-    </div>
+  <header class="topbar"><h1 class="title">Make</h1>${avatarBtn()}</header>
+  ${wips.length?`<section style="display:flex;flex-direction:column;gap:10px">
+    <div class="sec-head"><h2 class="h3">In progress</h2></div>
+    ${wips.map(p=>{ const P = PATTERNS[p.pid]; return `<button class="proj" data-act="open-proj" data-v="${p.pid}">
+      ${artTile(`<span style="width:48px">${projArt(P.art,P.way)}</span>`, tint(P.way), 64, 16)}
+      <div class="grow"><div class="h3">${P.name}</div><div class="small muted">${P.steps[p.step].label} of ${P.steps.length} · ${hm(p.minutes)} so far</div>
+      <div class="bar" style="margin-top:8px;height:6px;background:var(--surface-2)"><i style="width:${p.step/P.steps.length*100}%;background:var(--rasp)"></i></div></div>${I.chevR}
+    </button>`; }).join('')}
+  </section>`:''}
+  <section>
+    <div class="sec-head"><h2 class="h3">Free patterns</h2><span class="small muted">${lib.length} for you</span></div>
+    <div class="lib" style="margin-top:10px">${lib.map(id=>{ const P = PATTERNS[id]; return `<button class="lib-card" data-act="pattern" data-v="${id}">
+      <div class="pic" style="background:${tint(P.way)}">${projArt(P.art,P.way)}</div>
+      <div style="padding:0 4px"><div style="font-weight:700">${P.name}</div><div class="small muted">${P.level} · ${P.hrs} hrs</div></div></button>`; }).join('')}</div>
   </section>
-  <section class="card" style="margin-top:12px">
-    <p class="eyebrow">Coming up</p>
-    <div style="margin-top:6px">
-      <div class="list-row"><i class="dot" style="background:var(--period);width:10px;height:10px"></i><div style="flex:1">Next period</div><strong>${fmtDow(c.next)}</strong></div>
-      <div class="list-row"><i class="dot" style="background:#9FD2B4;width:10px;height:10px"></i><div style="flex:1">Estimated ovulation</div><strong>${fmtDow(ovNext)}</strong></div>
-      ${S.plan==='box'?`<div class="list-row"><i class="dot" style="background:#3A2140;width:10px;height:10px"></i><div style="flex:1">Lune Box arrives</div><strong>${S.paused?'Skipped':fmtDow(nextBoxDate())}</strong></div>`:''}
-    </div>
-  </section>
-  <p class="small muted" style="text-align:center;margin-top:14px">Tap any day to log. ${plural(logged,'check-in')} so far.</p>
+  ${done.length?`<section class="card" style="padding:4px 18px">${done.map(p=>`<div class="list-row"><span style="width:36px">${projArt(PATTERNS[p.pid].art, PATTERNS[p.pid].way)}</span><span class="grow" style="font-weight:600">${PATTERNS[p.pid].name}</span><span class="pill moss">Finished</span></div>`).join('')}</section>`:''}
   `;
 }
-
-/* ---------- Box ---------- */
-function renderBox(){
-  const d = nextBoxDate();
-  const subscribed = S.plan==='box';
-  const orders = S.orders;
-  const rev = pendingReveal();
+function renderCounter(pid){
+  const p = S.projects.find(x=>x.pid===pid && !x.done); if (!p){ ui.open=null; return renderMake(); }
+  const P = PATTERNS[pid], s = P.steps[p.step], total = P.steps.length;
+  const C = 2*Math.PI*112, pct = p.step/total;
+  const next = P.steps.slice(p.step+1, p.step+4);
   return `
-  <header class="row between" style="margin-bottom:16px">
-    <h1 class="title">${subscribed?'Your box':'Lune Box'}</h1>
-    <button class="avatar" data-act="profile" aria-label="Profile & settings">${esc((S.name||'L')[0].toUpperCase())}</button>
+  <header class="topbar">
+    <button class="icon-btn" data-act="close-proj" aria-label="Back">${I.back}</button>
+    <div style="text-align:center"><div class="h3">${P.name}</div><div class="small muted">${P.hook} hook · ${P.yarn.split(' · ')[0]}</div></div>
+    <span class="timer tnum" aria-label="Session time"><i></i><span id="timer">0:00</span></span>
   </header>
-  ${rev || inTransit() ? `<div style="margin-bottom:12px">${renderBoxStatus()}</div>` : ''}
-  ${!subscribed ? `
-  <section class="box-hero" style="padding:22px">
-    <div class="row" style="gap:0;justify-content:center;margin:-4px 0 6px">
-      <span class="float" style="width:70px">${buddySVG(BUDDIES[3])}</span>
-      <span class="float d2" style="width:92px">${buddySVG(BUDDIES[9])}</span>
-      <span class="float d3" style="width:70px">${buddySVG(BUDDIES[4])}</span>
-    </div>
-    <h2 class="h2" style="color:#fff;text-align:center">Supplies on autopilot, with a surprise inside</h2>
-    <p class="muted small" style="text-align:center;margin-top:6px">Shipped to match your cycle, not the calendar. Skip or cancel in two taps.</p>
-  </section>
-  <section class="card" style="margin-top:12px">
-    <p class="eyebrow">How it works</p>
-    ${[
-      ['Lune predicts your period','From your check-ins, and it gets sharper every cycle.'],
-      ['Your box lands 3 days early',`Next one would arrive ${fmtDow(d)}.`],
-      ['Open the mystery buddy','Reveal it in the app, or keep it sealed and open it for real.'],
-    ].map((x,i)=>`<div class="list-row" style="align-items:flex-start"><span class="pill berry tnum" style="width:26px;justify-content:center;padding:0">${i+1}</span><div><div style="font-weight:600">${x[0]}</div><div class="small muted">${x[1]}</div></div></div>`).join('')}
-  </section>` : `
-  <section class="card">
-    <div class="row between"><p class="eyebrow">Next delivery</p>${S.paused?'<span class="pill">Skipped</span>':'<span class="pill green">On schedule</span>'}</div>
-    <div style="font-weight:600;font-size:18px;margin-top:6px">${S.paused?'Skipping this cycle':fmtDow(d)}</div>
-    <div class="small muted">${S.paused?'We will not charge or ship until you resume.':`Ships ${fmt(addDays(d,-3))}, arriving 3 days before your period`}</div>
-    <div class="row" style="margin-top:14px">
-      <button class="btn sm ghost" data-act="skip">${S.paused?'Resume box':'Skip this one'}</button>
-      <button class="btn sm outline" data-act="ship-now">Ship it now (demo)</button>
-    </div>
-  </section>`}
-
-  <section class="card" style="margin-top:12px">
-    <div class="row between"><p class="eyebrow">In your box</p><button class="link" data-act="edit-products">Edit</button></div>
-    <div style="margin-top:6px">
-      ${boxItems().map(x=>`<div class="list-row"><span style="flex:1">${x}</span><span class="small muted">Included</span></div>`).join('')}
-      <div class="list-row"><span style="flex:1;display:flex;align-items:center;gap:8px">${I.gift} Mystery buddy, sealed</span><span class="small muted">Included</span></div>
-    </div>
-    <p class="eyebrow" style="margin-top:14px">Flow</p>
-    <div style="margin-top:8px">${seg('flow', FLOWS, S.flow)}</div>
-    <p class="eyebrow" style="margin-top:18px">Little extras</p>
-    <div style="margin-top:4px">
-      ${ADDONS.map(a=>`<div class="list-row"><div style="flex:1"><div style="font-weight:500">${a.name}</div><div class="small muted">${a.note}</div></div><span class="small tnum" style="margin-right:6px">+${money(a.price)}</span>
-        <button class="switch" role="switch" aria-label="${a.name}" aria-checked="${!!S.addons[a.id]}" data-act="addon" data-v="${a.id}"></button></div>`).join('')}
-    </div>
-    <div class="row between" style="border-top:1px solid var(--line);padding-top:14px;margin-top:4px">
-      <span style="font-weight:600">Per cycle</span><span style="font-weight:600;font-size:18px" class="tnum">${money(boxTotal())}</span>
-    </div>
-    ${!subscribed?`<button class="btn block" style="margin-top:14px" data-act="checkout" data-v="box">Start my box · ${money(boxTotal())}</button>
-      <p class="small muted" style="text-align:center;margin-top:8px">Free shipping · skip or cancel anytime</p>`:''}
-  </section>
-
-  <section class="card" style="margin-top:12px">
-    <div class="row" style="gap:14px">
-      <div style="width:44px;height:44px;border-radius:14px;background:var(--berry-soft);color:var(--berry);display:grid;place-items:center;flex:none">${I.truck}</div>
-      <div style="flex:1"><div style="font-weight:600">Running low?</div><div class="small muted">Top-up kit arrives tomorrow · ${money(TOPUP_PRICE)}</div></div>
-      <button class="btn sm ghost" data-act="checkout" data-v="topup">Order</button>
-    </div>
-  </section>
-
-  <section style="margin-top:22px">
-    <p class="eyebrow" style="padding:0 4px 8px">Orders</p>
-    ${orders.length ? `<div class="card" style="padding:4px 18px">${orders.map(o=>{
-      const st = orderStage(o);
-      const tag = st===4 ? (o.kind==='box' && o.state!=='revealed' ? `<span class="pill berry">Unopened</span>` : `<span class="pill green">Delivered</span>`) : `<span class="pill lilac">${STAGES[st].label}</span>`;
-      return `<button class="list-row" style="width:100%;text-align:left" data-act="order" data-v="${o.id}">
-        <div style="flex:1"><div style="font-weight:600">${o.kind==='box'?'Lune Box':'Top-up kit'}</div><div class="small muted tnum">${o.id} · ${fmt(o.placedAt)} · ${money(o.total)}</div></div>${tag}</button>`;
-    }).join('')}</div>` : `<div class="card small muted" style="text-align:center;padding:22px">No orders yet. Your deliveries will show up here.</div>`}
-  </section>
-  `;
-}
-
-/* ---------- Shelf / Collection ---------- */
-function renderShelf(){
-  const ownedCount = BUDDIES.filter(b=>S.owned[b.id]).length;
-  return `
-  <header class="row between" style="margin-bottom:6px">
-    <h1 class="title">Your shelf</h1>
-    <button class="avatar" data-act="profile" aria-label="Profile & settings">${esc((S.name||'L')[0].toUpperCase())}</button>
-  </header>
-  <p class="muted" style="margin-bottom:16px">Night Garden · Series 1</p>
-  <section class="card" style="margin-bottom:14px">
-    <div class="row between"><span style="font-weight:600">${ownedCount} of ${BUDDIES.length} collected</span><span class="small muted">${ownedCount===BUDDIES.length?'Complete!':'Keep going'}</span></div>
-    <div class="progress" style="margin-top:10px"><i style="width:${ownedCount/BUDDIES.length*100}%"></i></div>
-    <div class="row small muted" style="margin-top:10px;gap:14px"><span class="row" style="gap:5px"><span class="flag p">Real</span> in a box</span><span class="row" style="gap:5px"><span class="flag d">Digital</span> free pouch</span></div>
-  </section>
-  <div class="shelf">
-    ${BUDDIES.map(b=>{
-      const o = S.owned[b.id];
-      return `<button class="buddy-tile ${o?'':'locked'}" data-act="buddy" data-v="${b.id}" aria-label="${o?b.name:'Not collected yet'}">
-        ${buddySVG(b,{locked:!o})}
-        <span class="nm">${o?b.name:(b.rarity==='secret'?'Secret':'???')}</span>
-        <span class="flags">${o&&o.physical?'<span class="flag p">Real</span>':''}${o&&o.digital?'<span class="flag d">Digital</span>':''}${!o&&b.rarity!=='common'?`<span class="flag r">${RARITY_LABEL[b.rarity]}</span>`:''}</span>
-      </button>`;
-    }).join('')}
+  <div class="step-card" id="step-card">
+    <div class="row between"><span class="pill rasp">${s.label}</span>${s.st?`<span class="small muted tnum">${s.st} sts</span>`:''}</div>
+    <div class="instr" style="margin-top:10px">${esc(s.text)}</div>
+    ${s.note?`<div class="note">${I.pin}<span>${esc(s.note)}</span></div>`:''}
   </div>
-  <section class="card" style="margin-top:14px;background:var(--surface-2);box-shadow:none">
-    <p class="eyebrow">Coming soon</p>
-    <div style="font-weight:600;margin-top:4px">Series 2: Tide Pool</div>
-    <p class="small muted" style="margin-top:2px">Drops next season. Subscribers get first pulls.</p>
+  <div class="counter-wrap">
+    <button class="counter" id="counter" data-act="count" aria-label="Finished this round">
+      <svg class="ring" viewBox="0 0 244 244"><circle cx="122" cy="122" r="112" fill="none" stroke="rgba(35,31,43,.08)" stroke-width="6"/>
+        <circle id="ring-fill" cx="122" cy="122" r="112" fill="none" stroke="var(--rasp)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}" transform="rotate(-90 122 122)"/></svg>
+      <div style="text-align:center"><span class="cap" id="cap">${s.label.match(/^[A-Za-z ]+/)?.[0].trim()==='R'?'Round':esc(s.label.match(/^[A-Za-z]+/)?.[0]||'Step')}</span><span class="num tnum" id="num"><span>${s.label.replace(/^[A-Za-z ]+/,'') || '✓'}</span></span><span class="cap" style="color:rgba(255,255,255,.8)">Tap when done</span></div>
+    </button>
+  </div>
+  <div class="row" style="justify-content:center;gap:8px;margin-top:-4px">
+    <button class="btn sm ghost" data-act="undo" ${p.step===0?'disabled':''}>${I.undo} Undo</button>
+    <span class="pill tnum">${p.step} of ${total} done</span>
+  </div>
+  ${next.length?`<section class="card upnext" style="padding:6px 18px"><div class="label" style="padding-top:10px">Up next</div>${next.map(n=>`<div class="list-row"><span class="pill" style="min-width:58px;justify-content:center">${n.label}</span><span class="grow small" style="font-weight:600">${esc(n.text)}</span>${n.st?`<span class="small muted tnum">${n.st}</span>`:''}</div>`).join('')}</section>`:''}
+  <p class="small muted" style="text-align:center">sc single crochet · hdc half double · inc 2 in one st · dec 2 together</p>
+  `;
+}
+let timerInt = null;
+function startTimer(){
+  clearInterval(timerInt); ui.sessionStart = Date.now();
+  timerInt = setInterval(()=>{ const el = $('#timer'); if (!el){ clearInterval(timerInt); return; }
+    const s = Math.floor((Date.now()-ui.sessionStart)/1000); el.textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }, 1000);
+}
+function stopTimer(){
+  clearInterval(timerInt);
+  if (!ui.sessionStart) return;
+  const mins = Math.max(1, Math.round((Date.now()-ui.sessionStart)/60000));
+  const p = S.projects.find(x=>x.pid===ui.open && !x.done); if (p) p.minutes += mins;
+  S.week[(today().getDay()+6)%7] += mins; ui.sessionStart = 0; save();
+}
+
+/* ---------- Club ---------- */
+function renderClub(){
+  const drop = nextDropDate(), n = diffDays(drop, today());
+  const past = S.stash.filter(s=>s.from==='Club');
+  const live = toOpen() || inTransit();
+  return `
+  <header class="topbar"><h1 class="title">Yarn Club</h1>${avatarBtn()}</header>
+  ${live?`<div id="h-live">${renderLive()}</div>`:''}
+  <section class="club-hero">
+    <div class="parcel">${PARCEL(fmt(drop,{month:'short'}).toUpperCase())}</div>
+    ${S.club ? (S.skip
+      ? `<div class="h2" style="margin-top:10px">Skipping ${monthName(drop)}</div><p class="small muted">No charge until you're back</p>`
+      : `<div class="big-count tnum" style="margin-top:8px">${n}</div><div style="font-weight:700">days until ${monthName(drop)}'s drop</div><p class="small muted" style="margin-top:2px">Colorway stays a secret till you open it</p>`)
+      + `<div class="row" style="justify-content:center;gap:8px;margin-top:14px"><button class="btn sm white" data-act="skip">${S.skip?'Count me in':'Skip this month'}</button><button class="btn sm ghost" style="background:rgba(255,255,255,.6)" data-act="ship-now">Ship now (demo)</button></div>`
+    : `<h2 class="h2" style="font-size:26px;margin-top:10px">A new colorway every month</h2>
+       <p class="small" style="color:var(--ink-2);margin-top:6px;max-width:280px;margin-inline:auto">Hand-dyed in small batches. You find out the color when you open it.</p>`}
   </section>
+  <section>
+    <div class="sec-head"><h2 class="h3">In every drop</h2></div>
+    <div class="inside" style="margin-top:10px">
+      <div><span class="pic" style="width:70px">${skeinSVG('oat',{label:false}).replace('<svg','<svg style="filter:blur(3px) saturate(0)"')}</span><span class="nm">Hand-dyed skein</span><span class="small muted">~200 yds</span></div>
+      <div><span class="pic" style="width:46px">${projArt('hat','oat')}</span><span class="nm">A pattern for it</span><span class="small muted">Designed to match</span></div>
+      <div><span class="pic" style="width:34px">${charmSVG('acorn')}</span><span class="nm">Marker charm</span><span class="small muted">Autumn set</span></div>
+    </div>
+  </section>
+  ${past.length?`<section class="card"><div class="label">Your colorways</div><div class="past" style="margin-top:10px">${past.slice(0,3).map(s=>`<div>${skeinSVG(s.way,{label:false})}<div class="small" style="font-weight:700;margin-top:4px">${COLORWAYS[s.way].name}</div></div>`).join('')}</div></section>`:''}
+  <section>
+    <div class="sec-head"><h2 class="h3">Kits</h2><span class="small muted">Everything to finish one make</span></div>
+    <div class="hscroll" style="margin-top:8px">${KITS.map(k=>{ const P = PATTERNS[k.pattern]; return `<div class="kit">
+      <div class="pic" style="background:${tint(P.way)}">${projArt(P.art,P.way)}</div>
+      <div style="padding:0 6px"><div class="h3">${P.name}</div><div class="small muted">${k.blurb}</div>
+      <div class="row between" style="margin-top:10px"><strong style="font-size:17px">${money(k.price)}</strong><button class="btn sm" data-act="checkout" data-v="${k.id}">Get kit</button></div></div>
+    </div>`; }).join('')}</div>
+  </section>
+  ${S.orders.length?`<section><div class="sec-head"><h2 class="h3">Orders</h2></div>
+    <div class="card" style="padding:4px 18px;margin-top:10px">${S.orders.map(o=>{ const st = orderStage(o);
+      const tag = st<4 ? `<span class="pill">${STAGES[st].label}</span>` : o.state==='opened' ? `<span class="pill moss">Opened</span>` : `<span class="pill rasp">Unopened</span>`;
+      return `<button class="list-row" data-act="order" data-v="${o.id}"><div class="grow"><div style="font-weight:700">${o.title}</div><div class="small muted">${fmt(o.placedAt)} · ${money(o.total)}</div></div>${tag}</button>`; }).join('')}</div></section>`:''}
+  ${!S.club?`<div class="sticky-cta"><button class="btn block rasp" data-act="checkout" data-v="club">Join the Club · ${money(CLUB_PRICE)}/month</button></div>`:''}
   `;
 }
 
-/* ---------- Sheets content ---------- */
-function sheetHeader(title, sub=''){
-  return `<div class="row between" style="margin:4px 0 14px;align-items:flex-start">
-    <div><h2 class="h2" style="font-size:22px">${title}</h2>${sub?`<p class="small muted" style="margin-top:2px">${sub}</p>`:''}</div>
-    <button class="icon-btn" style="box-shadow:none;background:var(--surface-2);width:34px;height:34px" data-act="close" aria-label="Close">${I.close}</button>
-  </div>`;
+/* ---------- Stash ---------- */
+function renderStash(){
+  const got = CHARMS.filter(c=>S.charms[c.id]).length;
+  return `
+  <header class="topbar"><h1 class="title">Stash</h1>${avatarBtn()}</header>
+  ${seg('stash', ['Yarn','Markers'], ui.stashView)}
+  ${ui.stashView==='Yarn' ? `
+    <p class="small muted" style="margin:-2px 2px 0">${S.stash.length} skeins · ${S.stash.reduce((a,s)=>a+s.yds,0)} yds</p>
+    <div class="yarns">${S.stash.map((s,i)=>`<button class="yarn" data-act="yarn" data-v="${i}">${skeinSVG(s.way)}<div style="font-weight:700">${COLORWAYS[s.way].name}</div><div class="small muted">${s.weight} · ${s.yds} yds</div>${s.from==='Club'?'<span class="pill butter" style="margin-top:6px">Club</span>':''}</button>`).join('')}</div>
+  ` : `
+    <section class="tin">
+      <div class="row between"><div><div class="h2" style="color:#fff">Autumn Market</div><div class="small muted">${got} of ${CHARMS.length} charms</div></div><span class="pill" style="background:rgba(255,255,255,.1);color:#fff">Tin 01</span></div>
+      <div class="charms">${CHARMS.map((c,i)=>`<button class="charm ${S.charms[c.id]?'have':'missing'}" data-act="charm" data-v="${c.id}" aria-label="${S.charms[c.id]?c.name:'Not collected yet'}" style="--d:${i}">${S.charms[c.id]||!c.special?charmSVG(c.id,{dim:!S.charms[c.id]}):`<span style="font-family:var(--display);font-size:22px;font-weight:800;opacity:.4">?</span>`}</button>`).join('')}</div>
+      <p class="small muted" style="margin-top:14px">One charm comes with every drop and kit. They clip right onto your stitches.</p>
+    </section>
+  `}
+  `;
 }
-function openCheckout(kind){
-  let phase = 'review';
-  const isBox = kind==='box';
-  let placed = null;
+
+/* ---------- Sheets ---------- */
+function openPattern(id){
+  const P = PATTERNS[id];
+  openSheet(()=>`
+    <div class="art-bg" style="height:190px;background:${tint(P.way)};border-radius:24px"><span style="width:140px;animation:bob 4s ease-in-out infinite">${projArt(P.art,P.way)}</span></div>
+    ${sheetHead(P.name, `${P.kind} · ${P.level} · about ${P.hrs} hrs`)}
+    <div class="card" style="padding:4px 18px">
+      <div class="list-row"><span class="grow muted">Yarn</span><strong>${P.yarn}</strong></div>
+      <div class="list-row"><span class="grow muted">Hook</span><strong>${P.hook}</strong></div>
+      <div class="list-row"><span class="grow muted">Steps</span><strong>${P.steps.length}</strong></div>
+    </div>
+    <button class="btn block" data-act="start" data-v="${id}">Start this project</button>
+    ${KITS.some(k=>k.pattern===id)?`<button class="btn block ghost" data-act="checkout" data-v="${KITS.find(k=>k.pattern===id).id}" style="margin-top:-4px">Get the kit · ${money(KITS.find(k=>k.pattern===id).price)}</button>`:''}
+  `);
+}
+function openCheckout(what){
+  const isClub = what==='club', kit = KITS.find(k=>k.id===what);
+  const title = isClub ? 'Join the Club' : `${PATTERNS[kit.pattern].name} kit`;
+  const price = isClub ? CLUB_PRICE : kit.price;
+  let phase = 'review', placed = null;
   const renderIt = () => {
-    if (phase==='done'){
-      return `<div style="text-align:center;padding:10px 0 4px">
-        <div class="check-anim"><svg width="34" height="34" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="var(--fertile-ink)" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <h2 class="h2" style="margin-top:16px;font-size:24px">${isBox?'Your first box is on the way':'Top-up kit ordered'}</h2>
-        <p class="muted" style="margin-top:6px">Order ${placed.id}. ${isBox?`After this one, boxes ship automatically to arrive 3 days before each period.`:`Arrives tomorrow in a discreet mailer.`}</p>
-        <p class="small" style="margin-top:14px;background:var(--lilac);color:#5B3F86;border-radius:12px;padding:10px 12px">Demo: shipping is sped up, so this "arrives" in about 25 seconds.</p>
-        <button class="btn block" style="margin-top:18px" data-act="order-from-done" data-v="${placed.id}">Track order</button>
-        <button class="btn block ghost" style="margin-top:8px" data-act="close">Done</button>
-      </div>`;
-    }
-    const lines = isBox
-      ? [['Lune Box', BOX_PRICE], ...ADDONS.filter(a=>S.addons[a.id]).map(a=>[a.name, a.price])]
-      : [['Top-up kit', TOPUP_PRICE]];
-    const total = lines.reduce((s,[,p])=>s+p,0);
-    return `${sheetHeader(isBox?'Start your Lune Box':'Order a top-up kit', isBox?`First box ships today. After that, every ${S.cycleLen} days.`:'Next-day delivery')}
+    if (phase==='done') return `<div style="text-align:center;padding-top:8px">
+        <div class="check-anim"><svg width="38" height="38" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="var(--moss)" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h2 class="title" style="margin-top:16px;font-size:30px">${isClub?"You're in":'Kit ordered'}</h2>
+        <p class="muted" style="margin-top:6px">${isClub?"Your first parcel ships today. No peeking at the color.":'It ships today with a marker charm tucked in.'}</p>
+      </div>
+      <span class="pill butter" style="align-self:center">Demo: it arrives in about 25 seconds</span>
+      <button class="btn block" data-act="order-from-done" data-v="${placed.id}">Track it</button>
+      <button class="btn block ghost" data-act="close" style="margin-top:-4px">Done</button>`;
+    return `${sheetHead(title, isClub?'Billed monthly. Skip or cancel anytime.':'Ships today')}
       <div class="card" style="padding:4px 18px">
-        ${lines.map(([n,p])=>`<div class="list-row"><span style="flex:1">${n}</span><span class="tnum">${money(p)}</span></div>`).join('')}
-        <div class="list-row"><span style="flex:1">Shipping</span><span class="pill green">Free</span></div>
-        <div class="list-row"><strong style="flex:1">${isBox?'Total per cycle':'Total'}</strong><strong class="tnum">${money(total)}</strong></div>
+        <div class="list-row"><span class="grow">${isClub?'Monthly drop':'Kit'}</span><span class="tnum">${money(price)}</span></div>
+        <div class="list-row"><span class="grow">Shipping</span><span class="pill moss">Free</span></div>
+        <div class="list-row"><strong class="grow">${isClub?'Per month':'Total'}</strong><strong class="tnum" style="font-size:18px">${money(price)}</strong></div>
       </div>
-      <div class="card" style="margin-top:10px;padding:4px 18px">
-        <div class="list-row"><div style="flex:1"><div class="small muted">Ship to</div><div style="font-weight:500">${esc(S.name||'You')} · 214 Alder St, Apt 3B</div></div><span class="small muted">Demo</span></div>
-        <div class="list-row"><div style="flex:1"><div class="small muted">Pay with</div><div style="font-weight:500" class="tnum">Visa •••• 4242</div></div><span class="small muted">Demo</span></div>
+      <div class="card" style="padding:4px 18px">
+        <div class="list-row"><span class="small muted" style="width:56px">Ship to</span><span class="grow" style="font-weight:600">214 Alder St, Apt 3B</span></div>
+        <div class="list-row"><span class="small muted" style="width:56px">Pay</span><span class="grow tnum" style="font-weight:600">Visa •••• 4242</span></div>
       </div>
-      ${isBox?`<p class="small muted" style="margin-top:12px">Plain outer packaging. Skip, pause or cancel anytime from the Box tab. No calls, no guilt trips.</p>`:''}
-      <button class="btn block" style="margin-top:16px" id="pay-btn" data-act="pay">${phase==='paying'?'<span class="spinner"></span> Placing order…':`Place order · ${money(total)}`}</button>
-      <p class="small muted" style="text-align:center;margin-top:8px">This is a demo. No real payment is taken.</p>`;
+      <button class="btn block rasp" data-act="pay">${phase==='paying'?'<span class="spinner"></span>':`${isClub?'Join':'Place order'} · ${money(price)}`}</button>
+      <p class="small muted" style="text-align:center;margin-top:-4px">Demo only. Nothing is charged.</p>`;
   };
   openSheet(renderIt);
   sheet.pay = () => {
     if (phase!=='review') return;
-    phase='paying'; refreshSheet();
+    phase='paying'; refreshSheet(); buzz(10);
     setTimeout(()=>{
-      placed = placeOrder(kind);
+      placed = placeOrder(isClub?'drop':'kit', isClub?null:kit.id);
       phase='done';
-      if (sheet) refreshSheet();
-      render();
+      if (sheet){ sheet.body.classList.add('stagger'); sheet.body.innerHTML = renderIt();
+        const ck = sheet.body.querySelector('.check-anim'); setTimeout(()=>{ const [x,y] = centerOf(ck); burst(x,y,22); }, 350); }
+      render(); buzz(20);
     }, 1100);
   };
 }
@@ -1050,266 +1073,222 @@ function openOrder(id){
   openSheet(()=>{
     const o = findOrder(id); if (!o) return '';
     const st = orderStage(o);
-    return `${sheetHeader(o.kind==='box'?'Lune Box':'Top-up kit', `${o.id} · placed ${fmt(o.placedAt,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}`)}
-      <div class="card">
-        <div class="timeline">
-          ${STAGES.map((s,i)=>`<div class="tl-item ${i<st||st===4?'done':''} ${i===st&&st<4?'current':''}">
-            <span class="tl-dot"></span><div class="tl-label">${s.label}</div><div class="small muted">${i<=st?s.sub:'Pending'}</div></div>`).join('')}
-        </div>
+    const opened = o.state==='opened';
+    return `${sheetHead(o.title, `${o.id} · ${fmt(o.placedAt,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}`)}
+      <div class="card" data-live="${o.id}">
+        <div class="row between"><div class="h2" data-live-label>${STAGES[st].label}</div><span class="small muted" data-live-sub>${STAGES[st].sub}</span></div>
+        <div class="track"><span class="fill" data-live-fill style="width:${st/4*100}%"></span><span class="van" data-live-van style="left:${Math.min(94,Math.max(4,st/4*100))}%">${I.van}</span></div>
+        <div class="timeline">${STAGES.map((s,i)=>`<div class="tl-item ${i<st||st===4?'done':''} ${i===st&&st<4?'current':''}" data-live-step="${i}"><span class="tl-dot"></span><div class="tl-label">${s.label}</div></div>`).join('')}</div>
       </div>
-      ${st===4 && o.kind==='box' && o.state!=='revealed' ? `
-        <div class="row" style="margin-top:12px">
-          <button class="btn" style="flex:1" data-act="reveal" data-v="${o.id}">${o.state==='irl'?'I opened it':'Reveal buddy'}</button>
-          ${o.state!=='irl'?`<button class="btn ghost" style="flex:1" data-act="irl" data-v="${o.id}">Open it IRL</button>`:''}
-        </div>`:''}
-      ${o.state==='revealed' ? (()=>{ const b = BUDDIES.find(x=>x.id===o.buddy); return `<div class="card row" style="margin-top:12px"><div style="width:48px">${buddySVG(b)}</div><div><div class="small muted">Buddy in this box</div><div style="font-weight:600">${b.name} · ${RARITY_LABEL[b.rarity]}</div></div></div>`; })() : ''}
-      <div class="card" style="margin-top:12px;padding:4px 18px">
-        ${o.items.map(x=>`<div class="list-row"><span style="flex:1">${esc(x)}</span></div>`).join('')}
-        <div class="list-row"><strong style="flex:1">Total</strong><strong class="tnum">${money(o.total)}</strong></div>
-      </div>
-      ${st<4?`<p class="small muted" style="text-align:center;margin-top:12px">Demo: delivery is sped up to about 25 seconds.</p>`:''}`;
+      ${st===4 && !opened ? `<div class="row" style="gap:8px"><button class="btn rasp" style="flex:1" data-act="unwrap" data-v="${o.id}">${o.state==='irl'?'Add to stash':'Unwrap it'}</button>${o.state!=='irl'?`<button class="btn ghost" style="flex:1" data-act="irl" data-v="${o.id}">Save for IRL</button>`:''}</div>`:''}
+      <div class="card" style="padding:4px 18px">
+        <div class="list-row"><span style="width:44px">${opened||o.kind==='kit'?skeinSVG(o.way,{label:false}):skeinSVG('oat',{label:false}).replace('<svg','<svg style="filter:blur(3px) saturate(0)"')}</span><span class="grow">${opened||o.kind==='kit'?COLORWAYS[o.way].name:'Mystery colorway'}</span></div>
+        <div class="list-row"><span style="width:44px;display:grid;place-items:center"><span style="width:20px">${charmSVG(opened?o.charm:'acorn',{dim:!opened})}</span></span><span class="grow">${opened?CHARMS.find(c=>c.id===o.charm).name+' charm':'Marker charm'}</span></div>
+        <div class="list-row"><strong class="grow">Total</strong><strong class="tnum">${money(o.total)}</strong></div>
+      </div>`;
   });
   sheet.orderId = id;
 }
-function openReveal(id){
-  const o = findOrder(id); if (!o) return;
-  const b = BUDDIES.find(x=>x.id===o.buddy);
-  openRevealSheet(b, {physical:true, onDone:()=>{ o.state='revealed'; }});
+function patchLive(o){
+  const st = orderStage(o);
+  document.querySelectorAll(`[data-live="${o.id}"]`).forEach(root=>{
+    const set = (s,f) => { const el = root.querySelector(s); if (el) f(el); };
+    set('[data-live-label]', el=>el.textContent = STAGES[st].label);
+    set('[data-live-sub]', el=>el.textContent = STAGES[st].sub);
+    set('[data-live-fill]', el=>el.style.width = `${st/4*100}%`);
+    set('[data-live-van]', el=>el.style.left = `${Math.min(94,Math.max(4,st/4*100))}%`);
+    root.querySelectorAll('[data-live-step]').forEach(el=>{ const i = +el.dataset.liveStep; el.classList.toggle('done', i<st); el.classList.toggle('current', i===st); });
+  });
 }
-function openRevealSheet(b, {physical, onDone}){
-  let taps = 0, opened = false;
-  const isNew = !S.owned[b.id];
-  const glowColor = b.rarity==='secret' ? 'radial-gradient(circle,#F9A8C955,#9CD7E833 45%,transparent 70%)' : b.rarity==='rare' ? 'radial-gradient(circle,#FFE08A66,transparent 65%)' : `radial-gradient(circle,${b.color}55,transparent 65%)`;
-  const sparks = Array.from({length:14},(_,i)=>{
-    const a = (i/14)*Math.PI*2, r = 90 + (i%3)*22;
-    const col = ['#F6C84C','#F49AB0','#C9B8F0','#9CC7E8'][i%4];
-    return `<i class="spark" style="background:${col};--x:${Math.cos(a)*r}px;--y:${Math.sin(a)*r}px;animation-delay:${200+i*12}ms"></i>`;
-  }).join('');
+function openUnwrap(id){
+  const o = findOrder(id); if (!o) return;
+  const w = COLORWAYS[o.way], ch = CHARMS.find(c=>c.id===o.charm);
+  const isNewCharm = !S.charms[o.charm];
+  let taps = 0;
   openSheet(()=>`
-    ${sheetHeader(physical?'Your mystery buddy':'Free digital pouch', physical?'Night Garden · Series 1':'Earned with 5 moon stars')}
-    <div class="reveal-stage">
-      <div class="revealed" id="rv"><div class="glow" style="background:${glowColor}"></div>${sparks}${buddySVG(b,{uid:'rv'})}</div>
-      <button class="pouch" id="pouch" aria-label="Tap to tear open">
-        <svg viewBox="0 0 170 210" width="170" height="210" style="position:absolute;inset:0;overflow:visible">
-          <defs>
-            <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6E3470"/><stop offset=".45" stop-color="#B23A6E"/><stop offset=".55" stop-color="#D66A93"/><stop offset="1" stop-color="#5C2A55"/></linearGradient>
-            <linearGradient id="shine" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
-          </defs>
-          <g class="bottom"><path d="M8 50h154v142q0 10-10 10H18q-10 0-10-10z" fill="url(#foil)"/>
-            <rect x="8" y="50" width="40" height="152" fill="url(#shine)" opacity=".7"><animate attributeName="x" values="8;130;8" dur="3.2s" repeatCount="indefinite"/></rect>
-            <circle cx="85" cy="120" r="30" fill="rgba(255,255,255,.12)"/><text x="85" y="130" text-anchor="middle" font-family="Fraunces,Georgia,serif" font-size="30" font-weight="600" fill="#fff">?</text>
-            <text x="85" y="182" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" letter-spacing="2" fill="rgba(255,255,255,.75)">LUNE · SERIES 1</text></g>
-          <g class="top"><path d="M8 50V18q0-10 10-10h134q10 0 10 10v32l-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5-8 5-8-5z" fill="url(#foil)"/>
-            <path d="M22 22h126" stroke="rgba(255,255,255,.25)" stroke-width="6" stroke-linecap="round"/></g>
-        </svg>
-      </button>
+    ${sheetHead(o.title, o.kind==='drop'?'Hand-dyed, one batch only':'Your kit')}
+    <div class="stage" id="stage">
+      <div class="glow" style="background:radial-gradient(circle,${w.c[0]}88,transparent 65%)"></div>
+      <div class="reveal-skein">${skeinSVG(o.way)}</div>
+      <div class="reveal-charm">${charmSVG(o.charm)}</div>
+      <button class="wrapbox" id="wrap" aria-label="Untie the parcel">${PARCEL('♥')}</button>
     </div>
-    <div class="reveal-copy" id="rv-copy"><p class="muted">Tap the pouch to tear it open</p>
-      <div class="row" style="justify-content:center;margin-top:10px;gap:6px">${[0,1,2].map(i=>`<i class="dot" style="background:var(--line)" data-tap="${i}"></i>`).join('')}</div></div>
+    <div id="uw-copy" style="text-align:center;min-height:132px"><p style="font-weight:700" id="uw-hint">Tap to untie</p></div>
   `, {static:true, onMount:(body)=>{
-    const pouch = body.querySelector('#pouch');
-    pouch.addEventListener('click', ()=>{
-      if (opened) return;
-      taps++;
-      body.querySelectorAll('[data-tap]').forEach((d,i)=>{ if (i<taps) d.style.background='var(--berry)'; });
-      pouch.classList.remove('wiggle'); void pouch.offsetWidth; pouch.classList.add('wiggle');
-      if (navigator.vibrate) try{ navigator.vibrate(10); }catch(e){}
-      if (taps>=3){
-        opened = true;
-        setTimeout(()=>{
-          pouch.classList.add('open'); pouch.style.pointerEvents='none';
-          body.querySelector('#rv').classList.add('show');
-          const own = S.owned[b.id] || {physical:0, digital:0};
-          if (physical) own.physical++; else own.digital++;
-          S.owned[b.id] = own;
-          onDone && onDone();
-          save(); render();
-          body.querySelector('#rv-copy').innerHTML = `<div class="fade-in">
-            <div class="row" style="justify-content:center;gap:6px"><span class="pill ${b.rarity==='common'?'lilac':'gold'}">${RARITY_LABEL[b.rarity]} · ${RARITY_ODDS[b.rarity]}</span>${isNew?'<span class="pill berry">New!</span>':'<span class="pill">Duplicate</span>'}</div>
-            <h2 class="title" style="margin-top:10px">${b.name}</h2>
-            <p class="muted" style="margin-top:4px">${b.blurb}</p>
-            <button class="btn block" style="margin-top:16px" data-act="goto-shelf">See it on your shelf</button>
-          </div>`;
-        }, 260);
+    const wrap = body.querySelector('#wrap'), stage = body.querySelector('#stage');
+    wrap.addEventListener('click', ()=>{
+      taps++; buzz(10);
+      replay(wrap, 'nudge2 420ms var(--ease-out)');
+      if (taps===1){ wrap.classList.add('untied'); body.querySelector('#uw-hint').textContent = 'Now open it'; return; }
+      if (taps===2){
+        stage.classList.add('open'); buzz(30);
+        setTimeout(()=>{ const [x,y] = centerOf(stage); burst(x, y, 26, [...w.c, '#F6C945']); }, 350);
+        o.state = 'opened';
+        S.stash.unshift({way:o.way, weight:'Worsted', yds:200, from:o.kind==='drop'?'Club':'Kit'});
+        S.charms[o.charm] = (S.charms[o.charm]||0) + 1;
+        if (o.kind==='kit'){ const pid = KITS.find(k=>k.id===o.ref).pattern; if (!S.projects.some(p=>p.pid===pid && !p.done)) S.projects.push({pid, step:0, minutes:0, done:false}); }
+        save(); render();
+        body.querySelector('#uw-copy').innerHTML = `<div style="animation:rise 500ms var(--ease-out) 500ms both">
+          <p class="label">This month's colorway</p>
+          <div class="swatch-name" style="margin-top:6px">${w.name}</div>
+          <div class="row" style="justify-content:center;gap:6px;margin-top:10px"><span class="pill butter">+ ${ch.name} charm${isNewCharm?'':' (extra)'}</span></div>
+          <div class="row" style="gap:8px;margin-top:16px">
+            <button class="btn ghost" style="flex:1" data-act="goto-stash">See stash</button>
+            <button class="btn rasp" style="flex:1" data-act="${o.kind==='kit'?'goto-make':'start-drop'}">${o.kind==='kit'?'Start making':'Get the pattern'}</button>
+          </div></div>`;
       }
     });
   }});
 }
-function openBuddy(id){
-  const b = BUDDIES.find(x=>x.id===id); const o = S.owned[id];
-  openSheet(()=> o ? `
-    ${sheetHeader(b.name, `${RARITY_LABEL[b.rarity]} · Night Garden`)}
-    <div style="width:200px;margin:0 auto">${buddySVG(b)}</div>
-    <p style="text-align:center;margin-top:4px">${b.blurb}</p>
-    <div class="card" style="margin-top:16px;padding:4px 18px">
-      <div class="list-row"><span style="flex:1">Real figure</span><strong class="tnum">${o.physical?`× ${o.physical}`:'Not yet'}</strong></div>
-      <div class="list-row"><span style="flex:1">Digital</span><strong class="tnum">${o.digital?`× ${o.digital}`:'Not yet'}</strong></div>
-      <div class="list-row"><span style="flex:1">Pull odds</span><strong>${RARITY_ODDS[b.rarity]}</strong></div>
-    </div>
-    ${!o.physical?`<p class="small muted" style="text-align:center;margin-top:12px">The real figure comes sealed in Lune Boxes.</p>`:''}
-  ` : `
-    ${sheetHeader('Still a mystery', b.rarity==='common'?'Common':`${RARITY_LABEL[b.rarity]} · ${RARITY_ODDS[b.rarity]}`)}
-    <div style="width:180px;margin:0 auto">${buddySVG(b,{locked:true})}</div>
-    <p class="muted" style="text-align:center;margin-top:6px">Find this one in a Lune Box, or get lucky with a free digital pouch.</p>
-    <button class="btn block" style="margin-top:16px" data-act="goto-box">${S.plan==='box'?'See my next box':'Explore Lune Box'}</button>
-  `);
+function openCharm(id){
+  const c = CHARMS.find(x=>x.id===id), n = S.charms[id];
+  openSheet(()=>`${sheetHead(n?c.name:'Not yet', 'Autumn Market · stitch marker')}
+    <div style="width:110px;margin:6px auto;animation:sway 3s ease-in-out infinite;transform-origin:50% 12%">${(n||!c.special)?charmSVG(id,{dim:!n}):'<div class="swatch-name" style="text-align:center;opacity:.3">?</div>'}</div>
+    <p class="muted" style="text-align:center">${n?`You have ${n}. Clip it on to mark your first stitch.`:c.special?'Tucked into a few parcels this season.':'Comes in a future drop or kit.'}</p>`);
 }
-function openDay(k){
-  const d = parseKey(k), t = dayType(d), ci = S.checkins[k];
-  const future = d > today();
-  const label = {period:'Period day', predicted:'Predicted period', fertile:'Fertile window (estimate)', ovulation:'Estimated ovulation', '':'Regular day'}[t];
-  openSheet(()=>`
-    ${sheetHeader(fmt(d,{weekday:'long',month:'long',day:'numeric'}), label)}
-    ${ci?`<div class="card"><p class="eyebrow">Check-in</p><div class="chips" style="margin-top:8px"><span class="pill berry">${esc(ci.mood)}</span>${ci.sym.map(s=>`<span class="pill">${esc(s)}</span>`).join('')}</div></div>`
-       :`<div class="card small muted">${future?'Nothing logged yet. This day is in the future.':'No check-in logged for this day.'}</div>`}
-    ${!future?`<button class="btn block" style="margin-top:12px" data-act="log-period" data-v="${k}">${k===S.lastStart?'Marked as period start':'My period started this day'}</button>`
-             :`<p class="small muted" style="margin-top:12px;text-align:center">Predictions update when you log a period start.</p>`}
-  `);
+function openYarn(i){
+  const s = S.stash[i]; if (!s) return;
+  const w = COLORWAYS[s.way];
+  const fits = Object.entries(PATTERNS).filter(([,P])=>P.yarn.startsWith(s.weight)).map(([id])=>id);
+  openSheet(()=>`${sheetHead(w.name, `${s.weight} · ${s.yds} yds · from ${s.from}`)}
+    <div style="width:220px;margin:0 auto">${skeinSVG(s.way)}</div>
+    <div class="row" style="justify-content:center;gap:6px">${w.c.map(c=>`<i style="width:28px;height:28px;border-radius:50%;background:${c};box-shadow:inset 0 0 0 2px rgba(0,0,0,.05)"></i>`).join('')}</div>
+    ${fits.length?`<div class="label" style="margin-top:4px">Makes enough for</div>${fits.map(id=>`<button class="proj" data-act="pattern" data-v="${id}">${artTile(`<span style="width:40px">${projArt(PATTERNS[id].art, s.way)}</span>`, w.c[1], 52, 14)}<div class="grow"><div class="h3">${PATTERNS[id].name}</div><div class="small muted">${PATTERNS[id].level}</div></div>${I.chevR}</button>`).join('')}`:''}`);
 }
-function openProducts(){
-  openSheet(()=>`
-    ${sheetHeader('What goes in your box')}
-    <div class="stack">
-      ${PRODUCTS.map(p=>`<button class="option" data-act="prod-toggle" data-v="${p.id}" aria-pressed="${S.products.includes(p.id)}">
-        <div><div style="font-weight:600">${p.name}</div><div class="small muted">${p.desc}</div></div><span class="tick">${I.check}</span></button>`).join('')}
+function openDone(pid){
+  const P = PATTERNS[pid];
+  openSheet(()=>`<div style="text-align:center;padding-top:6px">
+      <div style="width:150px;margin:0 auto;animation:bob 3s ease-in-out infinite">${projArt(P.art,P.way)}</div>
+      <h2 class="title" style="margin-top:12px">You finished ${P.name}!</h2>
+      <p class="muted" style="margin-top:6px">${P.steps.length} steps. Show it off to the Club.</p>
     </div>
-    <button class="btn block" style="margin-top:16px" data-act="close">Done</button>
-  `);
+    <button class="btn block rasp" data-act="share">Share to the Club feed</button>
+    <button class="btn block ghost" data-act="close-done" style="margin-top:-4px">Done</button>`);
+  setTimeout(()=>{ if (sheet){ const [x,y] = centerOf(sheet.body.firstElementChild); burst(x, y-40, 30); } }, 400);
 }
 function openProfile(){
   openSheet(()=>`
-    ${sheetHeader(esc(S.name||'Your profile'), S.plan==='box'?`Lune Box member · ${money(boxTotal())}/cycle`:'Free plan')}
-    <div class="card" style="padding:4px 18px">
-      <div class="list-row"><span style="flex:1">Cycle length</span>
-        <div class="stepper"><button data-act="len" data-v="-1" aria-label="Shorter">−</button><span class="tnum">${S.cycleLen}</span><button data-act="len" data-v="1" aria-label="Longer">+</button></div></div>
-      <div class="list-row"><span style="flex:1">Period length</span>
-        <div class="stepper"><button data-act="plen" data-v="-1" aria-label="Shorter">−</button><span class="tnum">${S.periodLen}</span><button data-act="plen" data-v="1" aria-label="Longer">+</button></div></div>
-      <div class="list-row"><span style="flex:1">Last period started</span><strong>${fmt(parseKey(S.lastStart))}</strong></div>
-    </div>
-    ${S.plan==='box'?`<div class="card" style="margin-top:12px;padding:4px 18px">
-      <div class="list-row"><span style="flex:1">${S.paused?'Box is skipped this cycle':'Skip next box'}</span><button class="btn sm ghost" data-act="skip">${S.paused?'Resume':'Skip'}</button></div>
-      <div class="list-row"><span style="flex:1">Cancel membership</span><button class="btn sm outline" data-act="cancel">Cancel</button></div>
+    ${sheetHead(esc(S.name||'You'), S.club?`Club member · ${money(CLUB_PRICE)}/month`:'Free plan')}
+    ${S.club?`<div class="card" style="padding:4px 18px">
+      <div class="list-row"><span class="grow">${S.skip?'Skipping next drop':'Skip next drop'}</span><button class="btn sm ghost" data-act="skip">${S.skip?'Undo':'Skip'}</button></div>
+      <div class="list-row"><span class="grow">Leave the Club</span><button class="btn sm ghost" data-act="cancel">Leave</button></div>
     </div>`:''}
-    <p class="eyebrow" style="margin:18px 4px 8px">Demo controls</p>
+    <div class="label" style="margin:4px 4px -4px">Demo controls</div>
     <div class="card" style="padding:4px 18px">
-      <div class="list-row"><div style="flex:1"><div>Fast shipping</div><div class="small muted">Orders "arrive" in about 25s</div></div>
-        <button class="switch" role="switch" aria-label="Fast shipping" aria-checked="${S.demoFast}" data-act="fast"></button></div>
-      <div class="list-row"><div style="flex:1"><div>Give me 5 stars</div><div class="small muted">Unlock a free pouch now</div></div><button class="btn sm ghost" data-act="demo-stars">Add</button></div>
-      <div class="list-row"><div style="flex:1"><div>Reset demo</div><div class="small muted">Back to onboarding</div></div><button class="btn sm outline" data-act="reset">Reset</button></div>
+      <div class="list-row"><span class="grow">Fast shipping</span><button class="switch" role="switch" aria-label="Fast shipping" aria-checked="${S.demoFast}" data-act="fast"></button></div>
+      <div class="list-row"><span class="grow">Start over</span><button class="btn sm ghost" data-act="reset">Reset</button></div>
     </div>
-    <p class="small muted" style="text-align:center;margin-top:16px">Lune demo · everything is simulated on this device.</p>
-  `);
+    <p class="small muted" style="text-align:center">Loop demo. Everything stays on this device.</p>`);
 }
 function confirmSheet(title, msg, yes, onYes){
-  openSheet(()=>`${sheetHeader(title)}<p class="muted">${msg}</p>
-    <button class="btn block" style="margin-top:18px" data-act="confirm-yes">${yes}</button>
-    <button class="btn block ghost" style="margin-top:8px" data-act="close">Never mind</button>`);
+  openSheet(()=>`${sheetHead(title)}<p class="muted">${msg}</p>
+    <button class="btn block" data-act="confirm-yes">${yes}</button>
+    <button class="btn block ghost" data-act="close" style="margin-top:-4px">Never mind</button>`);
   sheet.onYes = onYes;
 }
 
 /* ---------- Actions ---------- */
-document.addEventListener('click', e=>{
-  const el = e.target.closest('[data-act]'); if (!el) return;
-  const act = el.dataset.act, v = el.dataset.v;
-  const A = {
-    'tab':()=>{ const same = ui.tab===v; ui.tab=v; if (v==='calendar') ui.calMonth=null; closeSheet(); renderTabs(); renderScreen(); if(!same) document.getElementById('scroller').scrollTop=0; },
-    'ob-next':()=>{
-      if (ui.obStep===1){ S.name = document.getElementById('ob-name').value.trim(); const dv = document.getElementById('ob-date').value; if (dv && parseKey(dv) <= today()) S.lastStart = dv; }
-      ui.obStep++; save(); render();
-    },
-    'ob-back':()=>{ if (ui.obStep===1) S.name = document.getElementById('ob-name').value.trim(); ui.obStep=Math.max(0,ui.obStep-1); render(); },
-    'ob-len':()=>{ S.name = document.getElementById('ob-name').value.trim(); const dv=document.getElementById('ob-date').value; if (dv) S.lastStart=dv;
-      S.cycleLen = clamp(S.cycleLen + +v, 21, 40); render(); },
-    'ob-prod':()=>{ toggleProduct(v); render(); },
-    'ob-finish':()=>{ S.onboarded=true; ui.tab='today'; save(); render(); },
-    'seg':()=>{
-      const name = el.dataset.seg;
-      if (name==='flow'){ S.flow = v; save(); }
-      const wrap = el.closest('.seg'); const btns=[...wrap.querySelectorAll('button')]; const i=btns.indexOf(el);
-      wrap.querySelector('.thumb').style.transform = `translateX(${i*100}%)`;
-      btns.forEach(b=>b.setAttribute('aria-pressed', b===el));
-      if (S.onboarded && ui.tab==='box') setTimeout(renderScreen, 260);
-    },
-    'ci-mood':()=>{ ui.draft.mood=v; renderScreen(); },
-    'ci-sym':()=>{ const s=ui.draft.sym; const i=s.indexOf(v); i>=0?s.splice(i,1):s.push(v); renderScreen(); },
-    'ci-edit':()=>{ ui.draft.editing=true; renderScreen(); },
-    'ci-save':()=>{
-      const k = key(today()); const first = !S.checkins[k];
-      S.checkins[k] = {mood:ui.draft.mood, sym:[...ui.draft.sym]};
-      ui.draft.editing=false;
-      if (first){ S.stars=Math.min(5,S.stars+1); S.streak++; }
-      save(); renderScreen();
-      toast(first ? (S.stars>=5?'Check-in saved. Your free pouch is ready!':'Check-in saved. +1 moon star') : 'Check-in updated');
-    },
-    'free-pouch':()=>{ if (S.stars<5) return; const b = BUDDIES.find(x=>x.id===pickBuddy()); openRevealSheet(b,{physical:false,onDone:()=>{ S.stars=0; }}); },
-    'log-period':()=>{
-      if (S.lastStart===v){ closeSheet(); toast('Already marked as your period start'); return; }
-      S.lastStart=v; save(); closeSheet(); renderScreen();
-      toast(`Period start logged for ${fmt(parseKey(v))}. Predictions updated.`);
-    },
-    'profile':()=>openProfile(),
-    'close':()=>closeSheet(),
-    'cal-nav':()=>{ ui.calMonth = new Date(ui.calMonth.getFullYear(), ui.calMonth.getMonth() + +v, 1); renderScreen(); },
-    'day':()=>openDay(v),
-    'checkout':()=>openCheckout(v),
-    'pay':()=>sheet && sheet.pay && sheet.pay(),
-    'order':()=>openOrder(v),
-    'order-from-done':()=>{ ui.tab='box'; render(); openOrder(v); },
-    'reveal':()=>openReveal(v),
-    'irl':()=>{ const o=findOrder(v); o.state='irl'; save(); closeSheet(); render(); toast('Saved for IRL. We will keep your buddy a secret.'); },
-    'goto-shelf':()=>{ ui.tab='shelf'; closeSheet(); render(); document.getElementById('scroller').scrollTop=0; },
-    'goto-box':()=>{ ui.tab='box'; closeSheet(); render(); document.getElementById('scroller').scrollTop=0; },
-    'buddy':()=>openBuddy(v),
-    'addon':()=>{ S.addons[v]=!S.addons[v]; save(); el.setAttribute('aria-checked', S.addons[v]); setTimeout(renderScreen, 240); },
-    'edit-products':()=>openProducts(),
-    'prod-toggle':()=>{ toggleProduct(v); refreshSheet(); renderScreen(); },
-    'skip':()=>{ S.paused=!S.paused; save(); refreshSheet(); renderScreen(); toast(S.paused?'Next box skipped. You will not be charged.':'Box resumed'); },
-    'ship-now':()=>{ const o = placeOrder('box'); render(); openOrder(o.id); },
-    'cancel':()=>confirmSheet('Cancel your Lune Box?', 'Tracking stays free and your shelf stays yours. You can restart anytime.', 'Yes, cancel', ()=>{ S.plan='free'; S.paused=false; save(); render(); toast('Membership cancelled'); }),
-    'confirm-yes':()=>{ const f = sheet && sheet.onYes; closeSheet(); f && f(); },
-    'len':()=>{ S.cycleLen=clamp(S.cycleLen + +v,21,40); save(); refreshSheet(); renderScreen(); },
-    'plen':()=>{ S.periodLen=clamp(S.periodLen + +v,2,9); save(); refreshSheet(); renderScreen(); },
-    'fast':()=>{
-      // keep each order's current progress when switching clock speed
-      S.orders.forEach(o=>{ const e = orderElapsed(o); S.demoFast = !S.demoFast; o.placedAt = Date.now() - e*1000/(S.demoFast?1:0.02); S.demoFast = !S.demoFast; });
-      S.demoFast=!S.demoFast; save(); refreshSheet();
-    },
-    'demo-stars':()=>{ S.stars=5; save(); closeSheet(); ui.tab='today'; render(); toast('5 moon stars added'); },
-    'reset':()=>confirmSheet('Reset the demo?', 'This clears everything on this device and restarts onboarding.', 'Reset', ()=>{ S=freshState(); ui.obStep=0; ui.draft=null; ui.tab='today'; save(); render(); }),
-  };
-  if (A[act]){ A[act](); }
-});
-document.addEventListener('keydown', e=>{ if (e.key==='Escape') closeSheet(); });
-function clamp(n,a,b){ return Math.max(a,Math.min(b,n)); }
-function toggleProduct(id){
-  const i = S.products.indexOf(id);
-  if (i>=0){ if (S.products.length>1 || !S.onboarded) S.products.splice(i,1); else toast('Keep at least one product'); }
-  else S.products.push(id);
-  save();
+function setTab(v){
+  if (ui.open){ stopTimer(); ui.open = null; }
+  const same = ui.tab===v; ui.tab=v;
+  closeSheet(); renderTabs(); renderScreen(!same);
+  if (!same) $('#scroller').scrollTop=0;
 }
+function openProject(pid){
+  ui.tab='make'; ui.open=pid; closeSheet(); renderTabs(); renderScreen('push'); $('#scroller').scrollTop=0; startTimer();
+}
+function readOb(){ const n = $('#ob-name'); if (n) S.name = n.value.trim(); }
+function toggleIn(arr, v){ const i = arr.indexOf(v); i>=0 ? arr.splice(i,1) : arr.push(v); return i<0; }
+const A = {
+  'tab':(el,v)=>setTab(v),
+  'ob-next':()=>{ readOb(); ui.obStep++; ui.obDir='fwd'; save(); render(); },
+  'ob-back':()=>{ readOb(); ui.obStep=Math.max(0,ui.obStep-1); ui.obDir='back'; render(); },
+  'ob-level':(el,v)=>{ S.level=v; document.querySelectorAll('[data-act="ob-level"]').forEach(b=>b.setAttribute('aria-pressed', b===el)); buzz(6); },
+  'ob-love':(el,v)=>{ el.setAttribute('aria-pressed', toggleIn(S.loves, v)); buzz(6); },
+  'ob-pal':(el,v)=>{ el.setAttribute('aria-pressed', toggleIn(S.palettes, v)); buzz(6); },
+  'ob-finish':()=>{ S.onboarded=true; ui.tab='home'; save(); render(true); },
+  'seg':(el,v)=>{
+    const wrap = el.closest('.seg'), btns=[...wrap.querySelectorAll('button')], i=btns.indexOf(el);
+    wrap.querySelector('.thumb').style.transform = `translateX(${i*100}%)`;
+    btns.forEach(b=>b.setAttribute('aria-pressed', b===el));
+    if (el.dataset.seg==='stash'){ ui.stashView=v; setTimeout(()=>{ renderScreen(); const s = $('#screen'); [...s.children].slice(2).forEach(c=>replay(c,'rise 380ms var(--ease-out)')); }, 120); }
+  },
+  'open-proj':(el,v)=>openProject(v),
+  'close-proj':()=>{ stopTimer(); ui.open=null; renderScreen('in'); },
+  'count':(el)=>{
+    const p = S.projects.find(x=>x.pid===ui.open && !x.done); if (!p) return;
+    const P = PATTERNS[p.pid];
+    buzz(12);
+    const r = document.createElement('i'); r.className='ripple'; el.appendChild(r); setTimeout(()=>r.remove(), 650);
+    p.step++; save();
+    if (p.step >= P.steps.length){ stopTimer(); p.done=true; p.step=P.steps.length-1; save(); ui.open=null; renderScreen('in'); openDone(p.pid); return; }
+    const s = P.steps[p.step];
+    const card = $('#step-card');
+    card.innerHTML = `<div class="row between"><span class="pill rasp">${s.label}</span>${s.st?`<span class="small muted tnum">${s.st} sts</span>`:''}</div><div class="instr" style="margin-top:10px">${esc(s.text)}</div>${s.note?`<div class="note">${I.pin}<span>${esc(s.note)}</span></div>`:''}`;
+    replay(card,'swap 360ms var(--ease-out)');
+    const cap = $('#cap'); if (cap) cap.textContent = /^R\d/.test(s.label) ? 'Round' : (s.label.match(/^[A-Za-z]+/)?.[0]||'Step');
+    const num = $('#num'); num.innerHTML = `<span>${s.label.replace(/^[A-Za-z ]+/,'') || '✓'}</span>`; replay(num.firstChild,'flip 380ms var(--ease-out)');
+    const C = 2*Math.PI*112; $('#ring-fill').style.strokeDashoffset = C*(1-p.step/P.steps.length);
+    const rest = $('#screen'); const tmp = document.createElement('div'); tmp.innerHTML = renderCounter(p.pid);
+    const newNext = tmp.querySelector('.upnext'), oldNext = rest.querySelector('.upnext');
+    if (oldNext && newNext) oldNext.innerHTML = newNext.innerHTML; else if (oldNext) oldNext.remove();
+    rest.querySelector('.pill.tnum').textContent = `${p.step} of ${P.steps.length} done`;
+    rest.querySelector('[data-act="undo"]').disabled = false;
+    if (s.note) buzz(20);
+  },
+  'undo':()=>{ const p = S.projects.find(x=>x.pid===ui.open && !x.done); if (!p || p.step===0) return; p.step--; save(); renderScreen(); toast('Back one step', I.undo); },
+  'pattern':(el,v)=>openPattern(v),
+  'start':(el,v)=>{ if (!S.projects.some(p=>p.pid===v && !p.done)) S.projects.unshift({pid:v, step:0, minutes:0, done:false}); save(); openProject(v); },
+  'like':(el,v)=>{ S.liked[v]=!S.liked[v]; save(); buzz(6); el.setAttribute('aria-pressed', S.liked[v]); el.querySelector('span').textContent = FEED[v].likes + (S.liked[v]?1:0); if (S.liked[v]){ const [x,y]=centerOf(el); burst(x,y,8,['#D6336C','#F7B89A','#FBE3EB']); } },
+  'checkout':(el,v)=>openCheckout(v),
+  'pay':()=>sheet && sheet.pay && sheet.pay(),
+  'order':(el,v)=>openOrder(v),
+  'order-from-done':(el,v)=>{ closeSheet(true); setTab('club'); openOrder(v); },
+  'unwrap':(el,v)=>openUnwrap(v),
+  'irl':(el,v)=>{ const o=findOrder(v); o.state='irl'; save(); closeSheet(); render(); toast('Saved. No spoilers here.', I.gift); },
+  'goto-stash':()=>{ closeSheet(); ui.stashView='Yarn'; setTab('stash'); },
+  'goto-make':()=>{ closeSheet(); setTab('make'); },
+  'start-drop':()=>{ closeSheet(); A.start(null, 'hat'); toast('Pattern added. Bucket hats love this yarn.', I.spark); },
+  'charm':(el,v)=>openCharm(v),
+  'yarn':(el,v)=>openYarn(+v),
+  'share':()=>{ closeSheet(); toast('Posted to the Club feed', I.heart); },
+  'close-done':()=>closeSheet(),
+  'skip':()=>{ S.skip=!S.skip; save(); refreshSheet(); renderScreen(); toast(S.skip?'Skipped. No charge this month.':"You're in for next month", I.check); },
+  'ship-now':()=>{ const o = placeOrder('drop'); render(); openOrder(o.id); },
+  'cancel':()=>confirmSheet('Leave the Club?', 'Your patterns, stash and charms stay yours.', 'Leave', ()=>{ S.club=false; S.skip=false; save(); render(); toast('You left the Club', I.check); }),
+  'confirm-yes':()=>{ const f = sheet && sheet.onYes; closeSheet(); f && f(); },
+  'profile':()=>openProfile(),
+  'close':()=>closeSheet(),
+  'fast':(el)=>{ const next = !S.demoFast; S.orders.forEach(o=>{ const e = orderElapsed(o); o.placedAt = Date.now() - e*1000/(next?1:0.01); }); S.demoFast = next; save(); el.setAttribute('aria-checked', next); },
+  'reset':()=>confirmSheet('Start over?', 'This clears the demo on this device.', 'Reset', ()=>{ stopTimer(); S=freshState(); ui.obStep=0; ui.obDir='fwd'; ui.tab='home'; ui.open=null; $('#tabbar').innerHTML=''; save(); render(); }),
+};
+document.addEventListener('click', e=>{
+  const el = e.target.closest('[data-act]'); if (!el || el.disabled) return;
+  const f = A[el.dataset.act]; if (f) f(el, el.dataset.v);
+});
+document.addEventListener('keydown', e=>{
+  if (e.key==='Escape') closeSheet();
+  if ((e.key===' ' || e.key==='Enter') && ui.open && !sheet && document.activeElement===document.body){ e.preventDefault(); $('#counter')?.click(); }
+});
 
-/* ---------- Simulated shipping clock ---------- */
+/* ---------- Shipping clock ---------- */
 setInterval(()=>{
   if (!S.onboarded) return;
-  let changed=false;
   S.orders.forEach(o=>{
-    const st = orderStage(o);
-    const prev = ui.lastStages[o.id];
+    const st = orderStage(o), prev = ui.lastStages[o.id];
     if (prev===undefined){ ui.lastStages[o.id]=st; return; }
-    if (st!==prev){
-      ui.lastStages[o.id]=st; changed=true;
-      if (st===4) toast(o.kind==='box'?'Your Lune Box was delivered':'Your top-up kit was delivered', I.gift);
-      else if (st===2) toast(`${o.id} has shipped`);
-    }
-  });
-  if (changed){
+    if (st===prev) return;
+    ui.lastStages[o.id]=st;
+    if (st<4){ patchLive(o); if (st===2) toast(`${o.title} is on the way`, I.van); return; }
+    toast(`${o.title} was delivered`, I.gift); buzz(20);
     renderTabs();
-    if (ui.tab==='today'||ui.tab==='box') renderScreen();
-    if (sheet && sheet.orderId) refreshSheet();
-  }
+    const live = $('#h-live'); if (live && !ui.open){ live.innerHTML = renderLive(); replay(live,'pop 520ms var(--spring)'); }
+    else if (ui.tab==='club') renderScreen();
+    if (sheet && sheet.orderId===o.id) refreshSheet();
+  });
 }, 1000);
 
-render();
+render(true);
 </script>
 </body>
 </html>
