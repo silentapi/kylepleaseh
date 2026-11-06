@@ -26,7 +26,13 @@ def mseg(m0, m1): return mus[int(m0 * SR):int(m1 * SR)].copy()
 music = np.zeros(N)
 cut, thurs = plan["cut"], plan["thurs"]
 # A: intro, ending exactly on the sax-entry downbeat at the cut
-a = mseg(plan["music_a_start"], plan["sax_in"])
+# intro is 16 bars (0.86s..43.37s); if the pre-cut story is longer, prepend whole bars so the
+# sax still enters exactly on "Thursday" and every line stays on the beat grid
+BAR = 4 * plan["P"]
+a = mseg(0.86, plan["sax_in"])
+loop = mseg(3.51, 3.51 + 8 * BAR)
+while len(a) < cut * SR: a = np.concatenate([loop, a])
+a = a[-int(cut * SR):]
 # tape-stop over the last 0.7s before the cut
 ts = int(0.7 * SR); tail = a[-ts:]
 speed = np.linspace(1.0, 0.05, ts) ** 1.5; pos = np.cumsum(speed); pos = pos / pos[-1] * (ts - 1) * 0.55

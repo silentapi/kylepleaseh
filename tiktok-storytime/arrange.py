@@ -18,11 +18,12 @@ beats = json.load(open("assets/music/beats.json"))
 SAX_IN = 43.37
 P = (88.54 - 0.86) / 33 / 4          # beat period (s)
 BAR = 4 * P
-CUT_SEG, THURS_SEG = 15, 17         # "She says no." / "Thursday."
-ON_BEAT = {i for i, s in enumerate(SEGMENTS) if s["k"] == "card"} | {6, 9, 13, 16, 29, 35, 37, 38}
+MARK = {s["mark"]: i for i, s in enumerate(SEGMENTS) if "mark" in s}
+CUT_SEG, THURS_SEG = MARK["cut"], MARK["thurs"]   # music tape-stop / sax re-entry
+ON_BEAT = {i for i, s in enumerate(SEGMENTS) if s["k"] == "card" or s["d"] in ("D", "P")}
 ON_BAR = {CUT_SEG, THURS_SEG}
 
-def norm(s): return re.sub(r"[^a-z0-9 ]", "", s.lower().replace("-", " ")).split()
+def norm(s): return re.sub(r"[^a-z0-9 ]", "", s.lower().replace("-", " ").replace("health care", "healthcare")).split()
 NUM = {"five": "5", "seventy": "70", "fifty": "50", "two": "2", "eleven": "11", "thirty": "30"}
 def words_eq(a, b):
     a = [NUM.get(w, w) for w in a]; b = [NUM.get(w, w) for w in b]
@@ -38,8 +39,8 @@ def trim(x, thr_db=-38):
     return y
 
 def finalize(path_in, path_out):
-    """No pitch shifting. One uniform, gentle 6% pace-up (pitch unchanged) applied identically to every line."""
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", path_in, "-af", "atempo=1.06", path_out], check=True)
+    """No pitch shifting. One uniform, gentle 9% pace-up (pitch unchanged) applied identically to every line."""
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", path_in, "-af", "atempo=1.09", path_out], check=True)
 
 wm = WhisperModel("small.en", device="cpu", compute_type="int8")
 def transcribe(x):
@@ -51,7 +52,7 @@ def median_f0(x):
     f0, _, _ = librosa.pyin(x, fmin=55, fmax=320, sr=SR, frame_length=2048)
     f0 = f0[~np.isnan(f0)]; return float(np.median(f0)) if len(f0) >= 5 else None
 BASE_F0 = 97.0   # narrator's natural median pitch (from the reference voice)
-DRAMATIC = {0, 1, 6, 9, 13, 14, 15, 16, 17, 20, 21, 23, 25, 28, 29, 33, 34, 35, 36, 37, 38}
+DRAMATIC = {i for i, s in enumerate(SEGMENTS) if s["d"] != "N"}
 def pitch_range(x):
     f0, _, _ = librosa.pyin(x, fmin=55, fmax=320, sr=SR, frame_length=2048)
     f0 = f0[~np.isnan(f0)]
@@ -66,13 +67,14 @@ for i, s in enumerate(SEGMENTS):
         if not os.path.exists(fn): continue
         x, sr = sf.read(fn); assert sr == SR
         x = trim(x); txt = transcribe(x)
-        sim = words_eq(norm(txt), norm(s["say"]))
+        sim = words_eq(norm(txt), norm(s.get("tts", s["say"])))
         nw = len(s["say"].split()); dur = len(x) / SR
         slow_pen = max(0, dur - (0.55 * nw + 1.0))       # hallucinated tails / dragging
         pr = pitch_range(x); mf = median_f0(x)
         drift = abs(12 * np.log2(mf / BASE_F0)) if mf else 0.0     # same-person check
         allow = 4.0 if i in DRAMATIC else 2.5
-        score = sim * 3 + min(pr, 14) / 14 - slow_pen - max(0, drift - allow) * 0.5
+        extra = max(0, len(norm(txt)) - len(norm(s.get("tts", s["say"]))))   # stray words the model added
+        score = -1.5 * extra + sim * 6 + min(pr, 14) / 14 - slow_pen - max(0, drift - allow) * 0.5
         report.append(f"{i:02d} t{k} sim={sim:.2f} f0={mf or 0:4.0f} pr={pr:4.1f} dur={dur:4.2f} score={score:.2f} | {txt.strip()}")
         if best is None or score > best[0]: best = (score, k, x, sim)
     if best is None: sys.exit(f"no takes for segment {i}")
@@ -98,7 +100,7 @@ for i, s in enumerate(SEGMENTS):
     else: start = snap(cursor, P / 2)
     if i == CUT_SEG: cut_time = start
     segs.append(dict(i=i, start=round(float(start), 4), end=round(float(start + d), 4), take=chosen[i]))
-    minpause = 0.06 + 0.3 * s.get("pause", 0.2)
+    minpause = 0.04 + 0.25 * s.get("pause", 0.2)
     cursor = start + d + minpause
 
 total = segs[-1]["end"] + 1.6

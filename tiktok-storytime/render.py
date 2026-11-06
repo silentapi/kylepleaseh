@@ -184,7 +184,6 @@ def wrap(words, f, maxw):
     if cur: lines.append(cur)
     return lines
 
-WHO = {0: "HER BOSS", 14: "BEN", 21: "BEN", 23: "BEN", 25: "BEN", 29: "BEN", 34: "TINA · HER EMAIL"}
 def render_card(seg, t):
     words = seg["show"].split(); n = len(words)
     size = 86 if n <= 7 else 72
@@ -193,7 +192,7 @@ def render_card(seg, t):
     boxw = int(max(f.getlength(" ".join(l)) for l in lines)) + 110; boxh = lh * len(lines) + 90
     im = Image.new("RGBA", (boxw + 40, boxh + 110), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
     rrect(d, (20, 70, 20 + boxw, 70 + boxh), 34, fill=RED + (255,))
-    who = WHO.get(seg["i"], "")
+    who = seg.get("who", "")
     if who:
         fw = font(F_MONO, 34); ww = fw.getlength(who)
         rrect(d, (20, 4, 20 + ww + 44, 62), 14, fill=(0, 0, 0, 235))
@@ -247,7 +246,7 @@ def frame_at(t):
         d = ImageDraw.Draw(frame); n = int(70 * ease_out(lt / 1.1))
         stroke_text(d, (W / 2, 560), f"{n} MILES", font(F_CAP, 190), WHITE, 12, "mm")
         if lt > 1.0: stroke_text(d, (W / 2, 720), "≈ 2 HRS EACH WAY", font(F_MONO, 64), YELLOW, 8, "mm")
-        s10 = timing[10]["start"]
+        s10 = next(sg["start"] for sg in timing if sg.get("mark") == "promised")
         if t >= s10:
             k = ease_back((t - s10) / 0.25)
             pill = Image.new("RGBA", (560, 120), (0, 0, 0, 0)); pd = ImageDraw.Draw(pill)
