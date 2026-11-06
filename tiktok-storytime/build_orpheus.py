@@ -117,34 +117,35 @@ thu_p = next(s["p"] for s in SEGMENTS if s.get("mark") == "thurs")
 dur = {p: len(P_AUDIO[p]) / SR for p in paras}
 starts, plan_extra = {}, {}
 if MUSIC:
-    # One continuous stretch of the song starting at S: "she says no" lands in the song's own silence and
-    # "Thursday" lands exactly where the beat returns. Paragraph starts snap to the song's beat grid.
-    bt = np.array(MUSIC["beats"]); Ss, Br = MUSIC["silence_start"], MUSIC["beat_return"]
-    pre = [p for p in paras if p < cut_p]
-    need = sum(dur[p] for p in pre) + 0.3 * (len(pre) - 1) + 0.35
-    drop_p = next((s["p"] for s in SEGMENTS if s.get("mark") == "drop"), None)
-    lim = Ss - need
-    if drop_p is not None and MUSIC.get("drop"):          # also land the song's big drop on this paragraph
-        lim = min(lim, MUSIC["drop"] - (sum(dur[q] + 0.3 for q in pre if q < drop_p) + 0.75))
-    S = float(bt[bt <= lim].max())
-    vbeats = bt - S
+    # The song starts at a fixed point (right before its first sax hit). Anchors:
+    #  - the word marked anchor= lands exactly on the song's big drop
+    #  - the paragraph before mark='payoff' fills the song's silence and the payoff starts on the beat return
+    bt = np.array(MUSIC["beats"]); Ss, Br, S = MUSIC["silence_start"], MUSIC["beat_return"], MUSIC["song_start"]
+    vb = bt - S
+    next_beat = lambda t: float(vb[vb >= t].min()) if (vb >= t).any() else t
+    anc = next(s for s in SEGMENTS if s.get("anchor")); anc_p = anc["p"]
+    pay_p = next(s["p"] for s in SEGMENTS if s.get("mark") == "payoff")
+    off = next((w.start for w in P_WORDS[anc_p] if norm(w.word) == [anc["anchor"]]), None)
+    if off is None: print("WARNING: anchor word not found"); off = dur[anc_p] * 0.8
     cursor = 0.0
-    for p in pre:
-        if p == pre[0]: st = 0.0
-        elif p == drop_p and MUSIC.get("drop"): st = MUSIC["drop"] - S
-        else:
-            cand = vbeats[vbeats >= cursor + 0.25]; st = float(cand.min()) if len(cand) else cursor + 0.3
+    for p in [p for p in paras if p < anc_p]:
+        st = 0.0 if p == paras[0] else cursor + 0.1
         starts[p] = st; cursor = st + dur[p]
-    if drop_p is not None and starts.get(drop_p - 1, 0) + dur.get(drop_p - 1, 0) > starts[drop_p] - 0.1:
-        print("WARNING: paragraph before the drop overlaps it")
-    sil = (Br - Ss) - dur[cut_p]                                   # centre the line in the song's silence,
-    starts[cut_p] = (Ss - S) + max(0.15, min(1.3, sil * 0.42)); cut_t = (Ss - S)   # a breath of quiet before it
-    if starts[cut_p] + dur[cut_p] > Br - S - 0.1: print("WARNING: 'she says no' paragraph spills past the silence")
-    starts[thu_p] = Br - S + 0.03; thu_t = starts[thu_p]
-    cursor = starts[thu_p] + dur[thu_p]
-    for p in [p for p in paras if p > thu_p]:
-        cand = vbeats[vbeats >= cursor + 0.2]; st = float(cand.min()) if len(cand) else cursor + 0.3
-        starts[p] = st; cursor = st + dur[p]
+    starts[anc_p] = MUSIC["drop"] - S - off
+    if starts[anc_p] < cursor + 0.15:
+        print(f"WARNING: intro runs {cursor + 0.15 - starts[anc_p]:.2f}s long; drop lands late"); starts[anc_p] = cursor + 0.15
+    cursor = starts[anc_p] + dur[anc_p]
+    mid = [p for p in paras if anc_p < p < pay_p]
+    for p in mid[:-1]:
+        starts[p] = cursor + 0.08; cursor = starts[p] + dur[p]
+    last = mid[-1]
+    starts[last] = max(cursor + 0.08, (Br - S) - dur[last] + 0.15); cursor = starts[last] + dur[last]
+    starts[pay_p] = max(cursor + 0.0, Br - S + 0.03); cursor = starts[pay_p] + dur[pay_p]
+    for p in [p for p in paras if p > pay_p]:
+        starts[p] = next_beat(cursor + 0.2); cursor = starts[p] + dur[p]
+    cut_t = starts[cut_p]
+    print(f"drop word '{anc['anchor']}' at video {starts[anc_p] + off:.2f}s (song {starts[anc_p] + off + S:.2f}); "
+          f"silence video {Ss - S:.2f}-{Br - S:.2f}; payoff at {starts[pay_p]:.2f}")
     plan_extra = dict(mode="batida", song_start=S)
     P_BEAT, SAX_IN = float(np.median(np.diff(bt))), Br
 else:
