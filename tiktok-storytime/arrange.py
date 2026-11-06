@@ -1,4 +1,4 @@
-"""Picks the best Chatterbox take per line, deepens the voice, and lays every line out on the
+"""Picks the best Chatterbox take per line, keeps the voice unprocessed, and lays every line out on the
 music's beat grid. Writes build/voice_raw.wav, build/seg_XX.wav, build/timing.json and build/plan.json.
 
 Music plan (track: "ʀᴏsᴇᴍᴀʀʏʟʏɴɴ |sʟᴏᴡ|", 89 BPM, sax section starts at the 43.37s downbeat):
@@ -37,11 +37,9 @@ def trim(x, thr_db=-38):
     y = x[a:b].copy(); f = int(0.01 * SR); y[:f] *= np.linspace(0, 1, f); y[-f * 4:] *= np.linspace(1, 0, f * 4)
     return y
 
-def deepen(path_in, path_out, formant_semis=-1.5, pitch_semis=-2.0, tempo=1.06):
-    r1, r2 = 2 ** (formant_semis / 12), 2 ** (pitch_semis / 12)
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", path_in, "-af",
-                    f"asetrate={int(SR * r1)},aresample={SR},atempo={1 / r1:.5f},"
-                    f"rubberband=pitch={r2:.5f}:tempo={tempo}:formant=preserved:pitchq=quality", path_out], check=True)
+def finalize(path_in, path_out):
+    """No pitch shifting. One uniform, gentle 6% pace-up (pitch unchanged) applied identically to every line."""
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", path_in, "-af", "atempo=1.06", path_out], check=True)
 
 wm = WhisperModel("small.en", device="cpu", compute_type="int8")
 def transcribe(x):
@@ -52,7 +50,8 @@ def transcribe(x):
 def median_f0(x):
     f0, _, _ = librosa.pyin(x, fmin=55, fmax=320, sr=SR, frame_length=2048)
     f0 = f0[~np.isnan(f0)]; return float(np.median(f0)) if len(f0) >= 5 else None
-TARGET_F0 = 112.0
+BASE_F0 = 97.0   # narrator's natural median pitch (from the reference voice)
+DRAMATIC = {0, 1, 6, 9, 13, 14, 15, 16, 17, 20, 21, 23, 25, 28, 29, 33, 34, 35, 36, 37, 38}
 def pitch_range(x):
     f0, _, _ = librosa.pyin(x, fmin=55, fmax=320, sr=SR, frame_length=2048)
     f0 = f0[~np.isnan(f0)]
@@ -70,16 +69,15 @@ for i, s in enumerate(SEGMENTS):
         sim = words_eq(norm(txt), norm(s["say"]))
         nw = len(s["say"].split()); dur = len(x) / SR
         slow_pen = max(0, dur - (0.55 * nw + 1.0))       # hallucinated tails / dragging
-        pr = pitch_range(x)
-        score = sim * 3 + min(pr, 16) / 16 - slow_pen
-        report.append(f"{i:02d} t{k} sim={sim:.2f} pr={pr:4.1f} dur={dur:4.2f} score={score:.2f} | {txt.strip()}")
+        pr = pitch_range(x); mf = median_f0(x)
+        drift = abs(12 * np.log2(mf / BASE_F0)) if mf else 0.0     # same-person check
+        allow = 4.0 if i in DRAMATIC else 2.5
+        score = sim * 3 + min(pr, 14) / 14 - slow_pen - max(0, drift - allow) * 0.5
+        report.append(f"{i:02d} t{k} sim={sim:.2f} f0={mf or 0:4.0f} pr={pr:4.1f} dur={dur:4.2f} score={score:.2f} | {txt.strip()}")
         if best is None or score > best[0]: best = (score, k, x, sim)
     if best is None: sys.exit(f"no takes for segment {i}")
     if best[3] < 0.75: print(f"WARNING seg {i} best similarity {best[3]:.2f}")
-    mf = median_f0(best[2]) or 165.0
-    ps = float(np.clip(12 * np.log2(TARGET_F0 / mf) + 1.5, -6.0, -0.5))
-    sf.write(f"{B}/_tmp.wav", best[2], SR); deepen(f"{B}/_tmp.wav", f"{B}/seg_{i:02d}.wav", pitch_semis=ps)
-    print(f"seg {i:02d} median {mf:.0f}Hz -> shift {ps - 1.5:+.1f} st")
+    sf.write(f"{B}/_tmp.wav", best[2], SR); finalize(f"{B}/_tmp.wav", f"{B}/seg_{i:02d}.wav")
     chosen.append(best[1])
 open(f"{B}/take_report.txt", "w").write("\n".join(report))
 print("\n".join(report))

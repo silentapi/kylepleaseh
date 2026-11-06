@@ -7,28 +7,30 @@ from script import SEGMENTS
 OUT, TAKES = sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 2
 os.makedirs(f"{OUT}/takes", exist_ok=True)
 torch.set_num_threads(4)
-DIRECTION = {  # index: (exaggeration, cfg_weight, optional TTS text)
- 0: (0.9, 0.3, "Enjoy waiting here... until five P.M."), 1: (0.8, 0.3, "Her boss said that... to her face."),
- 2: (0.7, 0.3, "So she put it in writing. And sent it straight to H.R."), 3: (0.55, 0.4, None),
- 4: (0.6, 0.4, None), 5: (0.65, 0.3, None), 6: (0.9, 0.3, "...Yet."), 7: (0.7, 0.35, "Then suddenly... her assignments start changing."),
- 8: (0.7, 0.35, "First? A solo home visit."), 9: (0.85, 0.3, "Seventy miles away. Two hours... each way."),
- 10: (0.65, 0.4, None), 11: (0.65, 0.4, None), 12: (0.7, 0.35, "And she has a special needs daughter who needs her nearby."), 13: (0.8, 0.3, None), 14: (0.9, 0.3, None),
- 15: (0.8, 0.35, None), 16: (0.95, 0.3, "And that's when it gets... ugly."), 17: (0.7, 0.35, "Thursday. Eleven thirty A.M."),
- 18: (0.6, 0.4, None), 19: (0.75, 0.35, None), 20: (0.7, 0.35, None), 21: (0.9, 0.3, None), 22: (0.5, 0.5, "Then."),
- 23: (0.9, 0.3, None), 24: (0.5, 0.5, "Then."), 25: (0.9, 0.3, None), 26: (0.7, 0.35, None), 27: (0.7, 0.35, None),
- 28: (0.8, 0.3, "And on his way out the door..."), 29: (1.0, 0.3, "Enjoy waiting here... until five P.M."),
- 30: (0.7, 0.35, None), 31: (0.8, 0.3, None), 32: (0.7, 0.35, None), 33: (0.8, 0.3, None), 34: (0.85, 0.3, None),
- 35: (0.8, 0.3, None), 36: (0.8, 0.3, "And he says she left something out..."), 37: (0.9, 0.3, "A working computer. That she refused to use."),
- 38: (0.8, 0.3, None), 39: (0.7, 0.35, None),
+# Calm, natural narration by default; dramatic only on the key beats. Kept <= 0.75 so the voice never distorts.
+N, BUILD, DRAMA, PEAK = (0.5, 0.5), (0.58, 0.45), (0.68, 0.4), (0.75, 0.4)
+DIRECTION = {  # index: ((exaggeration, cfg_weight), optional TTS text)
+ 0: (PEAK, "Enjoy waiting here... until five P.M."), 1: (BUILD, "Her boss said that... to her face."),
+ 2: (N, "So she put it in writing. And sent it straight to H.R."), 3: (N, None), 4: (N, None), 5: (N, None),
+ 6: (DRAMA, "...Yet."), 7: (N, "Then suddenly, her assignments start changing."), 8: (N, "First? A solo home visit."),
+ 9: (BUILD, "Seventy miles away. Two hours each way."), 10: (N, None), 11: (N, None),
+ 12: (N, "And she has a special needs daughter who needs her nearby."), 13: (BUILD, None), 14: (DRAMA, None),
+ 15: (DRAMA, None), 16: (PEAK, "And that's when it gets... ugly."), 17: (BUILD, "Thursday. Eleven thirty A.M."),
+ 18: (N, None), 19: (N, None), 20: (BUILD, None), 21: (DRAMA, None), 22: (N, "Then."), 23: (DRAMA, None),
+ 24: (N, "Then."), 25: (DRAMA, None), 26: (N, None), 27: (N, None), 28: (BUILD, "And on his way out the door..."),
+ 29: (PEAK, "Enjoy waiting here... until five P.M."), 30: (N, None), 31: (N, None), 32: (N, None),
+ 33: (BUILD, None), 34: (DRAMA, None), 35: (BUILD, None), 36: (BUILD, "And he says she left something out..."),
+ 37: (DRAMA, "A working computer. That she refused to use."), 38: (BUILD, None), 39: (N, None),
 }
+REF = "assets/voice/narrator_ref.wav"   # one fixed voice for every line
 m = ChatterboxTTS.from_pretrained(device="cpu")
 only = [int(x) for x in sys.argv[3].split(",")] if len(sys.argv) > 3 else range(len(SEGMENTS))
 for i in only:
-    ex, cfg, txt = DIRECTION[i]; txt = txt or SEGMENTS[i]["say"]
+    (ex, cfg), txt = DIRECTION[i]; txt = txt or SEGMENTS[i]["say"]
     for k in range(TAKES):
         fn = f"{OUT}/takes/seg_{i:02d}_t{k}.wav"
         if os.path.exists(fn): continue
         torch.manual_seed(1000 * i + k + 17)
-        w = m.generate(txt, exaggeration=ex, cfg_weight=cfg, temperature=0.8)
+        w = m.generate(txt, audio_prompt_path=REF, exaggeration=ex, cfg_weight=cfg, temperature=0.7)
         ta.save(fn, w, m.sr); print(i, k, round(w.shape[1] / m.sr, 2), txt, flush=True)
 print("ALL DONE")

@@ -11,8 +11,8 @@ plan = json.load(open(f"{B}/plan.json")); timing = json.load(open(f"{B}/timing.j
 rng = np.random.default_rng(7)
 
 subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", f"{B}/voice_raw.wav", "-af",
-    "aresample=48000,highpass=f=70,equalizer=f=120:t=q:w=1.2:g=2.5,equalizer=f=3200:t=q:w=1.5:g=2,"
-    "acompressor=threshold=-20dB:ratio=3:attack=5:release=90:makeup=2,aecho=0.85:0.5:30|60:0.07|0.04",
+    "aresample=48000,highpass=f=60,equalizer=f=3000:t=q:w=1.5:g=1.5,"
+    "acompressor=threshold=-22dB:ratio=2.5:attack=8:release=120:makeup=2",
     "-ac", "1", f"{B}/voice.wav"], check=True)
 voice, _ = sf.read(f"{B}/voice.wav")
 T = plan["total"]; N = int(T * SR); t = np.arange(N) / SR
