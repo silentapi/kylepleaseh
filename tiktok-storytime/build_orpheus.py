@@ -21,7 +21,9 @@ wm = WhisperModel("small.en", device="cpu", compute_type="int8")
 NUM = {"five": "5", "seventy": "70", "fifty": "50", "two": "2", "eleven": "11", "thirty": "30", "teena": "tina"}
 def norm(s):
     s = s.lower().replace("-", " ").replace("p.m.", "pm").replace("h.r.", "hr").replace("i.t.", "it")
-    return [NUM.get(w, w) for w in re.sub(r"[^a-z0-9' ]", " ", s).split()]
+    s = re.sub(r"\bp\.?\s?m\b\.?", "pm", s); s = re.sub(r"\bh\.?\s?r\b\.?", "hr", s); s = re.sub(r"(\d)\s?pm", r"\1 pm", s)
+    out = [NUM.get(w, w) for w in re.sub(r"[^a-z0-9' ]", " ", s).split()]
+    return [w for w in out if w]
 
 def synth(text, seed):
     llm.set_seed(seed)
