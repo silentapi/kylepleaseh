@@ -11,6 +11,7 @@ from faster_whisper import WhisperModel
 from script import SEGMENTS
 
 GGUF, B = sys.argv[1], sys.argv[2]
+MUSIC = json.load(open(sys.argv[3])) if len(sys.argv) > 3 else None   # song beats/silence plan (optional)
 os.makedirs(f"{B}/paras", exist_ok=True)
 VOICE, SR = "dan", 24000
 CUSTOM0, END_SPEECH, EOT = 128256, 128258, 128009
@@ -18,12 +19,12 @@ llm = Llama(model_path=GGUF, n_ctx=8192, n_threads=4, n_batch=512, verbose=False
 snac = SNAC.from_pretrained("hubertsiuzdak/snac_24khz").eval()
 wm = WhisperModel("small.en", device="cpu", compute_type="int8")
 
-NUM = {"five": "5", "seventy": "70", "fifty": "50", "two": "2", "eleven": "11", "thirty": "30", "teena": "tina"}
+NUM = {"five": "5", "seventy": "70", "fifty": "50", "two": "2", "eleven": "11", "thirty": "30", "teena": "tina", "kuh": "cuh", "cuz": "cuh", "kah": "cuh", "ka": "cuh", "cut": "cuh", "coz": "cuh", "cus": "cuh", "cause": "cuh", "kuz": "cuh", "kuhh": "cuh", "kuuh": "cuh", "cuhh": "cuh"}
 def norm(s):
-    s = s.lower().replace("-", " ").replace("p.m.", "pm").replace("h.r.", "hr").replace("i.t.", "it")
-    s = re.sub(r"\bp\.?\s?m\b\.?", "pm", s); s = re.sub(r"\bh\.?\s?r\b\.?", "hr", s); s = re.sub(r"(\d)\s?pm", r"\1 pm", s)
-    out = [NUM.get(w, w) for w in re.sub(r"[^a-z0-9' ]", " ", s).split()]
-    return [w for w in out if w]
+    s = re.sub(r"[^a-z0-9' ]", " ", s.lower().replace("-", " "))          # drop all punctuation first
+    s = re.sub(r"\bp\s+m\b", "pm", s); s = re.sub(r"\bh\s+r\b", "hr", s); s = re.sub(r"\bi\s+t\b", "it", s)
+    s = re.sub(r"(\d)pm\b", r"\1 pm", s)
+    return [NUM.get(w, w) for w in s.split()]
 
 def synth(text, seed):
     llm.set_seed(seed)
@@ -46,6 +47,23 @@ def words_of(a, prompt):
     res, _ = wm.transcribe(x, language="en", beam_size=5, word_timestamps=True, initial_prompt=prompt)
     return [w for r in res for w in r.words]
 
+def tighten(a, max_gap=0.42, thr_db=-40):
+    """Shorten silent gaps longer than max_gap (no stretching, no pitch change: the voice is untouched)."""
+    fr = int(0.01 * SR); n = len(a) // fr
+    e = 20 * np.log10(np.sqrt((a[: n * fr].reshape(n, fr) ** 2).mean(1)) + 1e-9)
+    quiet = e < e.max() + thr_db
+    out, i = [], 0
+    while i < n:
+        j = i
+        while j < n and quiet[j] == quiet[i]: j += 1
+        chunk = a[i * fr: j * fr]
+        if quiet[i] and (j - i) * 0.01 > max_gap and 0 < i and j < n:
+            keep = int(max_gap * SR); h = keep // 2
+            chunk = np.concatenate([chunk[:h], chunk[-(keep - h):]])
+        out.append(chunk); i = j
+    out.append(a[n * fr:])
+    return np.concatenate(out)
+
 paras = sorted({s["p"] for s in SEGMENTS})
 P_AUDIO, P_WORDS = {}, {}
 for p in paras:
@@ -67,7 +85,9 @@ for p in paras:
         if best is None or score > best[0]: best = (score, a, ws, sim)
         if sim >= 0.97 and extra == 0 and dur_ok: break
     if best[3] < 0.9: print(f"WARNING P{p} best similarity {best[3]:.2f}")
-    P_AUDIO[p], P_WORDS[p] = best[1], best[2]
+    a = tighten(best[1])
+    P_AUDIO[p], P_WORDS[p] = a, (words_of(a, " ".join(s["say"] for s in segs)) if len(a) != len(best[1]) else best[2])
+    print(f"P{p}: {len(best[1])/SR:.1f}s -> {len(a)/SR:.1f}s after tightening pauses", flush=True)
 
 # ---------- word alignment: script words -> whisper word times ----------
 def align(segs, ws):
@@ -91,18 +111,52 @@ def align(segs, ws):
     for (si, w), t in zip(script, times): out[si].append(t)
     return out
 
-# ---------- beat-grid layout (paragraph level) ----------
-P_BEAT = (88.54 - 0.86) / 33 / 4; BAR = 4 * P_BEAT; SAX_IN = 43.37
+# ---------- layout ----------
 cut_p = next(s["p"] for s in SEGMENTS if s.get("mark") == "cut")
 thu_p = next(s["p"] for s in SEGMENTS if s.get("mark") == "thurs")
-snap = lambda t, g: float(np.ceil((t - 1e-6) / g) * g)
-starts, cursor, cut_t = {}, 0.0, None
-for p in paras:
-    if p == 0: st = 0.0
-    elif p == cut_p: st = snap(cursor + 0.25, BAR); cut_t = st
-    elif p == thu_p: st = cut_t + snap(cursor + 0.35 - cut_t, P_BEAT)
-    else: st = snap(cursor + 0.2, P_BEAT / 2)
-    starts[p] = st; cursor = st + len(P_AUDIO[p]) / SR
+dur = {p: len(P_AUDIO[p]) / SR for p in paras}
+starts, plan_extra = {}, {}
+if MUSIC:
+    # One continuous stretch of the song starting at S: "she says no" lands in the song's own silence and
+    # "Thursday" lands exactly where the beat returns. Paragraph starts snap to the song's beat grid.
+    bt = np.array(MUSIC["beats"]); Ss, Br = MUSIC["silence_start"], MUSIC["beat_return"]
+    pre = [p for p in paras if p < cut_p]
+    need = sum(dur[p] for p in pre) + 0.3 * (len(pre) - 1) + 0.35
+    drop_p = next((s["p"] for s in SEGMENTS if s.get("mark") == "drop"), None)
+    lim = Ss - need
+    if drop_p is not None and MUSIC.get("drop"):          # also land the song's big drop on this paragraph
+        lim = min(lim, MUSIC["drop"] - (sum(dur[q] + 0.3 for q in pre if q < drop_p) + 0.75))
+    S = float(bt[bt <= lim].max())
+    vbeats = bt - S
+    cursor = 0.0
+    for p in pre:
+        if p == pre[0]: st = 0.0
+        elif p == drop_p and MUSIC.get("drop"): st = MUSIC["drop"] - S
+        else:
+            cand = vbeats[vbeats >= cursor + 0.25]; st = float(cand.min()) if len(cand) else cursor + 0.3
+        starts[p] = st; cursor = st + dur[p]
+    if drop_p is not None and starts.get(drop_p - 1, 0) + dur.get(drop_p - 1, 0) > starts[drop_p] - 0.1:
+        print("WARNING: paragraph before the drop overlaps it")
+    sil = (Br - Ss) - dur[cut_p]                                   # centre the line in the song's silence,
+    starts[cut_p] = (Ss - S) + max(0.15, min(1.3, sil * 0.42)); cut_t = (Ss - S)   # a breath of quiet before it
+    if starts[cut_p] + dur[cut_p] > Br - S - 0.1: print("WARNING: 'she says no' paragraph spills past the silence")
+    starts[thu_p] = Br - S + 0.03; thu_t = starts[thu_p]
+    cursor = starts[thu_p] + dur[thu_p]
+    for p in [p for p in paras if p > thu_p]:
+        cand = vbeats[vbeats >= cursor + 0.2]; st = float(cand.min()) if len(cand) else cursor + 0.3
+        starts[p] = st; cursor = st + dur[p]
+    plan_extra = dict(mode="batida", song_start=S)
+    P_BEAT, SAX_IN = float(np.median(np.diff(bt))), Br
+else:
+    P_BEAT = (88.54 - 0.86) / 33 / 4; BAR = 4 * P_BEAT; SAX_IN = 43.37
+    snap = lambda t, g: float(np.ceil((t - 1e-6) / g) * g)
+    cursor, cut_t = 0.0, None
+    for p in paras:
+        if p == 0: st = 0.0
+        elif p == cut_p: st = snap(cursor + 0.25, BAR); cut_t = st
+        elif p == thu_p: st = cut_t + snap(cursor + 0.35 - cut_t, P_BEAT)
+        else: st = snap(cursor + 0.2, P_BEAT / 2)
+        starts[p] = st; cursor = st + dur[p]
 
 total = cursor + 1.8
 voice = np.zeros(int(total * SR))
@@ -122,6 +176,6 @@ for p in paras:
         gi += 1
 sf.write(f"{B}/voice_raw.wav", voice.astype(np.float32), SR)
 json.dump(timing, open(f"{B}/timing.json", "w"), indent=1)
-plan = dict(total=total, P=P_BEAT, cut=cut_t, music_a_start=SAX_IN - cut_t, thurs=starts[thu_p], sax_in=SAX_IN)
+plan = dict(total=total, P=P_BEAT, cut=cut_t, music_a_start=SAX_IN - cut_t, thurs=starts[thu_p], sax_in=SAX_IN, **plan_extra)
 json.dump(plan, open(f"{B}/plan.json", "w"), indent=1)
 print("layout", json.dumps(plan))

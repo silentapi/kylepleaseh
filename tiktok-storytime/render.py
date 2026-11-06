@@ -36,6 +36,12 @@ spans = []
 for seg in timing:
     if spans and spans[-1]["v"] == seg["v"]: spans[-1]["end"] = seg["next"]
     else: spans.append(dict(v=seg["v"], start=seg["start"] if spans else 0.0, end=seg["next"]))
+# go to black exactly when the music cuts out (song mode), not when the next line starts
+if os.path.exists(f"{B}/plan.json"):
+    _plan = json.load(open(f"{B}/plan.json"))
+    for k, sp in enumerate(spans):
+        if sp["v"] == "black" and k > 0 and _plan.get("cut") is not None and _plan["cut"] < sp["start"]:
+            spans[k - 1]["end"] = sp["start"] = _plan["cut"]
 for i, sp in enumerate(spans): sp["idx"] = i
 
 def ease_out(x): x = min(max(x, 0), 1); return 1 - (1 - x) ** 3
@@ -154,7 +160,7 @@ def chunks_for(seg):
     if cur: out.append(cur)
     for j, c in enumerate(out):
         c_start = c[0]["s"] - 0.04
-        c_end = out[j + 1][0]["s"] - 0.04 if j + 1 < len(out) else seg["next"]
+        c_end = out[j + 1][0]["s"] - 0.04 if j + 1 < len(out) else min(seg["next"], c[-1]["e"] + 0.9)
         out[j] = dict(words=c, start=c_start, end=c_end)
     return out
 for seg in timing:
@@ -320,8 +326,8 @@ if PREVIEW:
 
 nf = int(TOTAL * FPS)
 p = subprocess.Popen(["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
-                      "-r", str(FPS), "-i", "-", "-i", f"{B}/" + os.environ.get("MIX", "mix.wav"), "-c:v", "libx264", "-preset", "medium", "-maxrate", "7M", "-bufsize", "14M",
-                      "-crf", "21", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-shortest",
+                      "-r", str(FPS), "-i", "-", "-i", f"{B}/" + os.environ.get("MIX", "mix.wav"), "-c:v", "libx264", "-preset", "medium", "-maxrate", "5M", "-bufsize", "10M",
+                      "-crf", "22", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-shortest",
                       "-movflags", "+faststart", OUT], stdin=subprocess.PIPE)
 for fi in range(nf):
     p.stdin.write(frame_at(fi / FPS).tobytes())
