@@ -16,7 +16,7 @@ SEGMENTS = [
  dict(v="miles",   k="cap",  say="Seventy miles away. Two hours each way.", show="70 miles away. 2 hours each way.", pause=0.4, sfx="boom"),
  dict(v="miles",   k="cap",  say="Tina says she was promised never more than fifty.", show="Tina says she was promised never more than 50.", pause=0.15),
  dict(v="mom",     k="cap",  say="She's never been trained to go alone.", pause=0.15),
- dict(v="mom",     k="cap",  say="And she has a special needs daughter who needs her close.", show="And she has a special-needs daughter who needs her close.", pause=0.45),
+ dict(v="mom",     k="cap",  say="And she has a special needs daughter who needs her nearby.", show="And she has a special-needs daughter who needs her nearby.", pause=0.45),
  dict(v="mom",     k="cap",  say="Ben's answer?", pause=0.3),
  dict(v="mom",     k="card", say="You would've been paid mileage.", show="“You would’ve been paid mileage.”", pause=0.6, sfx="boom"),
  # TURN

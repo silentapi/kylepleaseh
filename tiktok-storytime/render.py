@@ -1,7 +1,7 @@
 """Renders the 1080x1920 storytime video frame-by-frame with Pillow and pipes it to ffmpeg.
 usage: python3 render.py <build_dir> <out.mp4> [--preview SECONDS_LIST]
 """
-import json, math, re, subprocess, sys
+import json, math, os, re, subprocess, sys
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageEnhance
 from script import SEGMENTS
@@ -24,7 +24,7 @@ def font(path, size):
 
 timing = json.load(open(f"{B}/timing.json"))
 dur_audio = float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration",
-                                           "-of", "csv=p=0", f"{B}/mix.wav"]).decode())
+                                           "-of", "csv=p=0", f"{B}/" + os.environ.get("MIX", "mix.wav")]).decode())
 TOTAL = dur_audio
 for seg, s in zip(timing, SEGMENTS): seg.update(s)
 for i, seg in enumerate(timing):
@@ -321,7 +321,7 @@ if PREVIEW:
 
 nf = int(TOTAL * FPS)
 p = subprocess.Popen(["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
-                      "-r", str(FPS), "-i", "-", "-i", f"{B}/mix.wav", "-c:v", "libx264", "-preset", "medium", "-maxrate", "7M", "-bufsize", "14M",
+                      "-r", str(FPS), "-i", "-", "-i", f"{B}/" + os.environ.get("MIX", "mix.wav"), "-c:v", "libx264", "-preset", "medium", "-maxrate", "7M", "-bufsize", "14M",
                       "-crf", "21", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-shortest",
                       "-movflags", "+faststart", OUT], stdin=subprocess.PIPE)
 for fi in range(nf):

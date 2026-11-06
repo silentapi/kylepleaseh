@@ -1,26 +1,30 @@
 # Storytime TikTok, Part 1 (Ben & Tina)
 
-Final video: `../storytime_part1.mp4` (1080x1920, 30fps, about 87s, H.264/AAC, loudness -14 LUFS).
+Final video: `../storytime_part1.mp4` (1080x1920, 30fps, 89s, -14 LUFS). `../storytime_part1_nomusic.mp4` has narration and sound effects only, so you can add a TikTok sound in the app.
+
+The older Kokoro pipeline (`tts.py` and `audio.py`) is still in the folder but is no longer used.
 
 Everything is free and runs locally. There are no API keys and no paid services.
 
 | Step | Tool |
 |---|---|
-| Narration | [Kokoro-82M](https://github.com/thewh1teagle/kokoro-onnx) (open-weight TTS), voice `am_onyx` (deep male) at 1.17x |
+| Narration | [Chatterbox](https://github.com/resemble-ai/chatterbox) (open-source, MIT), with emotion and pacing set per line in `tts_cb.py`. Two to four takes per line; `arrange.py` picks the best take by Whisper accuracy and pitch range, then pitch-corrects each line to a deep narrator (about 115Hz median) with ffmpeg rubberband |
+| Beat sync | Every line starts on the music's beat grid. Quote cards land on beats, "She says no." gets a tape-stop and silence, and "Thursday" comes in on the saxophone entry |
 | Word timing and pronunciation check | faster-whisper `small.en` |
 | Images | CC0 stock from Openverse (see credits) plus generated graphics |
-| Music and sound effects | Synthesized in numpy (`audio.py`), so there are no copyright claims |
+| Music | "ʀᴏsᴇᴍᴀʀʏʟʏɴɴ |sʟᴏᴡ|" by ᴍōʀᴇᴅōᴅɴᴀ (Jamendo, CC BY 3.0, https://www.jamendo.com/track/1511790). Credit is required: put it in the TikTok caption |
+| Sound effects | Synthesized in numpy (`audio_music.py`) |
 | Frames | Pillow (`render.py`), encoded with ffmpeg |
 
 ## Rebuild
 ```bash
-pip install kokoro-onnx soundfile faster-whisper
-# model files: kokoro-v1.0.onnx + voices-v1.0.bin from the kokoro-onnx GitHub release "model-files-v1.0"
-mkdir -p build
-python3 tts.py <models_dir> build     # narration + timing
-python3 align.py build                # word timestamps
-python3 audio.py build                # music, sfx, mix
-python3 render.py build ../storytime_part1.mp4
+pip install soundfile faster-whisper librosa
+# Chatterbox needs torch 2.6 (CPU): pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu && pip install chatterbox-tts
+python tts_cb.py build_cb 2           # 2 expressive takes per line (about 25 min on CPU)
+python arrange.py build_cb            # pick takes, deepen voice, beat-grid layout
+python align.py build_cb              # word timestamps for captions
+python audio_music.py build_cb        # sax track, tape-stop, ducking, sfx
+python render.py build_cb ../storytime_part1.mp4
 ```
 To change the wording, edit `script.py` and rerun all four steps.
 
