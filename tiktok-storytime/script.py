@@ -1,69 +1,57 @@
-# Part 1 script, written as storytelling: cold open, dramatic irony, narrator asides, setup/payoff,
-# escalation in threes, callback, false ending, cliffhanger.
-# Fields: v = visual, k = 'cap' (karaoke caption) | 'card' (red quote card) | 'title' (visual carries the text)
-#   say = words spoken (also used for caption timing), show = on-screen text, tts = text fed to the voice model
-#   d = delivery: N natural, B building, D dramatic, P peak    who = label on quote cards
-#   mark = 'cut' (music tape-stop) | 'thurs' (music re-enters on the sax) | 'promised' (50-mile pill)
-#   pause = breath after the line (s), sfx = sound effect at line start
+# Part 1, v7: malicious-compliance framing. Built with the "short-drama-hook-engineering" skill rules
+# (conflict in the first 1-3s, start late, pressure fast, reaction/power shift when a beat relaxes,
+# last beat pulls into part 2) + "but / so / until" connectors instead of "and then".
+# Narration is generated per PARAGRAPH ("p") so it flows; lines are for captions/visuals only.
+# Music plan (Batida Funk Medley): P0-P1 over the sax riff, beat switch on P2, P3 card on a hit,
+# P4 music cuts out ('cut'), music slams back on "Thursday" ('thurs'), biggest drop on the P8 payoff.
 SEGMENTS = [
- # COLD OPEN
- dict(v="clock", k="card", d="P", who="HER BOSS", say="Enjoy waiting here until five P.M.", show="“Enjoy waiting here until 5pm.”",
-      tts="Enjoy waiting here... until five P.M.", pause=0.45, sfx="boom"),
- dict(v="clock", k="cap", d="B", say="That's the last thing her boss said before he walked out.", pause=0.3),
- dict(v="clock", k="cap", d="B", say="What he didn't know, she was writing down every single word.",
-      show="What he didn't know… she was writing down every single word.", tts="What he didn't know? She was writing down... every single word.", pause=0.6, sfx="whoosh"),
- # SETUP
- dict(v="hall", k="cap", d="N", say="Okay. Let me back up.", pause=0.3),
- dict(v="hall", k="cap", d="N", say="Ben runs a healthcare department. Tina's one of his nurses.", pause=0.2),
- dict(v="pip", k="cap", d="N", say="And Ben's been trying to get her on a performance plan.", pause=0.2),
- dict(v="pip", k="cap", d="B", say="Just one problem.", pause=0.35),
- dict(v="pip", k="cap", d="N", say="H.R. keeps telling him", show="HR keeps telling him…", tts="H.R. keeps telling him...", pause=0.35),
- dict(v="pip_denied", k="cap", d="D", say="Not yet.", show="…NOT YET.", tts="Not yet.", pause=0.7, sfx="stamp"),
- # THE ASSIGNMENT
- dict(v="highway", k="cap", d="N", say="Then, out of nowhere, her assignments start changing.", pause=0.25, sfx="whoosh"),
- dict(v="highway", k="cap", d="N", say="First up? A solo home visit.", pause=0.25),
- dict(v="miles", k="cap", d="B", say="Seventy miles away. Two hours there. Two hours back.", show="70 miles away. 2 hours there. 2 hours back.",
-      pause=0.4, sfx="boom"),
- dict(v="miles", k="cap", d="N", mark="promised", say="Tina says when she was hired, she was promised never more than fifty.",
-      show="Tina says when she was hired, she was promised never more than 50.", pause=0.3),
- dict(v="mom", k="cap", d="N", say="And this part matters.", pause=0.3),
- dict(v="mom", k="cap", d="N", say="Tina has a daughter with special needs, who needs her mom nearby.", pause=0.4),
- dict(v="mom", k="cap", d="B", say="So she tells Ben all of this. And his answer?", pause=0.35),
- dict(v="mom", k="card", d="D", who="BEN", say="You would've been paid mileage.", show="“You would’ve been paid mileage.”", pause=0.6, sfx="boom"),
- # THE TURN
- dict(v="black", k="cap", d="D", mark="cut", say="So she says no.", pause=0.5, sfx="hit"),
- dict(v="black", k="cap", d="P", say="And that's when it gets ugly.", show="And that's when it gets… ugly.", tts="And that's when it gets... ugly.", pause=0.5),
- # THE CONFRONTATION
- dict(v="thursday", k="title", d="B", mark="thurs", say="Thursday. Eleven thirty A.M.", show="THURSDAY. 11:30 AM.", pause=0.35, sfx="boom"),
- dict(v="office", k="cap", d="N", say="Ben walks up to her desk, and Tina asks him for one thing.", pause=0.3, sfx="whoosh"),
- dict(v="office", k="cap", d="N", say="Put it in writing.", show="“Put it in writing.”", pause=0.35),
- dict(v="office", k="cap", d="D", say="He refuses.", pause=0.45),
- dict(v="nurses", k="cap", d="N", say="So she asks how any reasonable adult is supposed to respond to coercion.", pause=0.3),
- dict(v="nurses", k="cap", d="B", say="And he says", show="And he says…", tts="And he says...", pause=0.3),
- dict(v="nurses", k="card", d="D", who="BEN", say="I'd expect them to say yes and okay.", show="“I’d expect them to say yes and okay.”", pause=0.45, sfx="boom"),
- dict(v="nurses", k="cap", d="N", say="And he wasn't done.", pause=0.25),
- dict(v="nurses", k="card", d="D", who="BEN", say="Any good nurse would change trash bags.", show="“Any good nurse would change trash bags.”", pause=0.45, sfx="boom"),
- dict(v="nurses", k="cap", d="B", say="And then, the big one.", pause=0.3),
- dict(v="nurses", k="card", d="P", who="BEN", say="Are you reconsidering your time here?", show="“Are you reconsidering your time here?”", pause=0.6, sfx="boom"),
- # THE 5PM LINE
- dict(v="error", k="cap", d="N", say="Oh, and her computer? Broken. The backup? Also broken.", pause=0.25, sfx="glitch"),
- dict(v="error", k="cap", d="N", say="Tina says he told her to just sit there until I.T. fixes it.", show="Tina says he told her to just sit there until IT fixes it.", pause=0.3),
- dict(v="error", k="cap", d="B", say="And on his way out the door", show="And on his way out the door…", tts="And on his way out the door...", pause=0.45),
- dict(v="clock2", k="card", d="P", who="BEN", say="Enjoy waiting here until five P.M.", show="“Enjoy waiting here until 5pm.”",
-      tts="Enjoy waiting here... until five P.M.", pause=0.8, sfx="boom"),
- # THE PAYOFF
- dict(v="typing", k="cap", d="N", say="But remember what I said at the start?", pause=0.35, sfx="whoosh"),
- dict(v="typing", k="cap", d="B", say="She was writing it all down.", pause=0.3),
- dict(v="hrcase", k="cap", d="N", say="Every quote. Every timestamp. Straight into her open H.R. case.",
-      show="Every quote. Every timestamp. Straight into her open HR case.", pause=0.3, sfx="stamp"),
- dict(v="hrcase", k="cap", d="B", say="And the last line of her email?", pause=0.35),
- dict(v="hrcase", k="card", d="D", who="TINA · HER EMAIL", say="As mandated, I am remaining stationary at my desk until five P.M.",
-      show="“As mandated, I am remaining stationary at my desk until 5:00 PM.”", pause=0.8, sfx="boom"),
- # FALSE ENDING + CLIFFHANGER
- dict(v="notif", k="cap", d="B", say="But it's not over. Because Ben just replied.", pause=0.3, sfx="ding"),
- dict(v="notif", k="cap", d="B", say="And he says Tina left out one very important detail", show="And he says Tina left out one very important detail…",
-      tts="And he says Tina left out one very important detail...", pause=0.35),
- dict(v="notif", k="cap", d="D", say="A working computer. That she refused to use.", show="…a working computer. That she REFUSED to use.", pause=0.45, sfx="boom"),
- dict(v="part2", k="cap", d="B", say="So, whose side are you on?", show="So… whose side are you on?", tts="So... whose side are you on?", pause=0.3),
- dict(v="part2", k="cap", d="N", say="Follow, because part two is his side of the story.", show="Follow. Part 2 is his side of the story.", pause=1.2),
+ # P0 HOOK: accusation + malicious-compliance promise
+ dict(p=0, v="clock", k="card", who="HER BOSS", say="Enjoy waiting here until five P.M.", show="“Enjoy waiting here until 5pm.”", sfx="boom"),
+ dict(p=0, v="clock", k="cap", say="Her boss said that to her face."),
+ dict(p=0, v="clock", k="cap", say="So she did, and turned every word into evidence.", show="So she did… and turned every word into EVIDENCE.", sfx="whoosh"),
+ # P1 STAKES
+ dict(p=1, v="pip", k="cap", say="Ben's a healthcare director, and he's been trying to put his nurse Tina on a performance plan.",
+      tts="Ben's a healthcare director, and he's been trying to put his nurse, Teena, on a performance plan."),
+ dict(p=1, v="pip_denied", k="cap", say="But H.R. keeps blocking it.", show="But HR keeps BLOCKING it.", sfx="stamp"),
+ # P2 PRESSURE + re-hook
+ dict(p=2, v="highway", k="cap", say="Until her assignments start changing.", sfx="whoosh"),
+ dict(p=2, v="miles", k="cap", say="A solo home visit. Seventy miles away. Two hours each way.", show="A solo home visit. 70 miles away. 2 hours each way.", sfx="boom"),
+ dict(p=2, v="miles", k="cap", mark="promised", say="She was promised never more than fifty.", show="She was promised: never more than 50."),
+ dict(p=2, v="mom", k="cap", say="And her special needs daughter needs her close by.", show="And her special-needs daughter needs her close by."),
+ dict(p=2, v="mom", k="cap", say="And this is where it gets personal.", show="And this is where it gets PERSONAL."),
+ # P3 THE TURN: juxtaposition + reaction beat
+ dict(p=3, v="mom", k="cap", say="She tells him about her daughter."),
+ dict(p=3, v="mom", k="cap", say="And his answer is about gas money.", show="And his answer… is about GAS MONEY."),
+ dict(p=3, v="mom", k="card", who="BEN", say="You would've been paid mileage.", show="“You would’ve been paid mileage.”", sfx="boom"),
+ dict(p=3, v="mom", k="cap", say="Her daughter, and he's talking mileage.", show="Her DAUGHTER… and he's talking mileage."),
+ # P4 POINT OF NO RETURN (music cuts out)
+ dict(p=4, v="black", k="cap", mark="cut", say="So she says no.", sfx="hit"),
+ dict(p=4, v="black", k="cap", say="And that's when it gets ugly.", show="And that's when it gets… ugly."),
+ # P5 CONFRONTATION (music slams back on "Thursday")
+ dict(p=5, v="thursday", k="title", mark="thurs", say="Thursday. Eleven thirty.", show="THURSDAY. 11:30 AM.", sfx="boom"),
+ dict(p=5, v="office", k="cap", say="He's at her desk. She asks him to put it in writing.", sfx="whoosh"),
+ dict(p=5, v="office", k="cap", say="He refuses.", show="He REFUSES."),
+ dict(p=5, v="nurses", k="cap", say="She asks how any reasonable adult is supposed to respond to that kind of pressure."),
+ dict(p=5, v="nurses", k="card", who="BEN", say="I'd expect them to say yes and okay.", show="“I’d expect them to say yes and okay.”", sfx="boom"),
+ # P6 ESCALATION IN THREES
+ dict(p=6, v="nurses", k="cap", say="Then,", show="Then…"),
+ dict(p=6, v="nurses", k="card", who="BEN", say="Any good nurse would change trash bags.", show="“Any good nurse would change trash bags.”", sfx="boom"),
+ dict(p=6, v="nurses", k="cap", say="Then,", show="Then…"),
+ dict(p=6, v="nurses", k="card", who="BEN", say="Are you reconsidering your time here?", show="“Are you reconsidering your time here?”", sfx="boom"),
+ # P7 CALLBACK to the hook
+ dict(p=7, v="error", k="cap", say="Her computer's dead.", sfx="glitch"),
+ dict(p=7, v="error", k="cap", say="She says he told her to just wait at her desk until I.T. fixes it.", show="She says he told her to just wait at her desk until IT fixes it."),
+ dict(p=7, v="error", k="cap", say="And on his way out,", show="And on his way out…"),
+ dict(p=7, v="clock2", k="card", who="BEN", say="Enjoy waiting here until five P.M.", show="“Enjoy waiting here until 5pm.”", sfx="boom"),
+ # P8 PAYOFF: the malicious compliance (biggest drop)
+ dict(p=8, v="typing", k="cap", say="So she did.", show="So she DID.", sfx="hit"),
+ dict(p=8, v="typing", k="cap", say="She sat right there and wrote it all down."),
+ dict(p=8, v="hrcase", k="cap", say="Every quote. Every timestamp. Straight into her open H.R. case.", show="Every quote. Every timestamp. Straight into her open HR case.", sfx="stamp"),
+ dict(p=8, v="hrcase", k="cap", say="And she signed off with,", show="And she signed off with…"),
+ dict(p=8, v="hrcase", k="card", who="TINA · HER EMAIL", say="As mandated, I am remaining stationary at my desk until five P.M.", show="“As mandated, I am remaining stationary at my desk until 5:00 PM.”", sfx="boom"),
+ # P9 EXIT BRIDGE: a real dilemma for the comments
+ dict(p=9, v="notif", k="cap", say="Then Ben hit reply.", sfx="ding"),
+ dict(p=9, v="notif", k="cap", say="And according to him, she left out a lot.", show="And according to him… she left out A LOT.", sfx="boom"),
+ dict(p=9, v="part2", k="cap", say="Was she protecting herself, or refusing to do her job?", show="Was she protecting herself… or refusing to do her job?"),
+ dict(p=9, v="part2", k="cap", say="Part two.", show="PART 2 →"),
 ]
